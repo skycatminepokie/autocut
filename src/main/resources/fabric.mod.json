@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "autocut",
+	"version": "${version}",
+	"name": "Autocut",
+	"description": "Cut your recordings based on in-game events.",
+	"authors": [
+		"skycatminepokie"
+	],
+	"contact": {
+		"sources": "https://github.com/skycatminepokie/autocut"
+	},
+	"license": "MIT",
+	"icon": "assets/autocut/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.skycatdev.autocut.Autocut"
+		],
+		"client": [
+			"com.skycatdev.autocut.AutocutClient"
+		],
+		"fabric-datagen": [
+			"com.skycatdev.autocut.AutocutDataGenerator"
+		]
+	},
+	"mixins": [
+		"autocut.mixins.json",
+		{
+			"config": "autocut.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
