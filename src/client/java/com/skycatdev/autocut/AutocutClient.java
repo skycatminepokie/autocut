@@ -1,10 +1,14 @@
 package com.skycatdev.autocut;
 
+import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import org.jetbrains.annotations.Nullable;
 
 public class AutocutClient implements ClientModInitializer {
+	@Nullable public static OBSRemoteController controller = null;
 	@Override
 	public void onInitializeClient() {
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+		ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
 	}
 }
