@@ -19,7 +19,7 @@ public class Recorder {
         this.fps = fps;
     }
 
-    public File toEdl() throws IOException { // TODO: Better throwing of errors
+    public File exportEdl() throws IOException { // TODO: Better throwing of errors
         File edl = new File(recordingPath + ".edl");
         assert !edl.exists() : "EDL already exists, and error handling has not been set up yet!"; // TODO
         edl.createNewFile();
