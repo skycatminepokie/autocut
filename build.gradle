@@ -45,6 +45,7 @@ dependencies {
 	implementation('io.obs-websocket.community:client:2.0.0') {
 		exclude group: 'org.slf4j.simple'
 	}
+	implementation("org.bytedeco:javacv-platform:1.5.10")
 }
 
 processResources {

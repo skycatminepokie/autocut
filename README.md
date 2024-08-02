@@ -1,0 +1,1 @@
+autocut includes [JavaCV by bytedeco](https://github.com/bytedeco/javacv), used under [Apache 2.0](https://github.com/bytedeco/javacv/blob/master/LICENSE.txt).
