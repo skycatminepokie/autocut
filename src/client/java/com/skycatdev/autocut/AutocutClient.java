@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AutocutClient implements ClientModInitializer {
 	@Nullable public static OBSRemoteController controller = null;
+	@Nullable public static Recorder currentRecorder = null;
 	@Override
 	public void onInitializeClient() {
 		ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);

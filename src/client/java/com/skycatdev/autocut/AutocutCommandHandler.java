@@ -38,9 +38,15 @@ public class AutocutCommandHandler {
     private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) {
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
+            assert AutocutClient.currentRecorder == null; // TODO: Error handling
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Recording started"));
+            AutocutClient.currentRecorder = new Recorder();
         } else {
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(recordStateChangedEvent.toString()));
+            if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
+                assert AutocutClient.currentRecorder != null; // TODO: Error handling
+                AutocutClient.currentRecorder.onRecordingEnded(recordStateChangedEvent.getOutputPath());
+                AutocutClient.currentRecorder = null;
+            }
         }
     }
 
