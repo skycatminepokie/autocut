@@ -6,9 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Autocut implements ModInitializer {
-    public static final Logger LOGGER = LoggerFactory.getLogger("autocut");
+    public static final String MOD_ID = "autocut";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	@Override
+    @Override
 	public void onInitialize() {
 
 	}

@@ -72,7 +72,7 @@ public class AutocutCommandHandler {
     private static int makeClip(CommandContext<FabricClientCommandSource> context) {
         if (AutocutClient.currentRecorder != null) {
             long time = System.currentTimeMillis() - AutocutClient.currentRecorder.startTime;
-            AutocutClient.currentRecorder.addClip(new Clip(time, time + 100));
+            AutocutClient.currentRecorder.addClip(new Clip(time, time + 100, ClipTypes.DEBUG, "Debug"));
             context.getSource().sendFeedback(Text.of("Clipped!")); // TODO: Localize
             return Command.SINGLE_SUCCESS;
         }
