@@ -11,8 +11,14 @@ import java.util.Comparator;
 public class Recorder {
     protected ArrayList<Clip> clips = new ArrayList<>();
     protected ArrayList<RecordingEvent> events = new ArrayList<>();
+    protected long startTime;
 
     public Recorder() {
+        startTime = System.currentTimeMillis();
+    }
+
+    public void addClip(Clip clip) {
+        clips.add(clip);
     }
 
     public void onRecordingEnded(String outputPath) {
@@ -23,7 +29,7 @@ public class Recorder {
         File[] filters;
         try {
            filters = buildFilters(clips);
-           ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-safe", "0", "-i", recording.getAbsolutePath(), "-vf", filters[0].getAbsolutePath(), "-af", filters[1].getAbsolutePath(), export.getAbsolutePath());
+           ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-i", recording.getAbsolutePath(), "-filter_script:v", filters[0].getAbsolutePath(), "-filter_script:a", filters[1].getAbsolutePath(), export.getAbsolutePath());
            pb.inheritIO().start().waitFor();
         } catch (IOException e) {
             throw new RuntimeException(e);

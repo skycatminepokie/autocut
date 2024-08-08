@@ -1,11 +1,11 @@
 package com.skycatdev.autocut;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
-import io.obswebsocket.community.client.message.response.outputs.GetOutputSettingsResponse;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
@@ -58,11 +58,26 @@ public class AutocutCommandHandler {
         var connectPassword = argument("password", StringArgumentType.word())
                 .executes(AutocutCommandHandler::connectPasswordCommand)
                 .build();
+        var clip = literal("clip")
+                .executes(AutocutCommandHandler::makeClip) // WARN: Debug only
+                .build();
         //@formatter:off
         dispatcher.getRoot().addChild(autocut);
         autocut.addChild(connect);
             connect.addChild(connectPassword);
+        autocut.addChild(clip);
         //@formatter:on
+    }
+
+    private static int makeClip(CommandContext<FabricClientCommandSource> context) {
+        if (AutocutClient.currentRecorder != null) {
+            long time = System.currentTimeMillis() - AutocutClient.currentRecorder.startTime;
+            AutocutClient.currentRecorder.addClip(new Clip(time, time + 100));
+            context.getSource().sendFeedback(Text.of("Clipped!")); // TODO: Localize
+            return Command.SINGLE_SUCCESS;
+        }
+        context.getSource().sendError(Text.of("Not recording.")); // TODO: Localize
+        return 0;
     }
 
 
