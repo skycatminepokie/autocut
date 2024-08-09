@@ -2,6 +2,7 @@ package com.skycatdev.autocut;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacv.*;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,9 +13,14 @@ public class Recorder {
     protected ArrayList<Clip> clips = new ArrayList<>();
     protected ArrayList<RecordingEvent> events = new ArrayList<>();
     protected long startTime;
+    @Nullable protected String outputPath = null;
 
     public Recorder() {
         startTime = System.currentTimeMillis();
+    }
+
+    public long getRecordingTime() {
+        return System.currentTimeMillis() - startTime;
     }
 
     public void addClip(Clip clip) {
@@ -22,20 +28,22 @@ public class Recorder {
     }
 
     public void onRecordingEnded(String outputPath) {
+        this.outputPath = outputPath;
+    }
+
+    public void export() {
         FFmpegLogCallback.set();
-        File recording = new File(outputPath);
-        File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile(); // Successful cut: ffmpeg -i '.\cut2024-08-02 21-46-13.mkv' -vf trim=1:2 -af atrim=1:2 output.mkv
-        String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
-        File[] filters;
-        try {
-           filters = buildFilters(clips);
-           ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-i", recording.getAbsolutePath(), "-filter_script:v", filters[0].getAbsolutePath(), "-filter_script:a", filters[1].getAbsolutePath(), export.getAbsolutePath());
-           pb.inheritIO().start().waitFor();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+            File recording = new File(outputPath);
+            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile(); // Successful cut: ffmpeg -i '.\cut2024-08-02 21-46-13.mkv' -vf trim=1:2 -af atrim=1:2 output.mkv
+            String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
+            File[] filters;
+            try {
+                filters = buildFilters(clips);
+                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-copyts", "-i", recording.getAbsolutePath(), "-filter_script:v", filters[0].getAbsolutePath(), "-filter_script:a", filters[1].getAbsolutePath(), export.getAbsolutePath());
+                pb.inheritIO().start().waitFor();
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
     }
 
     /**
@@ -80,7 +88,7 @@ public class Recorder {
         while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
-            if (current.out() <= next.in()) { // If current overlaps next
+            if (next.in() <= current.out()) { // If current overlaps next
                 Clip newClip = new Clip(current.in(), Math.max(current.out(), next.out()), ClipTypes.INTERNAL, null); // Take the union
                 mergedClips.set(i, newClip); // Replace the current
                 mergedClips.remove(i + 1); // Yeet the next, it's been combined

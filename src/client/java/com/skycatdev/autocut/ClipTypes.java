@@ -14,4 +14,8 @@ public class ClipTypes {
      * @see Recorder#mergeClips(Collection)
      */
     public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
+    /**
+     * A clip made because the player broke a block.
+     */
+    public static final Identifier BREAK_BLOCK = Identifier.of(Autocut.MOD_ID, "break_block");
 }

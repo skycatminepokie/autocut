@@ -45,7 +45,6 @@ public class AutocutCommandHandler {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
                 assert AutocutClient.currentRecorder != null; // TODO: Error handling
                 AutocutClient.currentRecorder.onRecordingEnded(recordStateChangedEvent.getOutputPath());
-                AutocutClient.currentRecorder = null;
             }
         }
     }
@@ -61,17 +60,28 @@ public class AutocutCommandHandler {
         var clip = literal("clip")
                 .executes(AutocutCommandHandler::makeClip) // WARN: Debug only
                 .build();
+        var finish = literal("finish")
+                .executes(AutocutCommandHandler::finish) // WARN: Debug only
+                .build();
         //@formatter:off
         dispatcher.getRoot().addChild(autocut);
         autocut.addChild(connect);
             connect.addChild(connectPassword);
+        autocut.addChild(finish);
         autocut.addChild(clip);
         //@formatter:on
     }
 
+    private static int finish(CommandContext<FabricClientCommandSource> context) {
+        assert AutocutClient.currentRecorder != null;
+        AutocutClient.currentRecorder.export();
+        // AutocutClient.currentRecorder = null; WARN TESTING TO REMOVE IT
+        return Command.SINGLE_SUCCESS;
+    }
+
     private static int makeClip(CommandContext<FabricClientCommandSource> context) {
         if (AutocutClient.currentRecorder != null) {
-            long time = System.currentTimeMillis() - AutocutClient.currentRecorder.startTime;
+            long time = AutocutClient.currentRecorder.getRecordingTime();
             AutocutClient.currentRecorder.addClip(new Clip(time, time + 100, ClipTypes.DEBUG, "Debug"));
             context.getSource().sendFeedback(Text.of("Clipped!")); // TODO: Localize
             return Command.SINGLE_SUCCESS;
