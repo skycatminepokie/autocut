@@ -60,7 +60,6 @@ public class Recorder {
                 // First clip
                 String videoIn = "[0:v]";
                 String audioIn = "[0:a]";
-                // Todo: might need to try with SETPTS
                 pw.printf("%sselect=%s%s;", videoIn, between, "[0v]");
                 pw.printf("%saselect=%s%s", audioIn, between, "[0a]");
 
