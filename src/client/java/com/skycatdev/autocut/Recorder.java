@@ -34,47 +34,52 @@ public class Recorder {
     public void export() {
         FFmpegLogCallback.set();
             File recording = new File(outputPath);
-            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile(); // Successful cut: ffmpeg -i '.\cut2024-08-02 21-46-13.mkv' -vf trim=1:2 -af atrim=1:2 output.mkv
+            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
             String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
-            File[] filters;
             try {
-                filters = buildFilters(clips);
-                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-copyts", "-i", recording.getAbsolutePath(), "-filter_script:v", filters[0].getAbsolutePath(), "-filter_script:a", filters[1].getAbsolutePath(), export.getAbsolutePath());
+                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-codec:v", "libx264", "-i", recording.getAbsolutePath(), "-filter_complex_script", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
                 pb.inheritIO().start().waitFor();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
     }
 
-    /**
-     * Create filters to keep only the given clips in.
-     * @param clips At least one clip. Clips may overlap.
-     * @return {@code new File[] {selectFilter, aselectFilter}}
-     * @throws IOException
-     */
-    // Yes the return for the javadoc is exactly the return line, but it doesn't get much clearer than that line.
-    public static File[] buildFilters(Collection<Clip> clips) throws IOException { // Find a faster way? Let me know!
+    public static File buildComplexFilter(Collection<Clip> clips) throws IOException { // TODO: currently only handles one audio track
         if (clips.isEmpty()) {
             throw new IllegalArgumentException("clips.isEmpty(), cannot build a (meaningful) filter out of no clips.");
         }
         var mergedClips = mergeClips(clips);
-        File selectFilter = File.createTempFile("autocutSelectFilter", null);
-        selectFilter.deleteOnExit();
-        File aselectFilter = File.createTempFile("autocutAselectFilter", null);
-        aselectFilter.deleteOnExit();
-        try (PrintWriter selectWriter = new PrintWriter(selectFilter); PrintWriter aselectWriter = new PrintWriter(aselectFilter)) {
+        File filter = File.createTempFile("autocutComplexFilter", null);
+        filter.deleteOnExit();
+        try (PrintWriter pw = new PrintWriter(filter)) {
+
             String between = mergedClips.getFirst().toBetweenStatement("t");
-            selectWriter.print("select='" + between);
-            aselectWriter.print("aselect='" + between);
-            for (int i = 1; i < mergedClips.size(); i++) {
-                between = mergedClips.get(i).toBetweenStatement("t");
-                selectWriter.print("+" + between);
-                aselectWriter.print("+" + between);
+            if (mergedClips.size() == 1) {
+                pw.printf("[0:v]select=%s[outv];[0:a]aselect=%s[outa]", between, between);
+            } else {
+                // First clip
+                String videoIn = "[0:v]";
+                String audioIn = "[0:a]";
+                // Todo: might need to try with SETPTS
+                pw.printf("%sselect=%s%s;", videoIn, between, "[0v]");
+                pw.printf("%saselect=%s%s", audioIn, between, "[0a]");
+
+                // Clips 2 thru n
+                for (int i = 1; i < mergedClips.size(); i++) {
+                    between = mergedClips.get(i).toBetweenStatement("t");
+                    pw.printf(";%sselect=%s,setpts=PTS-STARTPTS[%dv]", videoIn, between, i);
+                    pw.printf(";%saselect=%s,asetpts=PTS-STARTPTS[%da]", audioIn, between, i);
+                }
+
+                // Concat
+                pw.print(';');
+                for (int i = 0; i < mergedClips.size(); i++) { // List all the inputs
+                    pw.printf("[%dv][%da]", i, i);
+                }
+                pw.printf("concat=n=%d:v=1:a=1[outv][outa]", mergedClips.size());
             }
-            selectWriter.print("'");
-            aselectWriter.print("'");
         }
-        return new File[] {selectFilter, aselectFilter};
+        return filter;
     }
 
     /**
