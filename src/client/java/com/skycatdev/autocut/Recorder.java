@@ -12,17 +12,30 @@ import java.util.Comparator;
 public class Recorder {
     protected ArrayList<Clip> clips = new ArrayList<>();
     protected ArrayList<RecordingEvent> events = new ArrayList<>();
+    /**
+     * The UNIX time this recorder started.
+     */
     protected long startTime;
+    /**
+     * Where the video file of the recording is stored. {@code null} when recording has not finished.
+     */
     @Nullable protected String outputPath = null;
 
     public Recorder() {
         startTime = System.currentTimeMillis();
     }
 
+    /**
+     * @return how long this has been recording, in milliseconds
+     */
     public long getRecordingTime() {
         return System.currentTimeMillis() - startTime;
     }
 
+    /**
+     * Adds a new clip to the recording.
+     * @param clip The clip to add.
+     */
     public void addClip(Clip clip) {
         clips.add(clip);
     }
@@ -31,19 +44,31 @@ public class Recorder {
         this.outputPath = outputPath;
     }
 
+    /**
+     * Export all clips in the recording with ffmpeg. {@link Recorder#outputPath} must not be {@code null}.
+     */
     public void export() {
         FFmpegLogCallback.set();
-            File recording = new File(outputPath);
-            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
-            String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
-            try {
-                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-codec:v", "libx264", "-i", recording.getAbsolutePath(), "-filter_complex_script", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
-                pb.inheritIO().start().waitFor();
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        if (outputPath == null) {
+            throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
+        }
+        File recording = new File(outputPath);
+        File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
+        String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
+        try {
+            ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-codec:v", "libx264", "-i", recording.getAbsolutePath(), "-filter_complex_script", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
+            pb.inheritIO().start().waitFor();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    /**
+     * Builds a filter that keeps and concatenates only the clips given.
+     * @param clips The clips to keep. Must not be empty.
+     * @return A new temporary file containing the filter
+     * @throws IOException If there's problems with the file
+     */
     public static File buildComplexFilter(Collection<Clip> clips) throws IOException { // TODO: currently only handles one audio track
         if (clips.isEmpty()) {
             throw new IllegalArgumentException("clips.isEmpty(), cannot build a (meaningful) filter out of no clips.");
@@ -83,7 +108,7 @@ public class Recorder {
 
     /**
      * Sort and merge all overlapping clips together.
-     * @param clips The clips to merge together
+     * @param clips The clips to merge together.
      * @return A new ArrayList of merged clips.
      */
     private static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
