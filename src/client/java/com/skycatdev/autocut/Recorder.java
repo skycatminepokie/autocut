@@ -47,16 +47,15 @@ public class Recorder {
     /**
      * Export all clips in the recording with ffmpeg. {@link Recorder#outputPath} must not be {@code null}.
      */
-    public void export() {
+    public void export(String ffmpeg) {
         FFmpegLogCallback.set();
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
         File recording = new File(outputPath);
         File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
-        String ffmpeg = Loader.load(org.bytedeco.ffmpeg.ffmpeg.class);
         try {
-            ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-codec:v", "libx264", "-i", recording.getAbsolutePath(), "-filter_complex_script", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
+            ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-i", recording.getAbsolutePath(), "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
             pb.inheritIO().start().waitFor();
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);

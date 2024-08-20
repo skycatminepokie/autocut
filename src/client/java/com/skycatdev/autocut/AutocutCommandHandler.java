@@ -70,6 +70,8 @@ public class AutocutCommandHandler {
                 .executes(AutocutCommandHandler::makeClip) // WARN: Debug only
                 .build();
         var finish = literal("finish")
+                .build();
+        var finishFfmpeg = argument("ffmpeg", StringArgumentType.string())
                 .executes(AutocutCommandHandler::finish) // WARN: Debug only
                 .build();
         //@formatter:off
@@ -77,13 +79,14 @@ public class AutocutCommandHandler {
         autocut.addChild(connect);
             connect.addChild(connectPassword);
         autocut.addChild(finish);
+            finish.addChild(finishFfmpeg);
         autocut.addChild(clip);
         //@formatter:on
     }
 
     private static int finish(CommandContext<FabricClientCommandSource> context) {
         assert AutocutClient.currentRecorder != null;
-        AutocutClient.currentRecorder.export();
+        AutocutClient.currentRecorder.export(StringArgumentType.getString(context, "ffmpeg"));
         AutocutClient.currentRecorder = null;
         return Command.SINGLE_SUCCESS;
     }
