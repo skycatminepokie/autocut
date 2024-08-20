@@ -118,7 +118,7 @@ public class Recorder {
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
             if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new Clip(current.in(), Math.max(current.out(), next.out()), ClipTypes.INTERNAL, null); // Take the union
+                Clip newClip = new Clip(current.in(), Math.max(current.out(), next.out()), RecordingElementTypes.INTERNAL, null); // Take the union
                 mergedClips.set(i, newClip); // Replace the current
                 mergedClips.remove(i + 1); // Yeet the next, it's been combined
                 continue; // And check this clip for union with the next
