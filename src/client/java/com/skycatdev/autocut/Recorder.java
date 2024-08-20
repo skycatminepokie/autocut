@@ -69,7 +69,7 @@ public class Recorder {
      * @return A new temporary file containing the filter
      * @throws IOException If there's problems with the file
      */
-    public static File buildComplexFilter(Collection<Clip> clips) throws IOException { // TODO: currently only handles one audio track
+    public File buildComplexFilter(Collection<Clip> clips) throws IOException { // TODO: currently only handles one audio track
         if (clips.isEmpty()) {
             throw new IllegalArgumentException("clips.isEmpty(), cannot build a (meaningful) filter out of no clips.");
         }
@@ -78,7 +78,7 @@ public class Recorder {
         filter.deleteOnExit();
         try (PrintWriter pw = new PrintWriter(filter)) {
 
-            String between = mergedClips.getFirst().toBetweenStatement("t");
+            String between = mergedClips.getFirst().toBetweenStatement("t", startTime);
             if (mergedClips.size() == 1) {
                 pw.printf("[0:v]select=%s[outv];[0:a]aselect=%s[outa]", between, between);
             } else {
@@ -90,7 +90,7 @@ public class Recorder {
 
                 // Clips 2 thru n
                 for (int i = 1; i < mergedClips.size(); i++) {
-                    between = mergedClips.get(i).toBetweenStatement("t");
+                    between = mergedClips.get(i).toBetweenStatement("t", startTime);
                     pw.printf(";%sselect=%s,setpts=PTS-STARTPTS[%dv]", videoIn, between, i);
                     pw.printf(";%saselect=%s,asetpts=PTS-STARTPTS[%da]", audioIn, between, i);
                 }

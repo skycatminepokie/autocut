@@ -14,7 +14,7 @@ public class AutocutClient implements ClientModInitializer {
 		ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
 		ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
 			if (currentRecorder != null) {
-				long time = currentRecorder.getRecordingTime();
+				long time = System.currentTimeMillis();
 				currentRecorder.addClip(new Clip(time - 250, time + 250, RecordingElementTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString())); // TODO: Localize
 			}
 		}));
