@@ -42,9 +42,9 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	include(implementation("io.obs-websocket.community:client:2.0.0") {
-		exclude (group = "org.apache.logging.slf4j")
-	})
+	implementation("io.obs-websocket.community:client:2.0.0") {
+		exclude group: 'org.slf4j', module: 'slf4j-simple'
+	}
 	include implementation("org.bytedeco:javacv-platform:1.5.10")
 }
 
