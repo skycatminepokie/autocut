@@ -49,14 +49,16 @@ public class Recorder {
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
-        File recording = new File(outputPath);
-        File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
-        try {
-            ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-i", recording.getAbsolutePath(), "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
-            pb.inheritIO().start().waitFor();
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        new Thread(() -> {
+            File recording = new File(outputPath);
+            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
+            try {
+                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-i", recording.getAbsolutePath(), "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
+                pb.inheritIO().start().waitFor();
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
     }
 
     /**
