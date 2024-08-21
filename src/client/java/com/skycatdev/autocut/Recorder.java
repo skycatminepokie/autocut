@@ -53,7 +53,7 @@ public class Recorder {
             File recording = new File(outputPath);
             File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
             try {
-                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-i", recording.getAbsolutePath(), "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
+                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
                 pb.inheritIO().start().waitFor();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
@@ -78,13 +78,13 @@ public class Recorder {
 
             String between = mergedClips.getFirst().toBetweenStatement("t", startTime);
             if (mergedClips.size() == 1) {
-                pw.printf("[0:v]select=%s[outv];[0:a]aselect=%s[outa]", between, between);
+                pw.printf("[0:v]select=%s,setpts=PTS-STARTPTS[outv];[0:a]aselect=%s,asetpts=PTS-STARTPTS[outa]", between, between);
             } else {
                 // First clip
                 String videoIn = "[0:v]";
                 String audioIn = "[0:a]";
-                pw.printf("%sselect=%s%s;", videoIn, between, "[0v]");
-                pw.printf("%saselect=%s%s", audioIn, between, "[0a]");
+                pw.printf("%sselect=%s,setpts=PTS-STARTPTS%s;", videoIn, between, "[0v]");
+                pw.printf("%saselect=%s,asetpts=PTS-STARTPTS%s", audioIn, between, "[0a]");
 
                 // Clips 2 thru n
                 for (int i = 1; i < mergedClips.size(); i++) {
