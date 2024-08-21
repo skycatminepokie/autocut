@@ -1,7 +1,5 @@
 package com.skycatdev.autocut;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacv.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -48,7 +46,6 @@ public class Recorder {
      * Export all clips in the recording with ffmpeg. {@link Recorder#outputPath} must not be {@code null}.
      */
     public void export(String ffmpeg) {
-        FFmpegLogCallback.set();
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
