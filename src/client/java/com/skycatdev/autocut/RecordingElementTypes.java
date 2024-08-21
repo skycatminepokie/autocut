@@ -32,4 +32,8 @@ public class RecordingElementTypes {
      * @see RecordingElementTypes#MANUAL_TRIGGERED
      */
     public static final Identifier MANUAL_MADE = Identifier.of(Autocut.MOD_ID, "manual_made");
+    /**
+     * An element created by attacking an entity.
+     */
+    public static final Identifier ATTACK_ENTITY = Identifier.of(Autocut.MOD_ID, "attack_entity");
 }

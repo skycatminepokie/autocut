@@ -15,16 +15,16 @@ public class AutocutClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
-		// ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-		// 	if (currentRecorder != null) {
-		// 		long time = System.currentTimeMillis();
-		// 		currentRecorder.addClip(new Clip(time - 250, time + 250, RecordingElementTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString())); // TODO: Localize
-		// 	}
-		// }));
+		ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
+			if (currentRecorder != null) {
+				long time = System.currentTimeMillis();
+				currentRecorder.addClip(new Clip(time - 250, time + 250, RecordingElementTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString())); // TODO: Localize
+			}
+		}));
 		AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
 			if (currentRecorder != null && entity != null) {
 				long time = System.currentTimeMillis();
-				currentRecorder.addClip(new Clip(time - 250, time +250, RecordingElementTypes.MANUAL_TRIGGERED, "ATTACK")); // TODO: Type and description
+				currentRecorder.addClip(new Clip(time - 250, time +250, RecordingElementTypes.ATTACK_ENTITY, "Attacked " + entity.getName())); // TODO: Type and description
 			}
 			return ActionResult.PASS;
 		}));
