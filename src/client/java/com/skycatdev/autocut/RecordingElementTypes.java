@@ -14,7 +14,7 @@ public class RecordingElementTypes {
     public static final Identifier DEBUG = Identifier.of(Autocut.MOD_ID, "debug");
     /**
      * An element made for internal use. Should not end up being serialized.
-     * @see Recorder#mergeClips(Collection)
+     * @see RecordingHandler#mergeClips(Collection)
      */
     public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
     /**

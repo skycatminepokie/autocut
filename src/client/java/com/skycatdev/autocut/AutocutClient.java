@@ -10,20 +10,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class AutocutClient implements ClientModInitializer {
 	@Nullable public static OBSRemoteController controller = null;
-	@Nullable public static Recorder currentRecorder = null;
+	@Nullable public static RecordingHandler currentRecordingHandler = null;
 	@Override
 	public void onInitializeClient() {
 		ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
 		ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-			if (currentRecorder != null) {
+			if (currentRecordingHandler != null) {
 				long time = System.currentTimeMillis();
-				currentRecorder.addClip(new Clip(time - 250, time + 250, RecordingElementTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString())); // TODO: Localize
+				currentRecordingHandler.addClip(new Clip(time - 250, time + 250, RecordingElementTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString())); // TODO: Localize
 			}
 		}));
 		AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-			if (currentRecorder != null && entity != null) {
+			if (currentRecordingHandler != null && entity != null) {
 				long time = System.currentTimeMillis();
-				currentRecorder.addClip(new Clip(time - 250, time +250, RecordingElementTypes.ATTACK_ENTITY, "Attacked " + entity.getName())); // TODO: Type and description
+				currentRecordingHandler.addClip(new Clip(time - 250, time +250, RecordingElementTypes.ATTACK_ENTITY, "Attacked " + entity.getName())); // TODO: Type and description
 			}
 			return ActionResult.PASS;
 		}));

@@ -43,16 +43,16 @@ public class AutocutCommandHandler {
     private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) {
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
-            assert AutocutClient.currentRecorder == null; // TODO: Error handling
+            assert AutocutClient.currentRecordingHandler == null; // TODO: Error handling
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Recording started")); // TODO: Localize
-            AutocutClient.currentRecorder = new Recorder();
+            AutocutClient.currentRecordingHandler = new RecordingHandler();
         } else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Recording ended.")); // TODO: Localize
-                if (AutocutClient.currentRecorder == null) {
+                if (AutocutClient.currentRecordingHandler == null) {
                     MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Warning: Recording was not started in autocut - no recording is saved.")); // TODO: Check at connect and warn // TODO: Localize
                 } else {
-                    AutocutClient.currentRecorder.onRecordingEnded(recordStateChangedEvent.getOutputPath());
+                    AutocutClient.currentRecordingHandler.onRecordingEnded(recordStateChangedEvent.getOutputPath());
                 }
             }
         }
@@ -85,16 +85,16 @@ public class AutocutCommandHandler {
     }
 
     private static int finish(CommandContext<FabricClientCommandSource> context) {
-        assert AutocutClient.currentRecorder != null;
-        AutocutClient.currentRecorder.export(StringArgumentType.getString(context, "ffmpeg"));
-        AutocutClient.currentRecorder = null;
+        assert AutocutClient.currentRecordingHandler != null;
+        AutocutClient.currentRecordingHandler.export(StringArgumentType.getString(context, "ffmpeg"));
+        AutocutClient.currentRecordingHandler = null;
         return Command.SINGLE_SUCCESS;
     }
 
     private static int makeClip(CommandContext<FabricClientCommandSource> context) {
-        if (AutocutClient.currentRecorder != null) {
+        if (AutocutClient.currentRecordingHandler != null) {
             long time = System.currentTimeMillis();
-            AutocutClient.currentRecorder.addClip(new Clip(time - DEFAULT_CLIP_LENGTH, time, RecordingElementTypes.DEBUG, "Debug"));
+            AutocutClient.currentRecordingHandler.addClip(new Clip(time - DEFAULT_CLIP_LENGTH, time, RecordingElementTypes.DEBUG, "Debug"));
             context.getSource().sendFeedback(Text.of("Clipped!")); // TODO: Localize
             return Command.SINGLE_SUCCESS;
         }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
-public class Recorder {
+public class RecordingHandler {
     protected ArrayList<Clip> clips = new ArrayList<>();
     protected ArrayList<RecordingEvent> events = new ArrayList<>();
     /**
@@ -19,7 +19,7 @@ public class Recorder {
      */
     @Nullable protected String outputPath = null;
 
-    public Recorder() {
+    public RecordingHandler() {
         startTime = System.currentTimeMillis();
     }
 
@@ -43,7 +43,7 @@ public class Recorder {
     }
 
     /**
-     * Export all clips in the recording with ffmpeg. {@link Recorder#outputPath} must not be {@code null}.
+     * Export all clips in the recording with ffmpeg. {@link RecordingHandler#outputPath} must not be {@code null}.
      */
     public void export(String ffmpeg) {
         if (outputPath == null) {
