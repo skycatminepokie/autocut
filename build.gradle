@@ -42,19 +42,19 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	include implementation("io.obs-websocket.community:client:2.0.0") {
+	include implementation("io.obs-websocket.community:client:${project.obs_websocket_version}") {
 		exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
-	include implementation('org.eclipse.jetty.websocket:websocket-client:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty.websocket:websocket-common:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty.websocket:websocket-api:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty:jetty-util:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty:jetty-xml:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty:jetty-io:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty:jetty-client:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty:jetty-jmx:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty:jetty-http:9.4.49.v20220914') // For OBS WebSocket Java
-	include implementation('org.eclipse.jetty:jetty-xml:9.4.49.v20220914') // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty.websocket:websocket-client:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty.websocket:websocket-common:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty.websocket:websocket-api:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty:jetty-util:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty:jetty-xml:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty:jetty-io:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty:jetty-client:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty:jetty-jmx:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty:jetty-http:${project.jetty_version}") // For OBS WebSocket Java
+	include implementation("org.eclipse.jetty:jetty-xml:${project.jetty_version}") // For OBS WebSocket Java
 	include implementation("org.xerial:sqlite-jdbc:${project.sqlite_jdbc_version}")
 }
 
