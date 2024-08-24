@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class AutocutClient implements ClientModInitializer {
