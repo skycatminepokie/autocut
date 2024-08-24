@@ -55,6 +55,7 @@ dependencies {
 	include implementation('org.eclipse.jetty:jetty-jmx:9.4.49.v20220914') // For OBS WebSocket Java
 	include implementation('org.eclipse.jetty:jetty-http:9.4.49.v20220914') // For OBS WebSocket Java
 	include implementation('org.eclipse.jetty:jetty-xml:9.4.49.v20220914') // For OBS WebSocket Java
+	include implementation("org.xerial:sqlite-jdbc:${project.sqlite_jdbc_version}")
 }
 
 processResources {
