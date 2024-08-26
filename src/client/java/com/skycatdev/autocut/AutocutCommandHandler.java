@@ -103,7 +103,10 @@ public class AutocutCommandHandler {
     private static int makeClip(CommandContext<FabricClientCommandSource> context) {
         if (AutocutClient.currentRecordingHandler != null) {
             long time = System.currentTimeMillis();
-            AutocutClient.currentRecordingHandler.addClip(new Clip(time - DEFAULT_CLIP_LENGTH, time, RecordingElementTypes.DEBUG, "Debug"));
+            try {
+                AutocutClient.currentRecordingHandler.addClip(new Clip(time - DEFAULT_CLIP_LENGTH, time, RecordingElementTypes.DEBUG, "Debug"));
+            } catch (SQLException ignored) { // TODO
+            }
             context.getSource().sendFeedback(Text.of("Clipped!")); // TODO: Localize
             return Command.SINGLE_SUCCESS;
         }

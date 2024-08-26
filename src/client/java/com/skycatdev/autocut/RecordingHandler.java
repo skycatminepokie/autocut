@@ -7,10 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -20,26 +17,21 @@ public class RecordingHandler {
     protected static final String CLIPS_TABLE = "clips";
     protected static final String CLIPS_ID_COLUMN = "id";
     protected static final String CLIPS_INPOINT_COLUMN = "start_timestamp";
+    protected static final String CLIPS_TIMESTAMP_COLUMN = "timestamp";
     protected static final String CLIPS_OUTPOINT_COLUMN = "end_timestamp";
     protected static final String CLIPS_TYPE_COLUMN = "type";
-    protected static final String CLIPS_META_COLUMN = "meta";
-    protected static final String EVENTS_TABLE = "events";
-    protected static final String EVENTS_ID_COLUMN = "id";
-    protected static final String EVENTS_TIMESTAMP_COLUMN = "timestamp";
-    protected static final String EVENTS_TYPE_COLUMN = "type";
-    protected static final String EVENTS_META_COLUMN = "meta";
+    protected static final String CLIPS_DESCRIPTION_COLUMN = "description";
 
     static {
         RECORDING_DIRECTORY.toFile().mkdirs(); // TODO: Error handling
     }
 
     protected ArrayList<Clip> clips = new ArrayList<>();
-    protected ArrayList<RecordingEvent> events = new ArrayList<>();
     /**
      * The UNIX time this recorder started.
      */
     protected long startTime;
-    protected File database = RECORDING_DIRECTORY.resolve("autocut_" + startTime + ".sqlite").toFile();
+    protected File database;
     protected String sqlUrl;
     /**
      * Where the video file of the recording is stored. {@code null} when recording has not finished.
@@ -48,6 +40,7 @@ public class RecordingHandler {
 
     public RecordingHandler() throws SQLException, IOException {
         startTime = System.currentTimeMillis();
+        database = RECORDING_DIRECTORY.resolve("autocut_" + startTime + ".sqlite").toFile();
         database.createNewFile(); // TODO: Handle duplicate files
         sqlUrl = "jdbc:sqlite:" + database.getPath();
         try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
@@ -56,11 +49,6 @@ public class RecordingHandler {
                         %s INTEGER PRIMARY KEY AUTOINCREMENT,
                         %s INTEGER,
                         %s INTEGER,
-                        %s TEXT,
-                        %s TEXT
-                    );
-                    CREATE TABLE %s (
-                        %s INTEGER PRIMARY KEY AUTOINCREMENT,
                         %s INTEGER,
                         %s TEXT,
                         %s TEXT
@@ -68,14 +56,10 @@ public class RecordingHandler {
                     CLIPS_TABLE,
                     CLIPS_ID_COLUMN,
                     CLIPS_INPOINT_COLUMN,
+                    CLIPS_TIMESTAMP_COLUMN,
                     CLIPS_OUTPOINT_COLUMN,
                     CLIPS_TYPE_COLUMN,
-                    CLIPS_META_COLUMN,
-                    EVENTS_TABLE,
-                    EVENTS_ID_COLUMN,
-                    EVENTS_TIMESTAMP_COLUMN,
-                    EVENTS_TYPE_COLUMN,
-                    EVENTS_META_COLUMN));
+                    CLIPS_DESCRIPTION_COLUMN));
         }
     }
 
@@ -107,8 +91,21 @@ public class RecordingHandler {
      *
      * @param clip The clip to add.
      */
-    public void addClip(Clip clip) {
+    public void addClip(Clip clip) throws SQLException {
         clips.add(clip);
+        try (Connection connection = DriverManager.getConnection(sqlUrl);
+             PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?);",
+                     CLIPS_TABLE,
+                     CLIPS_INPOINT_COLUMN,
+                     CLIPS_OUTPOINT_COLUMN,
+                     CLIPS_TYPE_COLUMN,
+                     CLIPS_DESCRIPTION_COLUMN))) {
+            statement.setLong(1, clip.in());
+            statement.setLong(2, clip.out());
+            statement.setString(3, clip.type().toString());
+            statement.setString(4, clip.description());
+            statement.execute();
+        }
     }
 
     /**
