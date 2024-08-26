@@ -9,7 +9,12 @@ import io.obswebsocket.community.client.message.event.outputs.RecordStateChanged
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -45,7 +50,11 @@ public class AutocutCommandHandler {
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
             assert AutocutClient.currentRecordingHandler == null; // TODO: Error handling
             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Recording started")); // TODO: Localize
-            AutocutClient.currentRecordingHandler = new RecordingHandler();
+            try {
+                AutocutClient.currentRecordingHandler = new RecordingHandler();
+            } catch (SQLException | IOException e) {
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Failed to start autocut: ").copy().append(Text.of("Exception").copy().setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(e.getLocalizedMessage())))))); // TODO: Localize and unawfulify
+            }
         } else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Recording ended.")); // TODO: Localize

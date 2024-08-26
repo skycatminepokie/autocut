@@ -1,68 +1,119 @@
 package com.skycatdev.autocut;
 
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
 public class RecordingHandler {
+    protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
+    protected static final String CLIPS_TABLE = "clips";
+    protected static final String CLIPS_ID_COLUMN = "id";
+    protected static final String CLIPS_INPOINT_COLUMN = "start_timestamp";
+    protected static final String CLIPS_OUTPOINT_COLUMN = "end_timestamp";
+    protected static final String CLIPS_TYPE_COLUMN = "type";
+    protected static final String CLIPS_META_COLUMN = "meta";
+    protected static final String EVENTS_TABLE = "events";
+    protected static final String EVENTS_ID_COLUMN = "id";
+    protected static final String EVENTS_TIMESTAMP_COLUMN = "timestamp";
+    protected static final String EVENTS_TYPE_COLUMN = "type";
+    protected static final String EVENTS_META_COLUMN = "meta";
+
+    static {
+        RECORDING_DIRECTORY.toFile().mkdirs(); // TODO: Error handling
+    }
+
     protected ArrayList<Clip> clips = new ArrayList<>();
     protected ArrayList<RecordingEvent> events = new ArrayList<>();
     /**
      * The UNIX time this recorder started.
      */
     protected long startTime;
+    protected File database = RECORDING_DIRECTORY.resolve("autocut_" + startTime + ".sqlite").toFile();
+    protected String sqlUrl;
     /**
      * Where the video file of the recording is stored. {@code null} when recording has not finished.
      */
     @Nullable protected String outputPath = null;
 
-    public RecordingHandler() {
+    public RecordingHandler() throws SQLException, IOException {
         startTime = System.currentTimeMillis();
+        database.createNewFile(); // TODO: Handle duplicate files
+        sqlUrl = "jdbc:sqlite:" + database.getPath();
+        try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
+            statement.execute(String.format("""
+                    CREATE TABLE %s (
+                        %s INTEGER PRIMARY KEY AUTOINCREMENT,
+                        %s INTEGER,
+                        %s INTEGER,
+                        %s TEXT,
+                        %s TEXT
+                    );
+                    CREATE TABLE %s (
+                        %s INTEGER PRIMARY KEY AUTOINCREMENT,
+                        %s INTEGER,
+                        %s TEXT,
+                        %s TEXT
+                    );""",
+                    CLIPS_TABLE,
+                    CLIPS_ID_COLUMN,
+                    CLIPS_INPOINT_COLUMN,
+                    CLIPS_OUTPOINT_COLUMN,
+                    CLIPS_TYPE_COLUMN,
+                    CLIPS_META_COLUMN,
+                    EVENTS_TABLE,
+                    EVENTS_ID_COLUMN,
+                    EVENTS_TIMESTAMP_COLUMN,
+                    EVENTS_TYPE_COLUMN,
+                    EVENTS_META_COLUMN));
+        }
     }
 
     /**
-     * @return how long this has been recording, in milliseconds
+     * Sort and merge all overlapping clips together.
+     *
+     * @param clips The clips to merge together.
+     * @return A new ArrayList of merged clips.
      */
-    public long getRecordingTime() {
-        return System.currentTimeMillis() - startTime;
+    private static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
+        ArrayList<Clip> mergedClips = new ArrayList<>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
+        int i = 0;
+        while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
+            Clip current = mergedClips.get(i);
+            Clip next = mergedClips.get(i + 1);
+            if (next.in() <= current.out()) { // If current overlaps next
+                Clip newClip = new Clip(current.in(), Math.max(current.out(), next.out()), RecordingElementTypes.INTERNAL, null); // Take the union
+                mergedClips.set(i, newClip); // Replace the current
+                mergedClips.remove(i + 1); // Yeet the next, it's been combined
+                continue; // And check this clip for union with the next
+            }
+            i++; // This clip has no overlap, try the next one
+        }
+        return mergedClips;
     }
 
     /**
      * Adds a new clip to the recording.
+     *
      * @param clip The clip to add.
      */
     public void addClip(Clip clip) {
         clips.add(clip);
     }
 
-    public void onRecordingEnded(String outputPath) {
-        this.outputPath = outputPath;
-    }
-
-    /**
-     * Export all clips in the recording with ffmpeg. {@link RecordingHandler#outputPath} must not be {@code null}.
-     */
-    public void export(String ffmpeg) {
-        if (outputPath == null) {
-            throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
-        }
-        new Thread(() -> {
-            File recording = new File(outputPath);
-            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
-            try {
-                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
-                pb.inheritIO().start().waitFor();
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }).start();
-    }
-
     /**
      * Builds a filter that keeps and concatenates only the clips given.
+     *
      * @param clips The clips to keep. Must not be empty.
      * @return A new temporary file containing the filter
      * @throws IOException If there's problems with the file
@@ -105,24 +156,32 @@ public class RecordingHandler {
     }
 
     /**
-     * Sort and merge all overlapping clips together.
-     * @param clips The clips to merge together.
-     * @return A new ArrayList of merged clips.
+     * Export all clips in the recording with ffmpeg. {@link RecordingHandler#outputPath} must not be {@code null}.
      */
-    private static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
-        ArrayList<Clip> mergedClips = new ArrayList<>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
-        int i = 0;
-        while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
-            Clip current = mergedClips.get(i);
-            Clip next = mergedClips.get(i + 1);
-            if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new Clip(current.in(), Math.max(current.out(), next.out()), RecordingElementTypes.INTERNAL, null); // Take the union
-                mergedClips.set(i, newClip); // Replace the current
-                mergedClips.remove(i + 1); // Yeet the next, it's been combined
-                continue; // And check this clip for union with the next
-            }
-            i ++; // This clip has no overlap, try the next one
+    public void export(String ffmpeg) {
+        if (outputPath == null) {
+            throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
-        return mergedClips;
+        new Thread(() -> {
+            File recording = new File(outputPath);
+            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
+            try {
+                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
+                pb.inheritIO().start().waitFor();
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
+
+    /**
+     * @return how long this has been recording, in milliseconds
+     */
+    public long getRecordingTime() {
+        return System.currentTimeMillis() - startTime;
+    }
+
+    public void onRecordingEnded(String outputPath) {
+        this.outputPath = outputPath;
     }
 }
