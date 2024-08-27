@@ -57,10 +57,10 @@ public class RecordingHandler {
             statement.execute(String.format("""
                             CREATE TABLE %s (
                                 %s INTEGER PRIMARY KEY AUTOINCREMENT,
-                                %s INTEGER,
-                                %s INTEGER,
-                                %s INTEGER,
-                                %s TEXT,
+                                %s INTEGER NOT NULL,
+                                %s INTEGER NOT NULL,
+                                %s INTEGER NOT NULL,
+                                %s TEXT NOT NULL,
                                 %s TEXT,
                                 %s TEXT,
                                 %s TEXT,
@@ -234,7 +234,7 @@ public class RecordingHandler {
             File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
 
             try {
-                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
+                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // Requires a build of ffmpeg that supports libx264
                 pb.inheritIO().start().waitFor();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
