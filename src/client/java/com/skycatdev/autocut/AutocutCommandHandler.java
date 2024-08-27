@@ -97,7 +97,11 @@ public class AutocutCommandHandler {
 
     private static int finish(CommandContext<FabricClientCommandSource> context) {
         assert AutocutClient.currentRecordingHandler != null;
-        AutocutClient.currentRecordingHandler.export(StringArgumentType.getString(context, "ffmpeg"));
+        try {
+            AutocutClient.currentRecordingHandler.export(StringArgumentType.getString(context, "ffmpeg"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e); // TODO: Error handling
+        }
         AutocutClient.currentRecordingHandler = null;
         return Command.SINGLE_SUCCESS;
     }

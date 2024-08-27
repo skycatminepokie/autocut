@@ -4,6 +4,8 @@ import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -35,7 +37,6 @@ public class RecordingHandler {
         RECORDING_DIRECTORY.toFile().mkdirs(); // TODO: Error handling
     }
 
-    protected ArrayList<Clip> clips = new ArrayList<>();
     /**
      * The UNIX time this recorder started.
      */
@@ -121,7 +122,7 @@ public class RecordingHandler {
         rowValues.add(clip.time());
         rowValues.add(clip.out());
         rowValues.add(clip.type());
-        
+
         // Optional
         if (clip.description() != null) {
             columnsBuilder.append(", " + CLIPS_DESCRIPTION_COLUMN);
@@ -171,7 +172,6 @@ public class RecordingHandler {
      * @param clip The clip to add.
      */
     public void addClip(Clip clip) throws SQLException {
-        clips.add(clip);
         try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = prepareClipStatement(clip, connection)) {
             statement.execute();
         }
@@ -224,13 +224,15 @@ public class RecordingHandler {
     /**
      * Export all clips in the recording with ffmpeg. {@link RecordingHandler#outputPath} must not be {@code null}.
      */
-    public void export(String ffmpeg) {
+    public void export(String ffmpeg) throws SQLException {
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
+        LinkedList<Clip> clips = getClips();
         new Thread(() -> {
             File recording = new File(outputPath);
             File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
+
             try {
                 ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // WARN: Requires a build of ffmpeg that supports libx264
                 pb.inheritIO().start().waitFor();
@@ -238,6 +240,34 @@ public class RecordingHandler {
                 throw new RuntimeException(e);
             }
         }).start();
+    }
+
+    public LinkedList<Clip> getClips() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
+            ResultSet results = statement.executeQuery("SELECT * FROM " + CLIPS_TABLE + ";");
+            LinkedList<Clip> clips = new LinkedList<>();
+            while (results.next()) {
+                ClipBuilder builder = new ClipBuilder(results.getLong(CLIPS_INPOINT_COLUMN),
+                        results.getLong(CLIPS_TIMESTAMP_COLUMN),
+                        results.getLong(CLIPS_OUTPOINT_COLUMN),
+                        Identifier.of(results.getString(CLIPS_ID_COLUMN)));
+                builder.setDescription(CLIPS_DESCRIPTION_COLUMN);
+                builder.setSource(CLIPS_SOURCE_COLUMN);
+                builder.setObject(CLIPS_OBJECT_COLUMN);
+                if (results.getObject(CLIPS_SOURCE_X_COLUMN) instanceof Double x && // instanceof to check for null, cast to avoid re-getting.
+                    results.getObject(CLIPS_SOURCE_Y_COLUMN) instanceof Double y &&
+                    results.getObject(CLIPS_SOURCE_Z_COLUMN) instanceof Double z) {
+                    builder.setSourceLocation(new Vec3d(x, y, z));
+                }
+                if (results.getObject(CLIPS_OBJECT_X_COLUMN) instanceof Double x &&
+                    results.getObject(CLIPS_OBJECT_Y_COLUMN) instanceof Double y &&
+                    results.getObject(CLIPS_OBJECT_Z_COLUMN) instanceof Double z) {
+                    builder.setObjectLocation(new Vec3d(x, y, z));
+                }
+                clips.add(builder.build());
+            }
+            return clips;
+        }
     }
 
     /**
