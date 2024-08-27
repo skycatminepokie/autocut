@@ -1,5 +1,7 @@
 package com.skycatdev.autocut;
 
+import com.skycatdev.autocut.clips.Clip;
+import com.skycatdev.autocut.clips.ClipTypes;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -11,30 +13,31 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 
 public class AutocutClient implements ClientModInitializer {
-	@Nullable public static OBSRemoteController controller = null;
-	@Nullable public static RecordingHandler currentRecordingHandler = null;
-	@Override
-	public void onInitializeClient() {
-		ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
-		ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-			if (currentRecordingHandler != null) {
-				long time = System.currentTimeMillis();
+    @Nullable public static OBSRemoteController controller = null;
+    @Nullable public static RecordingHandler currentRecordingHandler = null;
+
+    @Override
+    public void onInitializeClient() {
+        ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
+        ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
+            if (currentRecordingHandler != null) {
+                long time = System.currentTimeMillis();
                 try {
-                    currentRecordingHandler.addClip(new Clip(time - 250, time + 250, RecordingElementTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString())); // TODO: Localize
+                    currentRecordingHandler.addClip(new Clip(time - 250, time, time + 250, ClipTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString(), null, null, null, null)); // TODO: Localize
                 } catch (SQLException e) { // TODO
-					e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
-		}));
-		AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-			if (currentRecordingHandler != null && entity != null) {
-				long time = System.currentTimeMillis();
+        }));
+        AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
+            if (currentRecordingHandler != null && entity != null) {
+                long time = System.currentTimeMillis();
                 try {
-                    currentRecordingHandler.addClip(new Clip(time - 250, time +250, RecordingElementTypes.ATTACK_ENTITY, "Attacked " + entity.getName())); // TODO: Type and description
+                    currentRecordingHandler.addClip(new Clip(time - 250, time, time + 250, ClipTypes.ATTACK_ENTITY, "Attacked " + entity.getName(), null, null, null, null)); // TODO: Type and description
                 } catch (SQLException ignored) { // TODO
                 }
             }
-			return ActionResult.PASS;
-		}));
-	}
+            return ActionResult.PASS;
+        }));
+    }
 }

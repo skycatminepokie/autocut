@@ -1,5 +1,7 @@
 package com.skycatdev.autocut;
 
+import com.skycatdev.autocut.clips.Clip;
+import com.skycatdev.autocut.clips.ClipTypes;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,9 +10,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.*;
 
 public class RecordingHandler {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
@@ -21,6 +21,14 @@ public class RecordingHandler {
     protected static final String CLIPS_OUTPOINT_COLUMN = "end_timestamp";
     protected static final String CLIPS_TYPE_COLUMN = "type";
     protected static final String CLIPS_DESCRIPTION_COLUMN = "description";
+    protected static final String CLIPS_SOURCE_COLUMN = "source";
+    protected static final String CLIPS_OBJECT_COLUMN = "object";
+    protected static final String CLIPS_SOURCE_X_COLUMN = "source_x";
+    protected static final String CLIPS_SOURCE_Y_COLUMN = "source_y";
+    protected static final String CLIPS_SOURCE_Z_COLUMN = "source_z";
+    protected static final String CLIPS_OBJECT_X_COLUMN = "object_x";
+    protected static final String CLIPS_OBJECT_Y_COLUMN = "object_y";
+    protected static final String CLIPS_OBJECT_Z_COLUMN = "object_z";
 
     static {
         RECORDING_DIRECTORY.toFile().mkdirs(); // TODO: Error handling
@@ -45,21 +53,38 @@ public class RecordingHandler {
         sqlUrl = "jdbc:sqlite:" + database.getPath();
         try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
             statement.execute(String.format("""
-                    CREATE TABLE %s (
-                        %s INTEGER PRIMARY KEY AUTOINCREMENT,
-                        %s INTEGER,
-                        %s INTEGER,
-                        %s INTEGER,
-                        %s TEXT,
-                        %s TEXT
-                    );""",
+                            CREATE TABLE %s (
+                                %s INTEGER PRIMARY KEY AUTOINCREMENT,
+                                %s INTEGER,
+                                %s INTEGER,
+                                %s INTEGER,
+                                %s TEXT,
+                                %s TEXT,
+                                %s TEXT,
+                                %s TEXT,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL
+                            );""",
                     CLIPS_TABLE,
                     CLIPS_ID_COLUMN,
                     CLIPS_INPOINT_COLUMN,
                     CLIPS_TIMESTAMP_COLUMN,
                     CLIPS_OUTPOINT_COLUMN,
                     CLIPS_TYPE_COLUMN,
-                    CLIPS_DESCRIPTION_COLUMN));
+                    CLIPS_DESCRIPTION_COLUMN,
+                    CLIPS_SOURCE_COLUMN,
+                    CLIPS_OBJECT_COLUMN,
+                    CLIPS_SOURCE_X_COLUMN,
+                    CLIPS_SOURCE_Y_COLUMN,
+                    CLIPS_SOURCE_Z_COLUMN,
+                    CLIPS_OBJECT_X_COLUMN,
+                    CLIPS_OBJECT_Y_COLUMN,
+                    CLIPS_OBJECT_Z_COLUMN)
+            );
         }
     }
 
@@ -76,7 +101,7 @@ public class RecordingHandler {
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
             if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new Clip(current.in(), Math.max(current.out(), next.out()), RecordingElementTypes.INTERNAL, null); // Take the union
+                Clip newClip = new Clip(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), ClipTypes.INTERNAL, null, null, null, null, null); // Take the union
                 mergedClips.set(i, newClip); // Replace the current
                 mergedClips.remove(i + 1); // Yeet the next, it's been combined
                 continue; // And check this clip for union with the next
@@ -86,6 +111,59 @@ public class RecordingHandler {
         return mergedClips;
     }
 
+    protected static PreparedStatement prepareClipStatement(Clip clip, Connection connection) throws SQLException {
+        List<Object> rowValues = new LinkedList<>();
+        // Required
+        StringBuilder columnsBuilder = new StringBuilder("(" + CLIPS_INPOINT_COLUMN + ", " + CLIPS_TIMESTAMP_COLUMN + ", " + CLIPS_OUTPOINT_COLUMN + ", " + CLIPS_TYPE_COLUMN);
+        StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?");
+        rowValues.add(clip.in());
+        rowValues.add(clip.time());
+        rowValues.add(clip.out());
+        rowValues.add(clip.type());
+        
+        // Optional
+        if (clip.description() != null) {
+            columnsBuilder.append(", " + CLIPS_DESCRIPTION_COLUMN);
+            valuesBuilder.append(", ?");
+            rowValues.add(clip.description());
+        }
+        if (clip.source() != null) {
+            columnsBuilder.append(", " + CLIPS_SOURCE_COLUMN);
+            valuesBuilder.append(", ?");
+            rowValues.add(clip.source());
+        }
+        if (clip.object() != null) {
+            columnsBuilder.append(", " + CLIPS_OBJECT_COLUMN);
+            valuesBuilder.append(", ?");
+            rowValues.add(clip.object());
+        }
+        if (clip.sourceLocation() != null) {
+            columnsBuilder.append(", " + CLIPS_SOURCE_X_COLUMN + ", " + CLIPS_SOURCE_Y_COLUMN + ", " + CLIPS_SOURCE_Z_COLUMN);
+            valuesBuilder.append(", ?, ?, ?");
+            rowValues.add(clip.sourceLocation().getX());
+            rowValues.add(clip.sourceLocation().getY());
+            rowValues.add(clip.sourceLocation().getZ());
+        }
+        if (clip.objectLocation() != null) {
+            columnsBuilder.append(", " + CLIPS_OBJECT_X_COLUMN + ", " + CLIPS_OBJECT_Y_COLUMN + ", " + CLIPS_OBJECT_Z_COLUMN);
+            valuesBuilder.append(", ?, ?, ?");
+            rowValues.add(clip.objectLocation().getX());
+            rowValues.add(clip.objectLocation().getY());
+            rowValues.add(clip.objectLocation().getZ());
+        }
+
+        // Build statement
+        columnsBuilder.append(")");
+        valuesBuilder.append(")");
+        PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s %s VALUES %s", CLIPS_TABLE, columnsBuilder, valuesBuilder));
+
+        // Fill out statement
+        for (int i = 1; i <= rowValues.size(); i++) {
+            statement.setObject(i, rowValues.get(i));
+        }
+        return statement;
+    }
+
     /**
      * Adds a new clip to the recording.
      *
@@ -93,17 +171,7 @@ public class RecordingHandler {
      */
     public void addClip(Clip clip) throws SQLException {
         clips.add(clip);
-        try (Connection connection = DriverManager.getConnection(sqlUrl);
-             PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s (%s, %s, %s, %s) VALUES (?, ?, ?, ?);",
-                     CLIPS_TABLE,
-                     CLIPS_INPOINT_COLUMN,
-                     CLIPS_OUTPOINT_COLUMN,
-                     CLIPS_TYPE_COLUMN,
-                     CLIPS_DESCRIPTION_COLUMN))) {
-            statement.setLong(1, clip.in());
-            statement.setLong(2, clip.out());
-            statement.setString(3, clip.type().toString());
-            statement.setString(4, clip.description());
+        try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = prepareClipStatement(clip, connection)) {
             statement.execute();
         }
     }

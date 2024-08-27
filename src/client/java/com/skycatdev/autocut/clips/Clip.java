@@ -1,19 +1,24 @@
-package com.skycatdev.autocut;
+package com.skycatdev.autocut.clips;
 
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * A period of time in a recording. Timestamps are UNIX time, not relative to the recording.
- *
- * @param in          The timestamp to begin, in milliseconds
- * @param out         The timestamp to end, in milliseconds
- * @param type        The type of clip this is
- * @param description A short, human-readable description of what the clip contains
  */
-public record Clip(long in, long out, Identifier type, @Nullable String description) {
+public record Clip(long in, long time, long out, @NotNull Identifier type, @Nullable String description, @Nullable String source,
+                   @Nullable String object, @Nullable Vec3d sourceLocation, @Nullable Vec3d objectLocation) {
     public Clip {
         assert in < out;
+    }
+
+    /**
+     * @return A deep copy of this clip
+     */
+    public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
+        return new Clip(in, time, out, type, description, source, object, sourceLocation, objectLocation);
     }
 
     /**
@@ -25,7 +30,8 @@ public record Clip(long in, long out, Identifier type, @Nullable String descript
 
     /**
      * Converts the clip to a {@code between} statement for ffmpeg.
-     * @param variable The variable for time in seconds.
+     *
+     * @param variable           The variable for time in seconds.
      * @param recordingStartTime The time the relevant recording started, used for offsetting the clip time
      * @return a {@code between} statement for ffmpeg statements.
      */
@@ -33,12 +39,5 @@ public record Clip(long in, long out, Identifier type, @Nullable String descript
         double inSecs = (double) (in - recordingStartTime) / 1000;
         double outSecs = (double) (out - recordingStartTime) / 1000;
         return String.format("between(%s\\,%f\\,%f)", variable, inSecs, outSecs);
-    }
-
-    /**
-     * @return A deep copy of this clip
-     */
-    public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new Clip(in, out, type, description);
     }
 }
