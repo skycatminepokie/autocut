@@ -1,6 +1,7 @@
 package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.clips.Clip;
+import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
@@ -101,7 +102,7 @@ public class RecordingHandler {
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
             if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new Clip(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), ClipTypes.INTERNAL, null, null, null, null, null); // Take the union
+                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), ClipTypes.INTERNAL).build(); // Take the union
                 mergedClips.set(i, newClip); // Replace the current
                 mergedClips.remove(i + 1); // Yeet the next, it's been combined
                 continue; // And check this clip for union with the next
@@ -159,7 +160,7 @@ public class RecordingHandler {
 
         // Fill out statement
         for (int i = 1; i <= rowValues.size(); i++) {
-            statement.setObject(i, rowValues.get(i));
+            statement.setObject(i, rowValues.get(i - 1));
         }
         return statement;
     }

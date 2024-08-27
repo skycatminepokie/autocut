@@ -4,7 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.skycatdev.autocut.clips.Clip;
+import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
@@ -106,7 +106,9 @@ public class AutocutCommandHandler {
         if (AutocutClient.currentRecordingHandler != null) {
             long time = System.currentTimeMillis();
             try {
-                AutocutClient.currentRecordingHandler.addClip(new Clip(time - DEFAULT_CLIP_LENGTH, time, time, ClipTypes.DEBUG, "Debug", null, null, null, null));
+                AutocutClient.currentRecordingHandler.addClip(new ClipBuilder(time - DEFAULT_CLIP_LENGTH, time, time, ClipTypes.DEBUG)
+                        .setDescription("Debug")
+                        .build());
             } catch (SQLException ignored) { // TODO
             }
             context.getSource().sendFeedback(Text.of("Clipped!")); // TODO: Localize

@@ -1,6 +1,6 @@
 package com.skycatdev.autocut;
 
-import com.skycatdev.autocut.clips.Clip;
+import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
@@ -23,7 +23,9 @@ public class AutocutClient implements ClientModInitializer {
             if (currentRecordingHandler != null) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingHandler.addClip(new Clip(time - 250, time, time + 250, ClipTypes.BREAK_BLOCK, "Broke " + state.getBlock().getName().toString(), null, null, null, null)); // TODO: Localize
+                    currentRecordingHandler.addClip(new ClipBuilder(time - 250, time, time + 250, ClipTypes.BREAK_BLOCK)
+                            .setDescription("Broke " + state.getBlock().getName().toString())
+                            .build()); // TODO: Localize TODO: MORE DATA
                 } catch (SQLException e) { // TODO
                     e.printStackTrace();
                 }
@@ -33,7 +35,9 @@ public class AutocutClient implements ClientModInitializer {
             if (currentRecordingHandler != null && entity != null) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingHandler.addClip(new Clip(time - 250, time, time + 250, ClipTypes.ATTACK_ENTITY, "Attacked " + entity.getName(), null, null, null, null)); // TODO: Type and description
+                    currentRecordingHandler.addClip(new ClipBuilder(time - 250, time, time + 250, ClipTypes.ATTACK_ENTITY)
+                            .setDescription("Attacked " + entity.getName())
+                            .build()); // TODO: More data
                 } catch (SQLException ignored) { // TODO
                 }
             }

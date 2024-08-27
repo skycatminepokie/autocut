@@ -8,7 +8,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A period of time in a recording. Timestamps are UNIX time, not relative to the recording.
  */
-public record Clip(long in, long time, long out, @NotNull Identifier type, @Nullable String description, @Nullable String source,
+public record Clip(long in, long time, long out, @NotNull Identifier type, @Nullable String description,
+                   @Nullable String source,
                    @Nullable String object, @Nullable Vec3d sourceLocation, @Nullable Vec3d objectLocation) {
     public Clip {
         assert in < out;
@@ -18,7 +19,7 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, @Null
      * @return A deep copy of this clip
      */
     public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new Clip(in, time, out, type, description, source, object, sourceLocation, objectLocation);
+        return new ClipBuilder(in, time, out, type).setDescription(description).setSource(source).setObject(object).setSourceLocation(sourceLocation).setObjectLocation(objectLocation).build();
     }
 
     /**
