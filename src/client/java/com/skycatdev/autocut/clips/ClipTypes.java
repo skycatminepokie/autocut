@@ -7,35 +7,39 @@ import net.minecraft.util.Identifier;
 import java.util.Collection;
 
 /**
- * Stores {@link Identifier}s that show the reason for a recording element (clip or event).
+ * Stores {@link Identifier}s that show the reason for a clip.
  */
-public class ClipTypes {
+public class ClipTypes { // TODO: Probably should make just a bunch of `extends Clip`s
     /**
-     * An element made using debug methods. Ideally not used by the end user.
+     * A clip made using debug methods. Ideally not used by the end user.
      */
     public static final Identifier DEBUG = Identifier.of(Autocut.MOD_ID, "debug");
     /**
-     * An element made for internal use. Should not end up being serialized.
+     * A clip made for internal use. Should not end up being serialized.
      * @see RecordingHandler#mergeClips(Collection)
      */
     public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
     /**
-     * An element based on a block breaking.
+     * A clip based on a block breaking.
      */
     public static final Identifier BREAK_BLOCK = Identifier.of(Autocut.MOD_ID, "break_block");
     /**
-     * An element triggered by a manual input, but which was not manually constructed.
-     * An element made via a keybind for clipping probably should have this id, but an element made by choosing start and end points through a GUI should not.
+     * A clip triggered by a manual input, but which was not manually constructed.
+     * A clip made via a keybind for clipping probably should have this id, but a clip made by choosing start and end points through a GUI should not.
      * @see ClipTypes#MANUAL_MADE
      */
     public static final Identifier MANUAL_TRIGGERED = Identifier.of(Autocut.MOD_ID, "manual");
     /**
-     * An element created manually - times selected by hand.
+     * An clip created manually - times selected by hand.
      * @see ClipTypes#MANUAL_TRIGGERED
      */
     public static final Identifier MANUAL_MADE = Identifier.of(Autocut.MOD_ID, "manual_made");
     /**
-     * An element created by attacking an entity.
+     * A clip created by attempting to attack an entity.
      */
     public static final Identifier ATTACK_ENTITY = Identifier.of(Autocut.MOD_ID, "attack_entity");
+    /**
+     * A clip created by attempting to use an item.
+     */
+    public static final Identifier USE_ITEM = Identifier.of(Autocut.MOD_ID, "use_item");
 }

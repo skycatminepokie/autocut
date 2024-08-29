@@ -1,6 +1,5 @@
 package com.skycatdev.autocut;
 
-import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
 import io.obswebsocket.community.client.OBSRemoteController;
@@ -8,8 +7,11 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,13 +35,12 @@ public class AutocutClient implements ClientModInitializer {
                             .setSource(player.getNameForScoreboard())
                             .setSourceLocation(player.getPos())
                             .build()); // TODO: Localize
-                } catch (SQLException e) { // TODO
-                    e.printStackTrace();
+                } catch (SQLException ignored) { // TODO
                 }
             }
         }));
         AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-            if (currentRecordingHandler != null && entity != null) { // WARN: DEBUG Ignores when not attacking entity
+            if (currentRecordingHandler != null && entity != null) {
                 long time = System.currentTimeMillis();
                 try {
                     ClipBuilder builder = new ClipBuilder(time - 250, time, time + 250, ClipTypes.ATTACK_ENTITY)
@@ -54,5 +55,21 @@ public class AutocutClient implements ClientModInitializer {
             }
             return ActionResult.PASS;
         }));
+        UseItemCallback.EVENT.register((player, world, hand) -> {
+            if (currentRecordingHandler != null) {
+                long time = System.currentTimeMillis();
+                try {
+                    ItemStack itemStack = player.getStackInHand(hand);
+                    ClipBuilder builder = new ClipBuilder(time - 250, time, time + 250, ClipTypes.USE_ITEM)
+                            .setDescription("Used " + itemStack.getName().getString())
+                            .setSource(player.getNameForScoreboard())
+                            .setSourceLocation(player.getPos())
+                            .setObject(Registries.ITEM.getId(itemStack.getItem()).toString());
+                    currentRecordingHandler.addClip(builder.build());
+                } catch (SQLException ignored) { // TODO
+                }
+            }
+            return TypedActionResult.pass(ItemStack.EMPTY);
+        });
     }
 }
