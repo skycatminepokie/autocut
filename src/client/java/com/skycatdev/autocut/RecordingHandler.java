@@ -3,6 +3,13 @@ package com.skycatdev.autocut;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import net.bramp.ffmpeg.job.FFmpegJob;
+import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import net.bramp.ffmpeg.progress.Progress;
+import net.bramp.ffmpeg.progress.ProgressListener;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
@@ -14,6 +21,7 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class RecordingHandler {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
@@ -234,9 +242,31 @@ public class RecordingHandler {
             File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
 
             try {
-                ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // Requires a build of ffmpeg that supports libx264
-                pb.inheritIO().start().waitFor();
-            } catch (IOException | InterruptedException e) {
+                FFmpegExecutor executor = new FFmpegExecutor();
+                FFprobe ffprobe = new FFprobe();
+                FFmpegProbeResult in = ffprobe.probe(outputPath);
+
+                FFmpegBuilder builder = new FFmpegBuilder()
+                        .addExtraArgs("-/filter_complex", buildComplexFilter(clips).getAbsolutePath())
+                        .setInput(in)
+                        .addOutput(export.getAbsolutePath())
+                        .addExtraArgs("-map", "[outv]", "-map", "[outa]")
+                        .setConstantRateFactor(18)
+                        .setVideoCodec("libx264")
+                        .done();
+                FFmpegJob job = executor.createJob(builder, new ProgressListener() {
+                    final double duration_ns = in.getFormat().duration * TimeUnit.SECONDS.toNanos(1);
+                    @Override
+                    public void progress(Progress progress) {
+                        double percentDone = progress.out_time_ns / duration_ns;
+                        System.out.printf("%.0f%% done%n", percentDone * 100); // TODO: Make this appear in-game
+                    }
+                });
+                job.run();
+
+                // ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // Requires a build of ffmpeg that supports libx264
+                // pb.inheritIO().start().waitFor();
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }).start();
