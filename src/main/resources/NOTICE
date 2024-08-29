@@ -2,3 +2,8 @@ This product includes the following softwares developed by David Crawshaw.
 See LICENSE.zentus file.
 
 And also, NestedVM (Apache License Version 2.0) is used inside sqlite-
+---
+For clarity, the above notice is from sqlite-jdbc.
+autocut also depends on ffmpeg-cli-wrapper by Andrew Brampton. See the LICENSE.bramp file.
+This section, including the above and below "---" is added by autocut, per Apache 2.0 allowance.
+---
