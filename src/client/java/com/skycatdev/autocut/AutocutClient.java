@@ -29,13 +29,14 @@ public class AutocutClient implements ClientModInitializer {
                 long time = System.currentTimeMillis();
                 try {
                     currentRecordingHandler.addClip(new ClipBuilder(time - 250, time, time + 250, ClipTypes.BREAK_BLOCK)
-                            .setDescription("Broke " + state.getBlock().getName().getString())
+                            .setDescription("Broke " + state.getBlock().getName().getString()) // TODO: Localize
                             .setObject(Registries.BLOCK.getId(state.getBlock()).toString())
                             .setObjectLocation(Vec3d.of(pos))
                             .setSource(player.getNameForScoreboard())
                             .setSourceLocation(player.getPos())
-                            .build()); // TODO: Localize
-                } catch (SQLException ignored) { // TODO
+                            .build());
+                } catch (SQLException e) {
+                    Autocut.LOGGER.warn("Unable to store block break event", e);
                 }
             }
         }));
@@ -50,7 +51,8 @@ public class AutocutClient implements ClientModInitializer {
                             .setObject(entity.getNameForScoreboard())
                             .setObjectLocation(entity.getPos());
                     currentRecordingHandler.addClip(builder.build());
-                } catch (SQLException ignored) { // TODO
+                } catch (SQLException e) {
+                    Autocut.LOGGER.warn("Unable to store entity attack event", e);
                 }
             }
             return ActionResult.PASS;
@@ -66,7 +68,8 @@ public class AutocutClient implements ClientModInitializer {
                             .setSourceLocation(player.getPos())
                             .setObject(Registries.ITEM.getId(itemStack.getItem()).toString());
                     currentRecordingHandler.addClip(builder.build());
-                } catch (SQLException ignored) { // TODO
+                } catch (SQLException e) {
+                    Autocut.LOGGER.warn("Unable to store use item event", e);
                 }
             }
             return TypedActionResult.pass(ItemStack.EMPTY);
