@@ -42,4 +42,8 @@ public class ClipTypes { // TODO: Probably should make just a bunch of `extends 
      * A clip created by attempting to use an item.
      */
     public static final Identifier USE_ITEM = Identifier.of(Autocut.MOD_ID, "use_item");
+    /**
+     * A clip created by successfully placing a block.
+     */
+    public static final Identifier PLACE_BLOCK = Identifier.of(Autocut.MOD_ID, "place_block");
 }
