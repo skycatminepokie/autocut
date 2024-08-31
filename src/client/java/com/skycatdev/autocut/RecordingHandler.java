@@ -11,6 +11,8 @@ import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
@@ -259,13 +261,14 @@ public class RecordingHandler {
                     @Override
                     public void progress(Progress progress) {
                         double percentDone = progress.out_time_ns / duration_ns;
-                        System.out.printf("%.0f%% done%n", percentDone * 100); // TODO: Make this appear in-game
+                        // System.out.printf("%.0f%%%n", percentDone * 100); // TODO: Make this appear in-game
+                        if (percentDone < 0) {
+                            return;
+                        }
+                        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone * 100)));
                     }
                 });
                 job.run();
-
-                // ProcessBuilder pb = new ProcessBuilder(ffmpeg, "-/filter_complex", buildComplexFilter(clips).getAbsolutePath(), "-i", recording.getAbsolutePath(), "-map", "[outv]", "-map", "[outa]", "-codec:v", "libx264", "-crf", "18", export.getAbsolutePath()); // Requires a build of ffmpeg that supports libx264
-                // pb.inheritIO().start().waitFor();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
