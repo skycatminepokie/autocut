@@ -106,7 +106,7 @@ public class RecordingHandler {
      * @param clips The clips to merge together.
      * @return A new ArrayList of merged clips.
      */
-    private static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
+    protected static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
         ArrayList<Clip> mergedClips = new ArrayList<>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
         int i = 0;
         while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
@@ -194,7 +194,7 @@ public class RecordingHandler {
      * @return A new temporary file containing the filter
      * @throws IOException If there's problems with the file
      */
-    public File buildComplexFilter(Collection<Clip> clips) throws IOException { // TODO: currently only handles one audio track
+    protected File buildComplexFilter(Collection<Clip> clips) throws IOException { // TODO: currently only handles one audio track
         if (clips.isEmpty()) {
             throw new IllegalArgumentException("clips.isEmpty(), cannot build a (meaningful) filter out of no clips.");
         }
@@ -257,15 +257,19 @@ public class RecordingHandler {
                         .setVideoCodec("libx264")
                         .done();
                 FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                    final double duration_ns = in.getFormat().duration * TimeUnit.SECONDS.toNanos(1);
+                    final double outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips));
                     @Override
                     public void progress(Progress progress) {
-                        double percentDone = progress.out_time_ns / duration_ns;
-                        // System.out.printf("%.0f%%%n", percentDone * 100); // TODO: Make this appear in-game
+                        if (progress.isEnd()) {
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Finished cutting!"));
+                            return;
+                        }
+                        double percentDone = progress.out_time_ns / outputDurationNs;
                         if (percentDone < 0) {
                             return;
                         }
                         MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone * 100)));
+
                     }
                 });
                 job.run();

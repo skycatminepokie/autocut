@@ -5,6 +5,8 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 /**
  * A period of time in a recording. Timestamps are UNIX time, not relative to the recording.
  */
@@ -40,5 +42,13 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, @Null
         double inSecs = (double) (in - recordingStartTime) / 1000;
         double outSecs = (double) (out - recordingStartTime) / 1000;
         return String.format("between(%s\\,%f\\,%f)", variable, inSecs, outSecs);
+    }
+
+    public static long totalDuration(Collection<Clip> clips) {
+        long duration = 0;
+        for (Clip clip : clips) {
+            duration += clip.duration();
+        }
+        return duration;
     }
 }
