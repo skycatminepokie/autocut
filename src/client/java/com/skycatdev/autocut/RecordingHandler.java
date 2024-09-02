@@ -257,18 +257,18 @@ public class RecordingHandler {
                         .setVideoCodec("libx264")
                         .done();
                 FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                    final double outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips));
+                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips));
                     @Override
                     public void progress(Progress progress) {
                         if (progress.isEnd()) {
                             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Finished cutting!"));
-                            return;
+                        } else {
+                            double percentDone = (double) progress.out_time_ns / outputDurationNs;
+                            if (percentDone < 0) {
+                                return;
+                            }
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone * 100)));
                         }
-                        double percentDone = progress.out_time_ns / outputDurationNs;
-                        if (percentDone < 0) {
-                            return;
-                        }
-                        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone * 100)));
 
                     }
                 });

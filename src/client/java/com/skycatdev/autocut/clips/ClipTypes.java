@@ -9,7 +9,7 @@ import java.util.Collection;
 /**
  * Stores {@link Identifier}s that show the reason for a clip.
  */
-public class ClipTypes { // TODO: Probably should make just a bunch of `extends Clip`s
+public class ClipTypes {
     /**
      * A clip made using debug methods. Ideally not used by the end user.
      */
@@ -46,4 +46,8 @@ public class ClipTypes { // TODO: Probably should make just a bunch of `extends 
      * A clip created by successfully placing a block.
      */
     public static final Identifier PLACE_BLOCK = Identifier.of(Autocut.MOD_ID, "place_block");
+    /**
+     * A clip created by shooting a player with an arrow.
+     */
+    public static final Identifier SHOOT_PLAYER = Identifier.of(Autocut.MOD_ID, "shoot_player");
 }
