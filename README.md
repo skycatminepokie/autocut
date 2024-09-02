@@ -1,3 +1,18 @@
+Cut videos based on your gameplay!
+
+## Usage
+1. Open OBS
+2. In OBS, go to Tools -> WebSocket Server Settings
+3. Enable web server
+4. Under Tools -> WebSocket Server Settings, go to Connection Information and copy the password
+5. In game, run `/autocut connect <password here>`
+6. Start Recording in OBS
+7. Do fun gameplay stuff
+8. Stop Recording in OBS
+9. (optional) Delete clips you don't want (see the [wiki](https://github.com/skycatminepokie/autocut/wiki/Database-structure))
+10. Run `/autocut finish "\<path to ffmpeg>"
+11. When it's finished a new video starting with `cut` will be in your recordings folder.
+
 ## Dependencies
 - Includes [OBS WebSocket Java](https://github.com/obs-websocket-community-projects/obs-websocket-java), used under [MIT](https://github.com/obs-websocket-community-projects/obs-websocket-java/blob/develop/LICENSE)
 - Includes [SQLite JDBC Driver](https://github.com/xerial/sqlite-jdbc), used under [Apache 2.0](https://github.com/xerial/sqlite-jdbc/blob/master/LICENSE)
