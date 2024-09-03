@@ -69,7 +69,7 @@ public class AutocutCommandHandler {
         }
     }
 
-    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
+    public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess ignoredCommandRegistryAccess) {
         var autocut = literal("autocut")
                 .build();
         var connect = literal("connect")
