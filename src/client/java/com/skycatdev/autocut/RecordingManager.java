@@ -230,18 +230,23 @@ public class RecordingManager {
 
             String between = mergedClips.getFirst().toBetweenStatement("t", startTime);
             if (mergedClips.size() == 1) {
+                //noinspection SpellCheckingInspection
                 pw.printf("[0:v]select=%s,setpts=PTS-STARTPTS[outv];[0:a]aselect=%s,asetpts=PTS-STARTPTS[outa]", between, between);
             } else {
                 // First clip
                 String videoIn = "[0:v]";
                 String audioIn = "[0:a]";
+                //noinspection SpellCheckingInspection
                 pw.printf("%sselect=%s,setpts=PTS-STARTPTS%s;", videoIn, between, "[0v]");
+                //noinspection SpellCheckingInspection
                 pw.printf("%saselect=%s,asetpts=PTS-STARTPTS%s", audioIn, between, "[0a]");
 
                 // Clips 2 thru n
                 for (int i = 1; i < mergedClips.size(); i++) {
                     between = mergedClips.get(i).toBetweenStatement("t", startTime);
+                    //noinspection SpellCheckingInspection
                     pw.printf(";%sselect=%s,setpts=PTS-STARTPTS[%dv]", videoIn, between, i);
+                    //noinspection SpellCheckingInspection
                     pw.printf(";%saselect=%s,asetpts=PTS-STARTPTS[%da]", audioIn, between, i);
                 }
 
@@ -250,6 +255,7 @@ public class RecordingManager {
                 for (int i = 0; i < mergedClips.size(); i++) { // List all the inputs
                     pw.printf("[%dv][%da]", i, i);
                 }
+                //noinspection SpellCheckingInspection
                 pw.printf("concat=n=%d:v=1:a=1[outv][outa]", mergedClips.size());
             }
         }
@@ -273,7 +279,7 @@ public class RecordingManager {
                 FFprobe ffprobe = new FFprobe();
                 FFmpegProbeResult in = ffprobe.probe(outputPath);
 
-                FFmpegBuilder builder = new FFmpegBuilder()
+                @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
                         .addExtraArgs("-/filter_complex", buildComplexFilter(clips).getAbsolutePath())
                         .setInput(in)
                         .addOutput(export.getAbsolutePath())
