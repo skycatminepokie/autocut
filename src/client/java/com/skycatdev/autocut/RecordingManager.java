@@ -15,6 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -27,21 +28,26 @@ import java.util.concurrent.TimeUnit;
 
 public class RecordingManager {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
-    protected static final String CLIPS_TABLE = "clips";
-    protected static final String CLIPS_ID_COLUMN = "id";
-    protected static final String CLIPS_INPOINT_COLUMN = "start_timestamp";
-    protected static final String CLIPS_TIMESTAMP_COLUMN = "timestamp";
-    protected static final String CLIPS_OUTPOINT_COLUMN = "end_timestamp";
-    protected static final String CLIPS_TYPE_COLUMN = "type";
-    protected static final String CLIPS_DESCRIPTION_COLUMN = "description";
-    protected static final String CLIPS_SOURCE_COLUMN = "source";
-    protected static final String CLIPS_OBJECT_COLUMN = "object";
-    protected static final String CLIPS_SOURCE_X_COLUMN = "source_x";
-    protected static final String CLIPS_SOURCE_Y_COLUMN = "source_y";
-    protected static final String CLIPS_SOURCE_Z_COLUMN = "source_z";
-    protected static final String CLIPS_OBJECT_X_COLUMN = "object_x";
-    protected static final String CLIPS_OBJECT_Y_COLUMN = "object_y";
-    protected static final String CLIPS_OBJECT_Z_COLUMN = "object_z";
+    protected static final String CLIPS_TABLE = "clips"; // Keep this hardcoded
+    protected static final String CLIPS_ID_COLUMN = "id"; // Keep this hardcoded
+    protected static final String CLIPS_INPOINT_COLUMN = "start_timestamp"; // Keep this hardcoded
+    protected static final String CLIPS_TIMESTAMP_COLUMN = "timestamp"; // Keep this hardcoded
+    protected static final String CLIPS_OUTPOINT_COLUMN = "end_timestamp"; // Keep this hardcoded
+    protected static final String CLIPS_TYPE_COLUMN = "type"; // Keep this hardcoded
+    protected static final String CLIPS_DESCRIPTION_COLUMN = "description"; // Keep this hardcoded
+    protected static final String CLIPS_SOURCE_COLUMN = "source"; // Keep this hardcoded
+    protected static final String CLIPS_OBJECT_COLUMN = "object"; // Keep this hardcoded
+    protected static final String CLIPS_SOURCE_X_COLUMN = "source_x"; // Keep this hardcoded
+    protected static final String CLIPS_SOURCE_Y_COLUMN = "source_y"; // Keep this hardcoded
+    protected static final String CLIPS_SOURCE_Z_COLUMN = "source_z"; // Keep this hardcoded
+    protected static final String CLIPS_OBJECT_X_COLUMN = "object_x"; // Keep this hardcoded
+    protected static final String CLIPS_OBJECT_Y_COLUMN = "object_y"; // Keep this hardcoded
+    protected static final String CLIPS_OBJECT_Z_COLUMN = "object_z"; // Keep this hardcoded
+    protected static final String META_TABLE = "meta"; // Keep this hardcoded
+    protected static final String META_KEY = "key"; // Keep this hardcoded
+    protected static final String META_VALUE = "value"; // Keep this hardcoded
+    protected static final String META_KEY_START_TIME = "start_time"; // Keep this hardcoded
+    protected static final String META_KEY_OUTPUT_PATH = "output_path"; // Keep this hardcoded
 
     static {
         RECORDING_DIRECTORY.toFile().mkdirs(); // TODO: Error handling
@@ -51,53 +57,71 @@ public class RecordingManager {
      * The UNIX time this recorder started.
      */
     protected long startTime;
-    protected File database;
-    protected String sqlUrl;
+    protected @NotNull File database;
+    protected @NotNull String sqlUrl;
     /**
-     * Where the video file of the recording is stored. {@code null} when recording has not finished.
+     * Where the video file of the recording is stored. {@code null} when recording has not finished. Probably needs a better name.
      */
     @Nullable protected String outputPath = null;
 
+    /**
+     * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
+     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
+     * @param database The database for this recording.
+     * @param outputPath Where the raw video recording is stored. Make sure it matches the path in the database's meta table.
+     */
+    private RecordingManager(long startTime, @NotNull File database, @Nullable String outputPath) {
+        this.startTime = startTime;
+        this.database = database;
+        this.sqlUrl = "jdbc:sqlite:" + database.getPath();
+        this.outputPath = outputPath;
+    }
+
+    /**
+     * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
+     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
+     * @param database The database for this recording.
+     */
+    private RecordingManager(long startTime, @NotNull File database) {
+        this(startTime, database, null);
+    }
+
+    /**
+     * Create a RecordingManager and initialize its database.
+     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
+     */
+    private RecordingManager(long startTime) throws IOException, SQLException {
+        this(startTime, RECORDING_DIRECTORY.resolve("autocut_" + startTime + ".sqlite").toFile()); // Also initializes sqlUrl
+        initializeDatabase(startTime);
+    }
+
+    /**
+     * Create a RecordingManager starting at this time and initialize its database.
+     */
     public RecordingManager() throws SQLException, IOException {
-        startTime = System.currentTimeMillis();
-        database = RECORDING_DIRECTORY.resolve("autocut_" + startTime + ".sqlite").toFile();
-        database.createNewFile(); // TODO: Handle duplicate files
-        sqlUrl = "jdbc:sqlite:" + database.getPath();
+        this(System.currentTimeMillis());
+    }
+
+    public static RecordingManager fromDatabase(@NotNull File database) throws SQLException { // STOPSHIP: Warn the user about anything that inputs to this or disallow it. Remote connection to another sql server may be possible.
+        String sqlUrl = "jdbc:sqlite:" + database.getPath();
+        long startTime;
+        String outputPath;
+        // Create connection
         try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
-            statement.execute(String.format("""
-                            CREATE TABLE %s (
-                                %s INTEGER PRIMARY KEY AUTOINCREMENT,
-                                %s INTEGER NOT NULL,
-                                %s INTEGER NOT NULL,
-                                %s INTEGER NOT NULL,
-                                %s TEXT NOT NULL,
-                                %s TEXT,
-                                %s TEXT,
-                                %s TEXT,
-                                %s REAL,
-                                %s REAL,
-                                %s REAL,
-                                %s REAL,
-                                %s REAL,
-                                %s REAL
-                            );""",
-                    CLIPS_TABLE,
-                    CLIPS_ID_COLUMN,
-                    CLIPS_INPOINT_COLUMN,
-                    CLIPS_TIMESTAMP_COLUMN,
-                    CLIPS_OUTPOINT_COLUMN,
-                    CLIPS_TYPE_COLUMN,
-                    CLIPS_DESCRIPTION_COLUMN,
-                    CLIPS_SOURCE_COLUMN,
-                    CLIPS_OBJECT_COLUMN,
-                    CLIPS_SOURCE_X_COLUMN,
-                    CLIPS_SOURCE_Y_COLUMN,
-                    CLIPS_SOURCE_Z_COLUMN,
-                    CLIPS_OBJECT_X_COLUMN,
-                    CLIPS_OBJECT_Y_COLUMN,
-                    CLIPS_OBJECT_Z_COLUMN)
-            );
+            // Get start time
+            ResultSet startTimeResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s", META_VALUE, META_TABLE, META_KEY, META_KEY_START_TIME));
+            startTimeResult.next();
+            startTime = Long.parseLong(startTimeResult.getString(META_VALUE));
+            startTimeResult.close();
+            // Get recording path
+            ResultSet recordingPathResult = statement.executeQuery(String.format("SELECT %S FROM %s WHERE %s = %s", META_VALUE, META_TABLE, META_KEY, META_KEY_OUTPUT_PATH));
+            if (recordingPathResult.next()) {
+                outputPath = recordingPathResult.getString(META_VALUE);
+            } else {
+                outputPath = null;
+            }
         }
+        return new RecordingManager(startTime, database, outputPath);
     }
 
     /**
@@ -258,6 +282,7 @@ public class RecordingManager {
                         .done();
                 FFmpegJob job = executor.createJob(builder, new ProgressListener() {
                     final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips));
+
                     @Override
                     public void progress(Progress progress) {
                         if (progress.isEnd()) {
@@ -312,6 +337,55 @@ public class RecordingManager {
      */
     public long getRecordingTime() {
         return System.currentTimeMillis() - startTime;
+    }
+
+    private void initializeDatabase(long startTime) throws IOException, SQLException {
+        database.createNewFile(); // TODO: Handle duplicate files
+        try (Connection connection = DriverManager.getConnection(sqlUrl);
+             Statement statement = connection.createStatement();
+             PreparedStatement insertStatement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META_TABLE))) {
+            statement.execute(String.format("""
+                            CREATE TABLE %s (
+                                %s INTEGER PRIMARY KEY AUTOINCREMENT,
+                                %s INTEGER NOT NULL,
+                                %s INTEGER NOT NULL,
+                                %s INTEGER NOT NULL,
+                                %s TEXT NOT NULL,
+                                %s TEXT,
+                                %s TEXT,
+                                %s TEXT,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL,
+                                %s REAL
+                            );""",
+                    CLIPS_TABLE,
+                    CLIPS_ID_COLUMN,
+                    CLIPS_INPOINT_COLUMN,
+                    CLIPS_TIMESTAMP_COLUMN,
+                    CLIPS_OUTPOINT_COLUMN,
+                    CLIPS_TYPE_COLUMN,
+                    CLIPS_DESCRIPTION_COLUMN,
+                    CLIPS_SOURCE_COLUMN,
+                    CLIPS_OBJECT_COLUMN,
+                    CLIPS_SOURCE_X_COLUMN,
+                    CLIPS_SOURCE_Y_COLUMN,
+                    CLIPS_SOURCE_Z_COLUMN,
+                    CLIPS_OBJECT_X_COLUMN,
+                    CLIPS_OBJECT_Y_COLUMN,
+                    CLIPS_OBJECT_Z_COLUMN)
+            );
+            statement.execute(String.format("""
+                    CREATE TABLE %s (
+                        %s TEXT UNIQUE ON CONFLICT FAIL,
+                        %s TEXT
+                    );""", META_TABLE, META_KEY, META_VALUE));
+            insertStatement.setString(1, META_KEY_START_TIME);
+            insertStatement.setString(2, String.valueOf(startTime));
+            insertStatement.execute();
+        }
     }
 
     public void onRecordingEnded(String outputPath) {
