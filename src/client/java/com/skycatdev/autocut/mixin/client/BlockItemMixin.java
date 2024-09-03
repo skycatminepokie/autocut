@@ -23,7 +23,7 @@ public class BlockItemMixin {
     @Inject(method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;", at = @At("RETURN"))
     private void autocut$onPlace(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> cir) {
         if (cir.getReturnValue().equals(ActionResult.SUCCESS)) {
-            if (AutocutClient.currentRecordingHandler != null && context.getPlayer() instanceof ClientPlayerEntity player) {
+            if (AutocutClient.currentRecordingManager != null && context.getPlayer() instanceof ClientPlayerEntity player) {
                 long time = System.currentTimeMillis();
                 try {
                     ItemStack itemStack = context.getStack();
@@ -33,7 +33,7 @@ public class BlockItemMixin {
                             .setSourceLocation(player.getPos())
                             .setObject(Registries.ITEM.getId(itemStack.getItem()).toString())
                             .setObjectLocation(Vec3d.of(context.getBlockPos()));
-                    AutocutClient.currentRecordingHandler.addClip(builder.build());
+                    AutocutClient.currentRecordingManager.addClip(builder.build());
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store block place event", e);
                 }

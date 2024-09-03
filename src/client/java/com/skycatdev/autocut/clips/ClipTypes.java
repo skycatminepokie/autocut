@@ -1,7 +1,7 @@
 package com.skycatdev.autocut.clips;
 
 import com.skycatdev.autocut.Autocut;
-import com.skycatdev.autocut.RecordingHandler;
+import com.skycatdev.autocut.RecordingManager;
 import net.minecraft.util.Identifier;
 
 import java.util.Collection;
@@ -16,7 +16,7 @@ public class ClipTypes {
     public static final Identifier DEBUG = Identifier.of(Autocut.MOD_ID, "debug");
     /**
      * A clip made for internal use. Should not end up being serialized.
-     * @see RecordingHandler#mergeClips(Collection)
+     * @see RecordingManager#mergeClips(Collection)
      */
     public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
     /**

@@ -19,16 +19,16 @@ import java.sql.SQLException;
 
 public class AutocutClient implements ClientModInitializer {
     @Nullable public static OBSRemoteController controller = null;
-    @Nullable public static RecordingHandler currentRecordingHandler = null;
+    @Nullable public static RecordingManager currentRecordingManager = null;
 
     @Override
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
         ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-            if (currentRecordingHandler != null) {
+            if (currentRecordingManager != null) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingHandler.addClip(new ClipBuilder(time - 250, time, time + 250, ClipTypes.BREAK_BLOCK)
+                    currentRecordingManager.addClip(new ClipBuilder(time - 250, time, time + 250, ClipTypes.BREAK_BLOCK)
                             .setDescription("Broke " + state.getBlock().getName().getString()) // TODO: Localize
                             .setObject(Registries.BLOCK.getId(state.getBlock()).toString())
                             .setObjectLocation(Vec3d.of(pos))
@@ -41,7 +41,7 @@ public class AutocutClient implements ClientModInitializer {
             }
         }));
         AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-            if (currentRecordingHandler != null && entity != null) {
+            if (currentRecordingManager != null && entity != null) {
                 long time = System.currentTimeMillis();
                 try {
                     ClipBuilder builder = new ClipBuilder(time - 250, time, time + 250, ClipTypes.ATTACK_ENTITY)
@@ -50,7 +50,7 @@ public class AutocutClient implements ClientModInitializer {
                             .setSourceLocation(player.getPos())
                             .setObject(entity.getNameForScoreboard())
                             .setObjectLocation(entity.getPos());
-                    currentRecordingHandler.addClip(builder.build());
+                    currentRecordingManager.addClip(builder.build());
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store entity attack event", e);
                 }
@@ -58,7 +58,7 @@ public class AutocutClient implements ClientModInitializer {
             return ActionResult.PASS;
         }));
         UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (currentRecordingHandler != null) {
+            if (currentRecordingManager != null) {
                 long time = System.currentTimeMillis();
                 try {
                     ItemStack itemStack = player.getStackInHand(hand);
@@ -67,7 +67,7 @@ public class AutocutClient implements ClientModInitializer {
                             .setSource(player.getNameForScoreboard())
                             .setSourceLocation(player.getPos())
                             .setObject(Registries.ITEM.getId(itemStack.getItem()).toString());
-                    currentRecordingHandler.addClip(builder.build());
+                    currentRecordingManager.addClip(builder.build());
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store use item event", e);
                 }

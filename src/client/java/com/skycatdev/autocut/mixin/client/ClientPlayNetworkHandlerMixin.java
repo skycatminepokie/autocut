@@ -19,7 +19,7 @@ import java.sql.SQLException;
 public class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onGameStateChange", at = @At(value = "FIELD", target = "Lnet/minecraft/network/packet/s2c/play/GameStateChangeS2CPacket;PROJECTILE_HIT_PLAYER:Lnet/minecraft/network/packet/s2c/play/GameStateChangeS2CPacket$Reason;"))
     private void autocut$onArrowHitPlayer(GameStateChangeS2CPacket packet, CallbackInfo ci) { // TODO: Test
-        if (AutocutClient.currentRecordingHandler != null) {
+        if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
                 ClientPlayerEntity player = MinecraftClient.getInstance().player;
@@ -28,7 +28,7 @@ public class ClientPlayNetworkHandlerMixin {
                             .setDescription("Shot a player with an arrow")
                             .setSource(player.getNameForScoreboard())
                             .setSourceLocation(player.getPos());
-                    AutocutClient.currentRecordingHandler.addClip(builder.build());
+                    AutocutClient.currentRecordingManager.addClip(builder.build());
                 }
             } catch (SQLException e) {
                 Autocut.LOGGER.warn("Unable to store player shot event", e);

@@ -25,7 +25,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class RecordingHandler {
+public class RecordingManager {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
     protected static final String CLIPS_TABLE = "clips";
     protected static final String CLIPS_ID_COLUMN = "id";
@@ -58,7 +58,7 @@ public class RecordingHandler {
      */
     @Nullable protected String outputPath = null;
 
-    public RecordingHandler() throws SQLException, IOException {
+    public RecordingManager() throws SQLException, IOException {
         startTime = System.currentTimeMillis();
         database = RECORDING_DIRECTORY.resolve("autocut_" + startTime + ".sqlite").toFile();
         database.createNewFile(); // TODO: Handle duplicate files
@@ -232,7 +232,7 @@ public class RecordingHandler {
     }
 
     /**
-     * Export all clips in the recording with ffmpeg. {@link RecordingHandler#outputPath} must not be {@code null}.
+     * Export all clips in the recording with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
      */
     public void export(String ffmpeg) throws SQLException {
         if (outputPath == null) {
@@ -263,11 +263,11 @@ public class RecordingHandler {
                         if (progress.isEnd()) {
                             MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Finished cutting!"));
                         } else {
-                            double percentDone = (double) progress.out_time_ns / outputDurationNs;
+                            double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
                             if (percentDone < 0) {
                                 return;
                             }
-                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone * 100)));
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone)));
                         }
 
                     }
