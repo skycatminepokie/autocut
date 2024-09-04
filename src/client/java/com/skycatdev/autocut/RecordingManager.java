@@ -265,7 +265,7 @@ public class RecordingManager {
     /**
      * Export all clips in the recording with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
      */
-    public void export(String ignoredFfmpeg) throws SQLException {
+    public void export(String ffmpeg) throws SQLException {
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
