@@ -63,12 +63,14 @@ public class RecordingManager {
      * Where the video file of the recording is stored. {@code null} when recording has not finished. Probably needs a better name.
      */
     @SuppressWarnings("UnusedAssignment")
-    @Nullable protected String outputPath = null;
+    @Nullable
+    protected String outputPath = null;
 
     /**
      * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
-     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
-     * @param database The database for this recording.
+     *
+     * @param startTime  The UNIX time the recording started. Make sure it matches the time in the database's meta table.
+     * @param database   The database for this recording.
      * @param outputPath Where the raw video recording is stored. Make sure it matches the path in the database's meta table.
      */
     private RecordingManager(long startTime, @NotNull File database, @Nullable String outputPath) {
@@ -80,8 +82,9 @@ public class RecordingManager {
 
     /**
      * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
+     *
      * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
-     * @param database The database for this recording.
+     * @param database  The database for this recording.
      */
     private RecordingManager(long startTime, @NotNull File database) {
         this(startTime, database, null);
@@ -89,6 +92,7 @@ public class RecordingManager {
 
     /**
      * Create a RecordingManager and initialize its database.
+     *
      * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
      */
     private RecordingManager(long startTime) throws IOException, SQLException {
@@ -108,14 +112,14 @@ public class RecordingManager {
         long startTime;
         String outputPath;
         // Create connection
-        try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
+        try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) { // TODO: prepare this statement
             // Get start time
-            ResultSet startTimeResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s", META_VALUE, META_TABLE, META_KEY, META_KEY_START_TIME));
+            ResultSet startTimeResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = \"%s\"", META_VALUE, META_TABLE, META_KEY, META_KEY_START_TIME));
             startTimeResult.next();
             startTime = Long.parseLong(startTimeResult.getString(META_VALUE));
             startTimeResult.close();
             // Get recording path
-            ResultSet recordingPathResult = statement.executeQuery(String.format("SELECT %S FROM %s WHERE %s = %s", META_VALUE, META_TABLE, META_KEY, META_KEY_OUTPUT_PATH));
+            ResultSet recordingPathResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = \"%s\"", META_VALUE, META_TABLE, META_KEY, META_KEY_OUTPUT_PATH));
             if (recordingPathResult.next()) {
                 outputPath = recordingPathResult.getString(META_VALUE);
             } else {
@@ -265,7 +269,7 @@ public class RecordingManager {
     /**
      * Export all clips in the recording with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
      */
-    public void export(String ffmpeg) throws SQLException {
+    public void export() throws SQLException {
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
@@ -349,9 +353,7 @@ public class RecordingManager {
 
     private void initializeDatabase(long startTime) throws IOException, SQLException {
         database.createNewFile(); // TODO: Handle duplicate files
-        try (Connection connection = DriverManager.getConnection(sqlUrl);
-             Statement statement = connection.createStatement();
-             PreparedStatement insertStatement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META_TABLE))) {
+        try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
             statement.execute(String.format("""
                             CREATE TABLE %s (
                                 %s INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -390,13 +392,22 @@ public class RecordingManager {
                         %s TEXT UNIQUE ON CONFLICT FAIL,
                         %s TEXT
                     );""", META_TABLE, META_KEY, META_VALUE));
-            insertStatement.setString(1, META_KEY_START_TIME);
-            insertStatement.setString(2, String.valueOf(startTime));
-            insertStatement.execute();
+            try (PreparedStatement insertStatement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META_TABLE))) {
+                insertStatement.setString(1, META_KEY_START_TIME);
+                insertStatement.setString(2, String.valueOf(startTime));
+                insertStatement.execute();
+            }
         }
     }
 
     public void onRecordingEnded(String outputPath) {
         this.outputPath = outputPath;
+        try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META_TABLE))) {
+            statement.setString(1, META_KEY_OUTPUT_PATH);
+            statement.setString(2, outputPath);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e); // TODO: error handling
+        }
     }
 }

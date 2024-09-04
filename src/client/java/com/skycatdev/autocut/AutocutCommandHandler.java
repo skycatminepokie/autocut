@@ -15,6 +15,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -82,7 +83,7 @@ public class AutocutCommandHandler {
                 .build();
         var finish = literal("finish")
                 .build();
-        var finishFfmpeg = argument("ffmpeg", StringArgumentType.string())
+        var finishDatabase = argument("database", StringArgumentType.string())
                 .executes(AutocutCommandHandler::finish) // WARN: Debug only
                 .build();
         //@formatter:off
@@ -90,19 +91,18 @@ public class AutocutCommandHandler {
         autocut.addChild(connect);
             connect.addChild(connectPassword);
         autocut.addChild(finish);
-            finish.addChild(finishFfmpeg);
+            finish.addChild(finishDatabase);
         autocut.addChild(clip);
         //@formatter:on
     }
 
     private static int finish(CommandContext<FabricClientCommandSource> context) {
-        assert AutocutClient.currentRecordingManager != null;
         try {
-            AutocutClient.currentRecordingManager.export(StringArgumentType.getString(context, "ffmpeg"));
+            RecordingManager recordingManager = RecordingManager.fromDatabase(new File(StringArgumentType.getString(context, "database")));
+            recordingManager.export();
         } catch (SQLException e) {
             throw new RuntimeException(e); // TODO: Error handling
         }
-        AutocutClient.currentRecordingManager = null;
         return Command.SINGLE_SUCCESS;
     }
 
