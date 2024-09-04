@@ -309,6 +309,7 @@ public class RecordingManager {
                     }
                 });
                 job.run();
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Preparing to cut..."));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

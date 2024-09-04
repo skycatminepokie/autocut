@@ -82,9 +82,10 @@ public class AutocutCommandHandler {
                 .executes(AutocutCommandHandler::makeClip) // WARN: Debug only
                 .build();
         var finish = literal("finish")
+                .executes(AutocutCommandHandler::finish)
                 .build();
         var finishDatabase = argument("database", StringArgumentType.string())
-                .executes(AutocutCommandHandler::finish) // WARN: Debug only
+                .executes(AutocutCommandHandler::finishDatabase)
                 .build();
         //@formatter:off
         dispatcher.getRoot().addChild(autocut);
@@ -97,6 +98,15 @@ public class AutocutCommandHandler {
     }
 
     private static int finish(CommandContext<FabricClientCommandSource> context) {
+        try {
+            AutocutClient.currentRecordingManager.export();
+        } catch (SQLException e) {
+            throw new RuntimeException(e); // TODO: Error handling
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int finishDatabase(CommandContext<FabricClientCommandSource> context) {
         try {
             RecordingManager recordingManager = RecordingManager.fromDatabase(new File(StringArgumentType.getString(context, "database")));
             recordingManager.export();
