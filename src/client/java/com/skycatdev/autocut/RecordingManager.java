@@ -297,19 +297,19 @@ public class RecordingManager {
                     @Override
                     public void progress(Progress progress) {
                         if (progress.isEnd()) {
-                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Finished cutting!"));
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Finished cutting!")); // TODO: This doesn't work on remote servers, probably threading issue
                         } else {
                             double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
                             if (percentDone < 0) {
                                 return;
                             }
-                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone)));
+                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.format("Cutting: %.0f%%", percentDone))); // TODO: This doesn't work on remote servers, probably threading issue
                         }
 
                     }
                 });
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Preparing to cut...")); // TODO: This doesn't work on remote servers, probably threading issue
                 job.run();
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Preparing to cut..."));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
