@@ -18,7 +18,7 @@ import java.sql.SQLException;
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onGameStateChange", at = @At(value = "FIELD", target = "Lnet/minecraft/network/packet/s2c/play/GameStateChangeS2CPacket;PROJECTILE_HIT_PLAYER:Lnet/minecraft/network/packet/s2c/play/GameStateChangeS2CPacket$Reason;"))
-    private void autocut$onArrowHitPlayer(GameStateChangeS2CPacket packet, CallbackInfo ci) { // TODO: Test
+    private void autocut$onArrowHitPlayer(GameStateChangeS2CPacket packet, CallbackInfo ci) {
         if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
