@@ -289,7 +289,7 @@ public class RecordingManager {
                         .addOutput(export.getAbsolutePath())
                         .addExtraArgs("-map", "[outv]", "-map", "[outa]")
                         .setConstantRateFactor(18)
-                        .setVideoCodec("libx264")
+                        //.setVideoCodec("libx264") requires gpl
                         .done();
                 FFmpegJob job = executor.createJob(builder, new ProgressListener() {
                     final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips));

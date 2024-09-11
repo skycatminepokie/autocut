@@ -57,10 +57,11 @@ dependencies {
 	}
 	include implementation("org.xerial:sqlite-jdbc:${project.sqlite_jdbc_version}")
 	shadow implementation("net.bramp.ffmpeg:ffmpeg:${project.ffmpeg_cli_wrapper_version}")
-	annotationProcessor("com.bawnorton.configurable:configurable-fabric-yarn:${project.configurable_version}")
-	modImplementation("com.bawnorton.configurable:configurable-fabric-yarn:${project.configurable_version}")
-	modImplementation "dev.isxander:yet-another-config-lib:${project.yacl_version}"
-	modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
+	modImplementation(annotationProcessor("com.bawnorton.configurable:configurable-fabric-yarn:${project.configurable_version}"))
+	modCompileOnly("dev.isxander:yet-another-config-lib:${project.yacl_version}")
+	modRuntimeOnly("dev.isxander:yet-another-config-lib:${project.yacl_version}")
+	modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+	modRuntimeOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
 }
 
 shadowJar {

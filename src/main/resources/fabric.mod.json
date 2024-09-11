@@ -33,8 +33,13 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.15.11",
-		"minecraft": "~1.21",
+		"minecraft": "1.21.1",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": ">=0.104.0+1.21.1",
+		"configurable": ">=1.1.0+1.21.1"
+	},
+	"recommends": {
+		"yacl": ">=3.5.0+1.21-fabric",
+		"modmenu": ">=11.0.2"
 	}
 }
