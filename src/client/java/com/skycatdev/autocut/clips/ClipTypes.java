@@ -16,6 +16,7 @@ public class ClipTypes {
     public static final Identifier DEBUG = Identifier.of(Autocut.MOD_ID, "debug");
     /**
      * A clip made for internal use. Should not end up being serialized.
+     *
      * @see RecordingManager#mergeClips(Collection)
      */
     public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
@@ -26,11 +27,13 @@ public class ClipTypes {
     /**
      * A clip triggered by a manual input, but which was not manually constructed.
      * A clip made via a keybind for clipping probably should have this id, but a clip made by choosing start and end points through a GUI should not.
+     *
      * @see ClipTypes#MANUAL_MADE
      */
     public static final Identifier MANUAL_TRIGGERED = Identifier.of(Autocut.MOD_ID, "manual");
     /**
      * An clip created manually - times selected by hand.
+     *
      * @see ClipTypes#MANUAL_TRIGGERED
      */
     public static final Identifier MANUAL_MADE = Identifier.of(Autocut.MOD_ID, "manual_made");
@@ -42,8 +45,5 @@ public class ClipTypes {
      * A clip created by attempting to use an item.
      */
     public static final Identifier USE_ITEM = Identifier.of(Autocut.MOD_ID, "use_item");
-    /**
-     * A clip created by successfully placing a block.
-     */
-    public static final Identifier PLACE_BLOCK = Identifier.of(Autocut.MOD_ID, "place_block");
+
 }
