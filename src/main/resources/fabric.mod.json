@@ -21,7 +21,7 @@
 			"com.skycatdev.autocut.AutocutClient"
 		],
 		"fabric-datagen": [
-			"com.skycatdev.autocut.AutocutDataGenerator"
+			"com.skycatdev.autocut.datagen.AutocutDataGenerator"
 		]
 	},
 	"mixins": [

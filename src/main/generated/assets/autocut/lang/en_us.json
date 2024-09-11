@@ -1,0 +1,13 @@
+{
+  "configurable.autocut.yacl.category.clips": "Clips",
+  "configurable.autocut.yacl.description.default_end_offset": "How many milliseconds after the event should be counted as part of the clip.",
+  "configurable.autocut.yacl.description.default_start_offset": "How many milliseconds before the event should be counted as part of the clip.",
+  "configurable.autocut.yacl.description.place_block_clip": "When you place a block",
+  "configurable.autocut.yacl.description.shoot_player_clip": "When you shoot a player. Note that some servers will \"fake\" this in order to play the sound that comes with it. On Hypixel, you'll notice this when you join a game. You can filter these out if you like - it seems to only happen when you're at x=8.5, z=8.5.",
+  "configurable.autocut.yacl.description.should_record": "Whether this event should be recorded.",
+  "configurable.autocut.yacl.option.default_end_offset": "Default end offset",
+  "configurable.autocut.yacl.option.default_start_offset": "Default start offset",
+  "configurable.autocut.yacl.option.should_record": "Enable recording",
+  "configurable.autocut.yacl.option_group.place_block_clip": "Place block",
+  "configurable.autocut.yacl.option_group.shoot_player_clip": "Shoot player"
+}
