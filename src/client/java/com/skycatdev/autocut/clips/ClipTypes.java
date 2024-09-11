@@ -46,8 +46,4 @@ public class ClipTypes {
      * A clip created by successfully placing a block.
      */
     public static final Identifier PLACE_BLOCK = Identifier.of(Autocut.MOD_ID, "place_block");
-    /**
-     * A clip created by shooting a player with an arrow.
-     */
-    public static final Identifier SHOOT_PLAYER = Identifier.of(Autocut.MOD_ID, "shoot_player");
 }

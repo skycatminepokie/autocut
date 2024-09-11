@@ -2,8 +2,7 @@ package com.skycatdev.autocut.mixin.client;
 
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.AutocutClient;
-import com.skycatdev.autocut.clips.ClipBuilder;
-import com.skycatdev.autocut.clips.ClipTypes;
+import com.skycatdev.autocut.clips.ShootPlayerClip;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -23,12 +22,8 @@ public class ClientPlayNetworkHandlerMixin {
             long time = System.currentTimeMillis();
             try {
                 ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                if (player != null) {
-                    ClipBuilder builder = new ClipBuilder(time - 100, time, time + 100, ClipTypes.SHOOT_PLAYER)
-                            .setDescription("Shot a player with an arrow")
-                            .setSource(player.getNameForScoreboard())
-                            .setSourceLocation(player.getPos());
-                    AutocutClient.currentRecordingManager.addClip(builder.build());
+                if (player != null && ShootPlayerClip.shouldRecord) {
+                    AutocutClient.currentRecordingManager.addClip(new ShootPlayerClip(time, player));
                 }
             } catch (SQLException e) {
                 Autocut.LOGGER.warn("Unable to store player shot event", e);
