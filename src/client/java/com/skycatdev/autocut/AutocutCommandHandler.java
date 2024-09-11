@@ -1,5 +1,6 @@
 package com.skycatdev.autocut;
 
+import com.bawnorton.configurable.Configurable;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -28,6 +29,8 @@ public class AutocutCommandHandler {
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
+    @Configurable
+    public static int testNumber = 6;
 
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) {
         String password = StringArgumentType.getString(context, "password");
@@ -117,6 +120,7 @@ public class AutocutCommandHandler {
     }
 
     private static int makeClip(CommandContext<FabricClientCommandSource> context) {
+        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(String.valueOf(testNumber)));
         if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
