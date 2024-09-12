@@ -37,7 +37,7 @@ You can use this mod to make videos! I'd love a mention somewhere in a descripti
 #### Programming
 You can use and reference all the code in the GitHub repo under MIT.
 ### What's actually going on
-autocut is licensed under MIT, but the JAR file includes several dependencies:
+Autocut is licensed under MIT, but the JAR file includes several dependencies:
 - OBS WebSocket Java is under MIT.
 - SQLite JDBC Driver is dual licensed (GPL and Apache) - I used it under Apache.
   - It includes a NOTICE
