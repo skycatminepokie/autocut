@@ -2,6 +2,7 @@
   "configurable.autocut.yacl.category.clips": "Clips",
   "configurable.autocut.yacl.description.attack_entity_clip": "When you attempt to attack an entity, including a player.",
   "configurable.autocut.yacl.description.break_block_clip": "When you break a block. This happens at the end, so it's not guaranteed that the whole breaking time will be included.",
+  "configurable.autocut.yacl.description.death_clip": "When you die.",
   "configurable.autocut.yacl.description.default_end_offset": "How many milliseconds after the event should be counted as part of the clip.",
   "configurable.autocut.yacl.description.default_start_offset": "How many milliseconds before the event should be counted as part of the clip.",
   "configurable.autocut.yacl.description.place_block_clip": "When you place a block",
@@ -13,6 +14,7 @@
   "configurable.autocut.yacl.option.should_record": "Enable recording",
   "configurable.autocut.yacl.option_group.attack_entity_clip": "Attack entity",
   "configurable.autocut.yacl.option_group.break_block_clip": "Break block",
+  "configurable.autocut.yacl.option_group.death_clip": "Death",
   "configurable.autocut.yacl.option_group.place_block_clip": "Place block",
   "configurable.autocut.yacl.option_group.shoot_player_clip": "Shoot player",
   "configurable.autocut.yacl.option_group.use_item_clip": "Use item"

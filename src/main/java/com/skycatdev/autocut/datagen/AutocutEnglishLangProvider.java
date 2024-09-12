@@ -23,6 +23,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOptionGroup("use_item_clip", "Use item", "When you use (right-click with) an item. This happens at the beginning of the click, and so it is not guaranteed to include the whole click if the button is held.", tb);
         addOptionGroup("break_block_clip", "Break block", "When you break a block. This happens at the end, so it's not guaranteed that the whole breaking time will be included.", tb);
         addOptionGroup("attack_entity_clip", "Attack entity", "When you attempt to attack an entity, including a player.", tb);
+        addOptionGroup("death_clip", "Death", "When you die.", tb);
 
         addOption("default_start_offset", "Default start offset", "How many milliseconds before the event should be counted as part of the clip.", tb);
         addOption("default_end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
