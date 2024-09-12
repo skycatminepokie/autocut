@@ -24,10 +24,12 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOptionGroup("break_block_clip", "Break block", "When you break a block. This happens at the end, so it's not guaranteed that the whole breaking time will be included.", tb);
         addOptionGroup("attack_entity_clip", "Attack entity", "When you attempt to attack an entity, including a player.", tb);
         addOptionGroup("death_clip", "Death", "When you die.", tb);
+        addOptionGroup("take_damage_clip", "Take damage", "Whenever you take damage from any source.", tb);
 
         addOption("default_start_offset", "Default start offset", "How many milliseconds before the event should be counted as part of the clip.", tb);
         addOption("default_end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
         addOption("should_record", "Enable recording", "Whether this event should be recorded.", tb);
+        addOption("damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
     }
 
     private void addOption(String key, String optionName, String description, TranslationBuilder tb) {

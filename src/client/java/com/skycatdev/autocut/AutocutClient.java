@@ -1,6 +1,8 @@
 package com.skycatdev.autocut;
 
-import com.skycatdev.autocut.clips.*;
+import com.skycatdev.autocut.clips.AttackEntityClip;
+import com.skycatdev.autocut.clips.BreakBlockClip;
+import com.skycatdev.autocut.clips.UseItemClip;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -54,5 +56,6 @@ public class AutocutClient implements ClientModInitializer {
             }
             return TypedActionResult.pass(ItemStack.EMPTY);
         });
+
     }
 }
