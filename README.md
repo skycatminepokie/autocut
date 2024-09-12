@@ -45,6 +45,7 @@ Autocut is licensed under MIT, but the JAR file includes several dependencies:
     - This is why there's a LICENSE.zentus file (it's mentioned in the NOTICE)
 - FFmpeg CLI Wrapper for Java is licensed under BSD 2-Clause "Simplified"
   - This is why there's a LICENSE.bramp file
+
 It also requires a few other things, which are NOT included in the jar
   - FFmpeg (with libx264) is used under LGPL
     - This is why there's a LICENSE.lgpl
