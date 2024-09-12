@@ -4,7 +4,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.skycatdev.autocut.clips.ClipBuilder;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -24,14 +23,10 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class AutocutCommandHandler {
 
-    /**
-     * A clip made using debug methods. Ideally not used by the end user.
-     */
-    public static final Identifier DEBUG = Identifier.of(Autocut.MOD_ID, "debug");
-    private static final long DEFAULT_CLIP_LENGTH = 30000; // 30 seconds
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
+    private static final long DEFAULT_CLIP_LENGTH = 30000; // 30 seconds
 
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) {
         String password = StringArgumentType.getString(context, "password");
@@ -50,6 +45,25 @@ public class AutocutCommandHandler {
                 .build();
         //controller.connect();
         return 1;
+    }
+
+    private static int finish(CommandContext<FabricClientCommandSource> context) {
+        try {
+            AutocutClient.currentRecordingManager.export();
+        } catch (SQLException e) {
+            throw new RuntimeException(e); // TODO: Error handling
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int finishDatabase(CommandContext<FabricClientCommandSource> context) {
+        try {
+            RecordingManager recordingManager = RecordingManager.fromDatabase(new File(StringArgumentType.getString(context, "database")));
+            recordingManager.export();
+        } catch (SQLException e) {
+            throw new RuntimeException(e); // TODO: Error handling
+        }
+        return Command.SINGLE_SUCCESS;
     }
 
     private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) {
@@ -82,9 +96,6 @@ public class AutocutCommandHandler {
         var connectPassword = argument("password", StringArgumentType.word())
                 .executes(AutocutCommandHandler::connectPasswordCommand)
                 .build();
-        var clip = literal("clip")
-                .executes(AutocutCommandHandler::makeClip) // WARN: Debug only
-                .build();
         var finish = literal("finish")
                 .executes(AutocutCommandHandler::finish)
                 .build();
@@ -97,44 +108,7 @@ public class AutocutCommandHandler {
             connect.addChild(connectPassword);
         autocut.addChild(finish);
             finish.addChild(finishDatabase);
-        autocut.addChild(clip);
         //@formatter:on
     }
-
-    private static int finish(CommandContext<FabricClientCommandSource> context) {
-        try {
-            AutocutClient.currentRecordingManager.export();
-        } catch (SQLException e) {
-            throw new RuntimeException(e); // TODO: Error handling
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int finishDatabase(CommandContext<FabricClientCommandSource> context) {
-        try {
-            RecordingManager recordingManager = RecordingManager.fromDatabase(new File(StringArgumentType.getString(context, "database")));
-            recordingManager.export();
-        } catch (SQLException e) {
-            throw new RuntimeException(e); // TODO: Error handling
-        }
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int makeClip(CommandContext<FabricClientCommandSource> context) {
-        if (AutocutClient.currentRecordingManager != null) {
-            long time = System.currentTimeMillis();
-            try {
-                AutocutClient.currentRecordingManager.addClip(new ClipBuilder(time - DEFAULT_CLIP_LENGTH, time, time, DEBUG)
-                        .setDescription("Debug")
-                        .build());
-            } catch (SQLException ignored) { // TODO
-            }
-            context.getSource().sendFeedback(Text.of("Clipped!")); // TODO: Localize
-            return Command.SINGLE_SUCCESS;
-        }
-        context.getSource().sendError(Text.of("Not recording.")); // TODO: Localize
-        return 0;
-    }
-
 
 }
