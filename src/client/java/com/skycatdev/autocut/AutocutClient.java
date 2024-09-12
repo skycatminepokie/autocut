@@ -2,6 +2,7 @@ package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
+import com.skycatdev.autocut.clips.UseItemClip;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -58,16 +59,11 @@ public class AutocutClient implements ClientModInitializer {
             return ActionResult.PASS;
         }));
         UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (currentRecordingManager != null) {
+            if (currentRecordingManager != null && UseItemClip.shouldRecord) {
                 long time = System.currentTimeMillis();
                 try {
                     ItemStack itemStack = player.getStackInHand(hand);
-                    ClipBuilder builder = new ClipBuilder(time - 250, time, time + 250, ClipTypes.USE_ITEM)
-                            .setDescription("Used " + itemStack.getName().getString())
-                            .setSource(player.getNameForScoreboard())
-                            .setSourceLocation(player.getPos())
-                            .setObject(Registries.ITEM.getId(itemStack.getItem()).toString());
-                    currentRecordingManager.addClip(builder.build());
+                    currentRecordingManager.addClip(new UseItemClip(time, player, itemStack));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store use item event", e);
                 }

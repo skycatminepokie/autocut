@@ -41,9 +41,5 @@ public class ClipTypes {
      * A clip created by attempting to attack an entity.
      */
     public static final Identifier ATTACK_ENTITY = Identifier.of(Autocut.MOD_ID, "attack_entity");
-    /**
-     * A clip created by attempting to use an item.
-     */
-    public static final Identifier USE_ITEM = Identifier.of(Autocut.MOD_ID, "use_item");
 
 }

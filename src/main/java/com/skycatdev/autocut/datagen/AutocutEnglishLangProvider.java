@@ -20,6 +20,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
 
         addOptionGroup("place_block_clip", "Place block", "When you place a block", tb);
         addOptionGroup("shoot_player_clip", "Shoot player", "When you shoot a player. Note that some servers will \"fake\" this in order to play the sound that comes with it. On Hypixel, you'll notice this when you join a game. You can filter these out if you like - it seems to only happen when you're at x=8.5, z=8.5.", tb);
+        addOptionGroup("use_item_clip", "Use item", "When you use (right-click with) an item. This happens at the beginning of the click, and so it is not guaranteed to include the whole click if the button is held.", tb);
 
         addOption("default_start_offset", "Default start offset", "How many milliseconds before the event should be counted as part of the clip.", tb);
         addOption("default_end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
