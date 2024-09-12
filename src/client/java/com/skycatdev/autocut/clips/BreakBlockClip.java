@@ -14,6 +14,7 @@ import net.minecraft.util.math.Vec3d;
 /**
  * A clip created by the user breaking a block
  */
+@Configurable("break_block_clip")
 public class BreakBlockClip extends Clip {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "break_block");
     @Configurable(value = "default_start_offset", min = 0, max = Long.MAX_VALUE, yacl = @Yacl(controller = ControllerType.LONG_FIELD))
