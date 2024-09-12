@@ -39,7 +39,7 @@ public class Clip {
      * @return A deep copy of this clip
      */
     public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new ClipBuilder(in, time, out, type).setDescription(description).setSource(source).setObject(object).setSourceLocation(sourceLocation).setObjectLocation(objectLocation).build();
+        return new Clip(in, time, out, type, description, source, object, sourceLocation, objectLocation);
     }
 
     /**
