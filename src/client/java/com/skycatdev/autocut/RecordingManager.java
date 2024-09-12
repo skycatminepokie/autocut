@@ -2,7 +2,6 @@ package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
-import com.skycatdev.autocut.clips.ClipTypes;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -27,6 +26,12 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class RecordingManager {
+    /**
+     * A clip made for internal use. Should not end up being serialized.
+     *
+     * @see RecordingManager#mergeClips(Collection)
+     */
+    public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
     protected static final String CLIPS_TABLE = "clips"; // Keep this hardcoded
     protected static final String CLIPS_ID_COLUMN = "id"; // Keep this hardcoded
@@ -142,7 +147,7 @@ public class RecordingManager {
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
             if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), ClipTypes.INTERNAL).build(); // Take the union
+                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL).build(); // Take the union
                 mergedClips.set(i, newClip); // Replace the current
                 mergedClips.remove(i + 1); // Yeet the next, it's been combined
                 continue; // And check this clip for union with the next

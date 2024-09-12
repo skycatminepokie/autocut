@@ -5,7 +5,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.skycatdev.autocut.clips.ClipBuilder;
-import com.skycatdev.autocut.clips.ClipTypes;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -14,6 +13,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +24,10 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class AutocutCommandHandler {
 
+    /**
+     * A clip made using debug methods. Ideally not used by the end user.
+     */
+    public static final Identifier DEBUG = Identifier.of(Autocut.MOD_ID, "debug");
     private static final long DEFAULT_CLIP_LENGTH = 30000; // 30 seconds
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
@@ -120,7 +124,7 @@ public class AutocutCommandHandler {
         if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
-                AutocutClient.currentRecordingManager.addClip(new ClipBuilder(time - DEFAULT_CLIP_LENGTH, time, time, ClipTypes.DEBUG)
+                AutocutClient.currentRecordingManager.addClip(new ClipBuilder(time - DEFAULT_CLIP_LENGTH, time, time, DEBUG)
                         .setDescription("Debug")
                         .build());
             } catch (SQLException ignored) { // TODO

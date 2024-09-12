@@ -1,9 +1,6 @@
 package com.skycatdev.autocut;
 
-import com.skycatdev.autocut.clips.BreakBlockClip;
-import com.skycatdev.autocut.clips.ClipBuilder;
-import com.skycatdev.autocut.clips.ClipTypes;
-import com.skycatdev.autocut.clips.UseItemClip;
+import com.skycatdev.autocut.clips.*;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -35,16 +32,10 @@ public class AutocutClient implements ClientModInitializer {
             }
         }));
         AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-            if (currentRecordingManager != null && entity != null) {
+            if (currentRecordingManager != null && entity != null && AttackEntityClip.shouldRecord) {
                 long time = System.currentTimeMillis();
                 try {
-                    ClipBuilder builder = new ClipBuilder(time - 250, time, time + 250, ClipTypes.ATTACK_ENTITY)
-                            .setDescription("Attacked " + entity.getName())
-                            .setSource(player.getNameForScoreboard())
-                            .setSourceLocation(player.getPos())
-                            .setObject(entity.getNameForScoreboard())
-                            .setObjectLocation(entity.getPos());
-                    currentRecordingManager.addClip(builder.build());
+                    currentRecordingManager.addClip(new AttackEntityClip(time, player, entity));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store entity attack event", e);
                 }
