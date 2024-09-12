@@ -10,8 +10,10 @@ Cut videos based on your gameplay!
 7. Do fun gameplay stuff
 8. Stop Recording in OBS
 9. (optional) Delete clips you don't want (see the [wiki](https://github.com/skycatminepokie/autocut/wiki/Database-structure))
-10. Run `/autocut finish "\<path to ffmpeg>"
+10. Run `/autocut finish`
 11. When it's finished a new video starting with `cut` will be in your recordings folder.
+
+You can also optionally run `/autocut finish "path/to/database"` to cut an old video. This will fail if the original video is moved or deleted.
 
 ## Dependencies
 - Includes [OBS WebSocket Java](https://github.com/obs-websocket-community-projects/obs-websocket-java), used under [MIT](https://github.com/obs-websocket-community-projects/obs-websocket-java/blob/develop/LICENSE)
