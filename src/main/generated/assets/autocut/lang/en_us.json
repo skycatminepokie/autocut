@@ -1,13 +1,19 @@
 {
   "configurable.autocut.yacl.category.clips": "Clips",
+  "configurable.autocut.yacl.description.attack_entity_clip": "When you attempt to attack an entity, including a player.",
+  "configurable.autocut.yacl.description.break_block_clip": "When you break a block. This happens at the end, so it's not guaranteed that the whole breaking time will be included.",
   "configurable.autocut.yacl.description.default_end_offset": "How many milliseconds after the event should be counted as part of the clip.",
   "configurable.autocut.yacl.description.default_start_offset": "How many milliseconds before the event should be counted as part of the clip.",
   "configurable.autocut.yacl.description.place_block_clip": "When you place a block",
   "configurable.autocut.yacl.description.shoot_player_clip": "When you shoot a player. Note that some servers will \"fake\" this in order to play the sound that comes with it. On Hypixel, you'll notice this when you join a game. You can filter these out if you like - it seems to only happen when you're at x=8.5, z=8.5.",
   "configurable.autocut.yacl.description.should_record": "Whether this event should be recorded.",
+  "configurable.autocut.yacl.description.use_item_clip": "When you use (right-click with) an item. This happens at the beginning of the click, and so it is not guaranteed to include the whole click if the button is held.",
   "configurable.autocut.yacl.option.default_end_offset": "Default end offset",
   "configurable.autocut.yacl.option.default_start_offset": "Default start offset",
   "configurable.autocut.yacl.option.should_record": "Enable recording",
+  "configurable.autocut.yacl.option_group.attack_entity_clip": "Attack entity",
+  "configurable.autocut.yacl.option_group.break_block_clip": "Break block",
   "configurable.autocut.yacl.option_group.place_block_clip": "Place block",
-  "configurable.autocut.yacl.option_group.shoot_player_clip": "Shoot player"
+  "configurable.autocut.yacl.option_group.shoot_player_clip": "Shoot player",
+  "configurable.autocut.yacl.option_group.use_item_clip": "Use item"
 }
