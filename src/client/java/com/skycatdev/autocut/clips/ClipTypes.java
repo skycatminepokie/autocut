@@ -21,10 +21,6 @@ public class ClipTypes {
      */
     public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
     /**
-     * A clip based on a block breaking.
-     */
-    public static final Identifier BREAK_BLOCK = Identifier.of(Autocut.MOD_ID, "break_block");
-    /**
      * A clip triggered by a manual input, but which was not manually constructed.
      * A clip made via a keybind for clipping probably should have this id, but a clip made by choosing start and end points through a GUI should not.
      *

@@ -1,5 +1,6 @@
 package com.skycatdev.autocut;
 
+import com.skycatdev.autocut.clips.BreakBlockClip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.clips.UseItemClip;
@@ -10,10 +11,8 @@ import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
@@ -26,16 +25,10 @@ public class AutocutClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
         ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-            if (currentRecordingManager != null) {
+            if (currentRecordingManager != null && BreakBlockClip.shouldRecord) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingManager.addClip(new ClipBuilder(time - 250, time, time + 250, ClipTypes.BREAK_BLOCK)
-                            .setDescription("Broke " + state.getBlock().getName().getString()) // TODO: Localize
-                            .setObject(Registries.BLOCK.getId(state.getBlock()).toString())
-                            .setObjectLocation(Vec3d.of(pos))
-                            .setSource(player.getNameForScoreboard())
-                            .setSourceLocation(player.getPos())
-                            .build());
+                    currentRecordingManager.addClip(new BreakBlockClip(time, player, pos, state));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store block break event", e);
                 }
