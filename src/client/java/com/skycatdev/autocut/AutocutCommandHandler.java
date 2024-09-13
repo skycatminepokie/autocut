@@ -84,7 +84,7 @@ public class AutocutCommandHandler {
             try {
                 AutocutClient.currentRecordingManager = new RecordingManager();
             } catch (SQLException | IOException e) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.start.fail").setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(e.getLocalizedMessage()))))); // TODO: make a function for the supplier
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.start.fail").setStyle(styleHoverException(e)));
             }
         } else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
@@ -96,6 +96,10 @@ public class AutocutCommandHandler {
                 }
             }
         }
+    }
+
+    private static Style styleHoverException(Exception e) {
+        return Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(e.getLocalizedMessage())));
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess ignoredCommandRegistryAccess) {
