@@ -24,6 +24,6 @@ public class BreakBlockClip extends Clip {
     @Configurable("should_record")
     public static boolean shouldRecord = true;
     public BreakBlockClip(long time, ClientPlayerEntity player, BlockPos pos, BlockState state) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, "Broke " + state.getBlock().getName().toString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Broke " + state.getBlock().getName().toString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
     }
 }

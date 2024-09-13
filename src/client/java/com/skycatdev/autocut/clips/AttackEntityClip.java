@@ -22,6 +22,6 @@ public class AttackEntityClip extends Clip {
     public static boolean shouldRecord = true;
 
     public AttackEntityClip(long time, PlayerEntity player, Entity entity) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, "Attacked " + entity.getNameForScoreboard(), player.getNameForScoreboard(), entity.getType().getName().getString(), player.getPos(), entity.getPos());
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Attacked " + entity.getNameForScoreboard(), player.getNameForScoreboard(), entity.getType().getName().getString(), player.getPos(), entity.getPos());
     }
 }

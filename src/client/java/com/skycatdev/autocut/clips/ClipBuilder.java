@@ -10,6 +10,7 @@ public class ClipBuilder {
     private long time;
     private long out;
     private @NotNull Identifier type;
+    private boolean active = true;
     private @Nullable String description;
     private @Nullable String source;
     private @Nullable String object;
@@ -24,11 +25,16 @@ public class ClipBuilder {
     }
 
     public Clip build() {
-        return new Clip(in, time, out, type, description, source, object, sourceLocation, objectLocation);
+        return new Clip(in, time, out, type, active, description, source, object, sourceLocation, objectLocation);
     }
 
     public ClipBuilder setDescription(@Nullable String description) {
         this.description = description;
+        return this;
+    }
+
+    public ClipBuilder setActive(boolean active) {
+        this.active = active;
         return this;
     }
 

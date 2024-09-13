@@ -48,6 +48,7 @@ public class RecordingManager {
     protected static final String CLIPS_OBJECT_X_COLUMN = "object_x"; // Keep this hardcoded
     protected static final String CLIPS_OBJECT_Y_COLUMN = "object_y"; // Keep this hardcoded
     protected static final String CLIPS_OBJECT_Z_COLUMN = "object_z"; // Keep this hardcoded
+    protected static final String CLIPS_ACTIVE_COLUMN = "active"; // Keep this hardcoded
     protected static final String META_TABLE = "meta"; // Keep this hardcoded
     protected static final String META_KEY = "key"; // Keep this hardcoded
     protected static final String META_VALUE = "value"; // Keep this hardcoded
@@ -165,11 +166,12 @@ public class RecordingManager {
         List<Object> rowValues = new LinkedList<>();
         // Required
         StringBuilder columnsBuilder = new StringBuilder("(" + CLIPS_INPOINT_COLUMN + ", " + CLIPS_TIMESTAMP_COLUMN + ", " + CLIPS_OUTPOINT_COLUMN + ", " + CLIPS_TYPE_COLUMN);
-        StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?");
+        StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?, ?");
         rowValues.add(clip.in());
         rowValues.add(clip.time());
         rowValues.add(clip.out());
         rowValues.add(clip.type());
+        rowValues.add(clip.active());
 
         // Optional
         if (clip.description() != null) {
@@ -282,7 +284,7 @@ public class RecordingManager {
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
-        LinkedList<Clip> clips = getClips();
+        LinkedList<Clip> clips = getActiveClips();
         new Thread(() -> {
             File recording = new File(outputPath);
             File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
@@ -325,9 +327,9 @@ public class RecordingManager {
         }).start();
     }
 
-    public LinkedList<Clip> getClips() throws SQLException {
+    public LinkedList<Clip> getActiveClips() throws SQLException {
         try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
-            ResultSet results = statement.executeQuery("SELECT * FROM " + CLIPS_TABLE + ";");
+            ResultSet results = statement.executeQuery("SELECT * FROM " + CLIPS_TABLE + " WHERE " + CLIPS_ACTIVE_COLUMN + " IS TRUE;");
             LinkedList<Clip> clips = new LinkedList<>();
             while (results.next()) {
                 ClipBuilder builder = new ClipBuilder(results.getLong(CLIPS_INPOINT_COLUMN),
@@ -371,6 +373,7 @@ public class RecordingManager {
                                 %s INTEGER NOT NULL,
                                 %s INTEGER NOT NULL,
                                 %s TEXT NOT NULL,
+                                %s INTEGER NOT NULL,
                                 %s TEXT,
                                 %s TEXT,
                                 %s TEXT,
@@ -387,6 +390,7 @@ public class RecordingManager {
                     CLIPS_TIMESTAMP_COLUMN,
                     CLIPS_OUTPOINT_COLUMN,
                     CLIPS_TYPE_COLUMN,
+                    CLIPS_ACTIVE_COLUMN,
                     CLIPS_DESCRIPTION_COLUMN,
                     CLIPS_SOURCE_COLUMN,
                     CLIPS_OBJECT_COLUMN,

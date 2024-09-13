@@ -16,18 +16,20 @@ public class Clip {
     private final long time;
     private final long out;
     private final @NotNull Identifier type;
+    private final boolean active;
     private final @Nullable String description;
     private final @Nullable String source;
     private final @Nullable String object;
     private final @Nullable Vec3d sourceLocation;
     private final @Nullable Vec3d objectLocation;
 
-    public Clip(long in, long time, long out, @NotNull Identifier type, @Nullable String description, @Nullable String source, @Nullable String object, @Nullable Vec3d sourceLocation, @Nullable Vec3d objectLocation) {
+    public Clip(long in, long time, long out, @NotNull Identifier type, boolean active, @Nullable String description, @Nullable String source, @Nullable String object, @Nullable Vec3d sourceLocation, @Nullable Vec3d objectLocation) {
         assert in < out;
         this.in = in;
         this.time = time;
         this.out = out;
         this.type = type;
+        this.active = active;
         this.description = description;
         this.source = source;
         this.object = object;
@@ -39,7 +41,7 @@ public class Clip {
      * @return A deep copy of this clip
      */
     public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new Clip(in, time, out, type, description, source, object, sourceLocation, objectLocation);
+        return new Clip(in, time, out, type, active, description, source, object, sourceLocation, objectLocation);
     }
 
     /**
@@ -104,6 +106,10 @@ public class Clip {
 
     public @Nullable Vec3d objectLocation() {
         return objectLocation;
+    }
+
+    public boolean active() {
+        return active;
     }
 
     @Override

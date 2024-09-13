@@ -22,6 +22,6 @@ public class DeathClip extends Clip {
     public static boolean shouldRecord = true;
 
     public DeathClip(long time, ClientPlayerEntity player, Text deathMessage) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, deathMessage.getString(), null, player.getNameForScoreboard(), null, player.getPos());
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, deathMessage.getString(), null, player.getNameForScoreboard(), null, player.getPos());
     }
 }

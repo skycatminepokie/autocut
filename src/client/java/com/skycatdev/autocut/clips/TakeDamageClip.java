@@ -26,6 +26,6 @@ public class TakeDamageClip extends Clip {
     public static int precision = 1;
 
     public TakeDamageClip(long time, ClientPlayerEntity player, float damageTaken) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, String.format(String.format("Took %%.%df damage", precision), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, String.format(String.format("Took %%.%df damage", precision), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
     }
 }

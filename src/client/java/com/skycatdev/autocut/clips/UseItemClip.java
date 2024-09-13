@@ -22,6 +22,6 @@ public class UseItemClip extends Clip {
     @Configurable("should_record")
     public static boolean shouldRecord = true;
     public UseItemClip(long time, PlayerEntity player, ItemStack itemStack) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, "Used " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), null);
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Used " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), null);
     }
 }

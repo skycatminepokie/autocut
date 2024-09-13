@@ -20,6 +20,6 @@ public class ShootPlayerClip extends Clip {
     public static boolean shouldRecord = true;
 
     public ShootPlayerClip(long time, ClientPlayerEntity player) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
     }
 }
