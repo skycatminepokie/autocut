@@ -115,8 +115,8 @@ public class RecordingManager {
         this(System.currentTimeMillis());
     }
 
-    public static RecordingManager fromDatabase(@NotNull File database) throws SQLException { // STOPSHIP: Warn the user about anything that inputs to this or disallow it. Remote connection to another sql server may be possible.
-        if (!database.exists()) {
+    public static RecordingManager fromDatabase(@NotNull File database) throws SQLException {
+        if (!database.exists()) { // This check should prevent connection to a remote server
             throw new IllegalArgumentException("database must exist and it does not.");
         }
         String sqlUrl = "jdbc:sqlite:" + database.getPath();
