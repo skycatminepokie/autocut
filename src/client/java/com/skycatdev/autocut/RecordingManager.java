@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.sql.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -103,7 +104,7 @@ public class RecordingManager {
      * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
      */
     private RecordingManager(long startTime) throws IOException, SQLException {
-        this(startTime, RECORDING_DIRECTORY.resolve("autocut_" + startTime + ".sqlite").toFile()); // Also initializes sqlUrl
+        this(startTime, RECORDING_DIRECTORY.resolve("autocut_" + Instant.ofEpochMilli(startTime).toString().replace(':', '_').replace('T', '_').replace('.', '_') + ".sqlite").toFile()); // Also initializes sqlUrl
         initializeDatabase(startTime);
     }
 
