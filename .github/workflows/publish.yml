@@ -63,7 +63,7 @@ jobs:
         with:
           version-type: ${{ env.VERSION_TYPE }}
 
-          modrinth-id: ibmeD85j
+          modrinth-id: DZJzhD8k
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
           github-tag: "v${{ env.VERSION }}"
