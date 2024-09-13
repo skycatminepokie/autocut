@@ -4,6 +4,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -12,7 +14,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,9 @@ public class AutocutCommandHandler {
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
     private static final long DEFAULT_CLIP_LENGTH = 30000; // 30 seconds
+    // Exceptions are in the form of COMMAND_PATH_REASON_EXCEPTION
+    private static final SimpleCommandExceptionType FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION = new SimpleCommandExceptionType(() -> "The given database does not exist.");
+    private static final SimpleCommandExceptionType FINISH_NO_RECORDING_EXCEPTION = new SimpleCommandExceptionType(() -> "No recording found. Did you connect, start recording, and stop recording?");
 
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) {
         String password = StringArgumentType.getString(context, "password");
@@ -47,21 +51,28 @@ public class AutocutCommandHandler {
         return 1;
     }
 
-    private static int finish(CommandContext<FabricClientCommandSource> context) {
+    private static int finish(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         try {
+            if (AutocutClient.currentRecordingManager == null) {
+                throw FINISH_NO_RECORDING_EXCEPTION.create();
+            }
             AutocutClient.currentRecordingManager.export();
         } catch (SQLException e) {
-            throw new RuntimeException(e); // TODO: Error handling
+            throw new RuntimeException(e);
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int finishDatabase(CommandContext<FabricClientCommandSource> context) {
+    private static int finishDatabase(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         try {
-            RecordingManager recordingManager = RecordingManager.fromDatabase(new File(StringArgumentType.getString(context, "database")));
+            File database = new File(StringArgumentType.getString(context, "database"));
+            if (!database.exists()) {
+                throw FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION.create();
+            }
+            RecordingManager recordingManager = RecordingManager.fromDatabase(database);
             recordingManager.export();
         } catch (SQLException e) {
-            throw new RuntimeException(e); // TODO: Error handling
+            throw new RuntimeException(e);
         }
         return Command.SINGLE_SUCCESS;
     }

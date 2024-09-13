@@ -55,7 +55,8 @@ public class RecordingManager {
     protected static final String META_KEY_OUTPUT_PATH = "output_path"; // Keep this hardcoded
 
     static {
-        RECORDING_DIRECTORY.toFile().mkdirs(); // TODO: Error handling
+        //noinspection ResultOfMethodCallIgnored
+        RECORDING_DIRECTORY.toFile().mkdirs();
     }
 
     /**
@@ -113,6 +114,9 @@ public class RecordingManager {
     }
 
     public static RecordingManager fromDatabase(@NotNull File database) throws SQLException { // STOPSHIP: Warn the user about anything that inputs to this or disallow it. Remote connection to another sql server may be possible.
+        if (!database.exists()) {
+            throw new IllegalArgumentException("database must exist and it does not.");
+        }
         String sqlUrl = "jdbc:sqlite:" + database.getPath();
         long startTime;
         String outputPath;
