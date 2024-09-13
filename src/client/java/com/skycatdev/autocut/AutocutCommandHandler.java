@@ -27,10 +27,9 @@ public class AutocutCommandHandler {
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
-    private static final long DEFAULT_CLIP_LENGTH = 30000; // 30 seconds
     // Exceptions are in the form of COMMAND_PATH_REASON_EXCEPTION
-    private static final SimpleCommandExceptionType FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION = new SimpleCommandExceptionType(() -> "The given database does not exist.");
-    private static final SimpleCommandExceptionType FINISH_NO_RECORDING_EXCEPTION = new SimpleCommandExceptionType(() -> "No recording found. Did you connect, start recording, and stop recording?");
+    private static final SimpleCommandExceptionType FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION = new SimpleCommandExceptionType(() -> Text.stringifiedTranslatable("autocut.command.autocut.finish.database.fail.databaseDoesNotExist").getString());
+    private static final SimpleCommandExceptionType FINISH_NO_RECORDING_EXCEPTION = new SimpleCommandExceptionType(() -> Text.stringifiedTranslatable("autocut.command.autocut.finish.fail.noRecording").getString());
 
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) {
         String password = StringArgumentType.getString(context, "password");
@@ -41,7 +40,7 @@ public class AutocutCommandHandler {
                 .connectionTimeout(DEFAULT_CONNECTION_TIMEOUT)
                 .lifecycle()
                 .onReady(() -> {
-                    context.getSource().sendFeedback(Text.of("OBS connected")); // TODO: Localize
+                    context.getSource().sendFeedback(Text.translatable("autocut.recording.connect.success"));
                 })
                 .and()
                 .autoConnect(true)
@@ -81,17 +80,17 @@ public class AutocutCommandHandler {
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
             assert AutocutClient.currentRecordingManager == null; // TODO: Error handling
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Recording started")); // TODO: Localize
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.start.success"));
             try {
                 AutocutClient.currentRecordingManager = new RecordingManager();
             } catch (SQLException | IOException e) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Failed to start autocut: ").copy().append(Text.of("Exception").copy().setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(e.getLocalizedMessage())))))); // TODO: Localize and unawfulify
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.start.fail").setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(e.getLocalizedMessage()))))); // TODO: make a function for the supplier
             }
         } else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Recording ended.")); // TODO: Localize
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.end.success"));
                 if (AutocutClient.currentRecordingManager == null) {
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("Warning: Recording was not started in autocut - no recording is saved.")); // TODO: Check at connect and warn // TODO: Localize
+                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.end.fail.notStarted")); // TODO: Check at connect and warn
                 } else {
                     AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
                 }

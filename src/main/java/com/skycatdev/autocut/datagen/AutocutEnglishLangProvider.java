@@ -31,6 +31,16 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOption("should_record", "Enable recording", "Whether this event should be recorded.", tb);
         addOption("default_active", "Active", "Whether this event should be exported in the final recording.", tb);
         addOption("damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
+
+        addText("recording.connect.success", "OBS connected.", tb);
+        addText("recording.start.success", "Recording started.", tb);
+        addText("recording.start.fail", "Failed to start autocut", tb);
+        addText("recording.end.success", "Recording ended.", tb);
+        addText("recording.end.fail.notStarted", "Warning: Recording was not started in autocut - no recording is saved.", tb);
+
+        addCommandMessage("autocut.finish.database", "fail.databaseDoesNotExist", "The given database does not exist.", tb);
+        addCommandMessage("autocut.finish", "fail.noRecording", "No recording found. Did you connect, start recording, and stop recording?", tb);
+
     }
 
     private void addOption(String key, String optionName, String description, TranslationBuilder tb) {
@@ -41,5 +51,13 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
     private void addOptionGroup(String key, String groupName, String description, TranslationBuilder tb) {
         tb.add(YACL_PREFIX + ".option_group." + key, groupName);
         tb.add(YACL_PREFIX + ".description." + key, description);
+    }
+
+    private void addCommandMessage(String commandPath, String key, String text, TranslationBuilder tb) {
+        addText("command." + commandPath + "." + key, text, tb);
+    }
+
+    private void addText(String path, String text, TranslationBuilder tb) {
+        tb.add(Autocut.MOD_ID + "." + path, text);
     }
 }

@@ -1,4 +1,11 @@
 {
+  "autocut.command.autocut.finish.database.fail.databaseDoesNotExist": "The given database does not exist.",
+  "autocut.command.autocut.finish.fail.noRecording": "No recording found. Did you connect, start recording, and stop recording?",
+  "autocut.recording.connect.success": "OBS connected.",
+  "autocut.recording.end.fail.notStarted": "Warning: Recording was not started in autocut - no recording is saved.",
+  "autocut.recording.end.success": "Recording ended.",
+  "autocut.recording.start.fail": "Failed to start autocut",
+  "autocut.recording.start.success": "Recording started.",
   "configurable.autocut.yacl.category.clips": "Clips",
   "configurable.autocut.yacl.description.attack_entity_clip": "When you attempt to attack an entity, including a player.",
   "configurable.autocut.yacl.description.break_block_clip": "When you break a block. This happens at the end, so it's not guaranteed that the whole breaking time will be included.",
