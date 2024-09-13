@@ -18,8 +18,10 @@ public class ShootPlayerClip extends Clip {
     public static long defaultEndOffset = 100;
     @Configurable("should_record")
     public static boolean shouldRecord = true;
+    @Configurable("default_active")
+    public static boolean defaultActive = true;
 
     public ShootPlayerClip(long time, ClientPlayerEntity player) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, defaultActive, "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
     }
 }

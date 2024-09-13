@@ -20,8 +20,10 @@ public class DeathClip extends Clip {
     public static long defaultEndOffset = 100;
     @Configurable("should_record")
     public static boolean shouldRecord = true;
+    @Configurable("default_active")
+    public static boolean defaultActive = true;
 
     public DeathClip(long time, ClientPlayerEntity player, Text deathMessage) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, deathMessage.getString(), null, player.getNameForScoreboard(), null, player.getPos());
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, defaultActive, deathMessage.getString(), null, player.getNameForScoreboard(), null, player.getPos());
     }
 }

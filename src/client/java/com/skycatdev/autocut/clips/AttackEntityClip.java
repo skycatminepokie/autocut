@@ -20,8 +20,9 @@ public class AttackEntityClip extends Clip {
     public static long defaultEndOffset = 100;
     @Configurable("should_record")
     public static boolean shouldRecord = true;
-
+    @Configurable("default_active")
+    public static boolean defaultActive = true;
     public AttackEntityClip(long time, PlayerEntity player, Entity entity) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Attacked " + entity.getNameForScoreboard(), player.getNameForScoreboard(), entity.getType().getName().getString(), player.getPos(), entity.getPos());
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, defaultActive, "Attacked " + entity.getNameForScoreboard(), player.getNameForScoreboard(), entity.getType().getName().getString(), player.getPos(), entity.getPos());
     }
 }

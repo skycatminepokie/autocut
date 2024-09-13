@@ -23,7 +23,9 @@ public class BreakBlockClip extends Clip {
     public static long defaultEndOffset = 100;
     @Configurable("should_record")
     public static boolean shouldRecord = true;
+    @Configurable("default_active")
+    public static boolean defaultActive = true;
     public BreakBlockClip(long time, ClientPlayerEntity player, BlockPos pos, BlockState state) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Broke " + state.getBlock().getName().toString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, defaultActive, "Broke " + state.getBlock().getName().getString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
     }
 }

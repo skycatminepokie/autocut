@@ -29,6 +29,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOption("default_start_offset", "Default start offset", "How many milliseconds before the event should be counted as part of the clip.", tb);
         addOption("default_end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
         addOption("should_record", "Enable recording", "Whether this event should be recorded.", tb);
+        addOption("default_active", "Active", "Whether this event should be exported in the final recording.", tb);
         addOption("damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
     }
 

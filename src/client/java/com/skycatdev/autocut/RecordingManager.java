@@ -165,7 +165,7 @@ public class RecordingManager {
     protected static PreparedStatement prepareClipStatement(Clip clip, Connection connection) throws SQLException {
         List<Object> rowValues = new LinkedList<>();
         // Required
-        StringBuilder columnsBuilder = new StringBuilder("(" + CLIPS_INPOINT_COLUMN + ", " + CLIPS_TIMESTAMP_COLUMN + ", " + CLIPS_OUTPOINT_COLUMN + ", " + CLIPS_TYPE_COLUMN);
+        StringBuilder columnsBuilder = new StringBuilder("(" + CLIPS_INPOINT_COLUMN + ", " + CLIPS_TIMESTAMP_COLUMN + ", " + CLIPS_OUTPOINT_COLUMN + ", " + CLIPS_TYPE_COLUMN + ", " +  CLIPS_ACTIVE_COLUMN);
         StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?, ?");
         rowValues.add(clip.in());
         rowValues.add(clip.time());
@@ -336,9 +336,10 @@ public class RecordingManager {
                         results.getLong(CLIPS_TIMESTAMP_COLUMN),
                         results.getLong(CLIPS_OUTPOINT_COLUMN),
                         Identifier.of(results.getString(CLIPS_ID_COLUMN)));
-                builder.setDescription(CLIPS_DESCRIPTION_COLUMN);
-                builder.setSource(CLIPS_SOURCE_COLUMN);
-                builder.setObject(CLIPS_OBJECT_COLUMN);
+                builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));
+                builder.setSource(results.getString(CLIPS_SOURCE_COLUMN));
+                builder.setObject(results.getString(CLIPS_OBJECT_COLUMN));
+                builder.setActive(results.getBoolean(CLIPS_ACTIVE_COLUMN));
                 if (results.getObject(CLIPS_SOURCE_X_COLUMN) instanceof Double x && // instanceof to check for null, cast to avoid re-getting.
                     results.getObject(CLIPS_SOURCE_Y_COLUMN) instanceof Double y &&
                     results.getObject(CLIPS_SOURCE_Z_COLUMN) instanceof Double z) {

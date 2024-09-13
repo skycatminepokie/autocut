@@ -19,6 +19,8 @@ public class TakeDamageClip extends Clip {
     public static long defaultEndOffset = 100;
     @Configurable("should_record")
     public static boolean shouldRecord = true;
+    @Configurable("default_active")
+    public static boolean defaultActive = true;
     /**
      * How many decimal points of precision to record damage at.
      */
@@ -26,6 +28,6 @@ public class TakeDamageClip extends Clip {
     public static int precision = 1;
 
     public TakeDamageClip(long time, ClientPlayerEntity player, float damageTaken) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, String.format(String.format("Took %%.%df damage", precision), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, defaultActive, String.format(String.format("Took %%.%df damage", precision), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
     }
 }

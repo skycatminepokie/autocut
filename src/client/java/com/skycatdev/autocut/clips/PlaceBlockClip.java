@@ -23,8 +23,10 @@ public class PlaceBlockClip extends Clip {
     public static long defaultEndOffset = 100;
     @Configurable("should_record")
     public static boolean shouldRecord = true;
+    @Configurable("default_active")
+    public static boolean defaultActive = true;
 
     public PlaceBlockClip(long time, ClientPlayerEntity player, ItemStack itemStack, BlockPos placementLocation) {
-        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, true, "Placed " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), Vec3d.of(placementLocation));
+        super(time - defaultStartOffset, time, time + defaultEndOffset, ID, defaultActive, "Placed " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), Vec3d.of(placementLocation));
     }
 }
