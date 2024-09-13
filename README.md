@@ -47,7 +47,7 @@ Autocut is licensed under MIT, but the JAR file includes several dependencies:
   - This is why there's a LICENSE.bramp file
 
 It also requires a few other things, which are NOT included in the jar
-- FFmpeg (with libx264) is used under LGPL
+- FFmpeg is used under LGPL
   - This is why there's a LICENSE.lgpl
   - This is why there's a LICENSE.gpl (required by lgpl)
 - Fabric API is used under Apache 2.0
