@@ -39,9 +39,7 @@ public class AutocutCommandHandler {
                 .password(password)
                 .connectionTimeout(DEFAULT_CONNECTION_TIMEOUT)
                 .lifecycle()
-                .onReady(() -> {
-                    context.getSource().sendFeedback(Text.translatable("autocut.recording.connect.success"));
-                })
+                .onReady(() -> context.getSource().sendFeedback(Text.translatable("autocut.recording.connect.success")))
                 .and()
                 .autoConnect(true)
                 .registerEventListener(RecordStateChangedEvent.class, AutocutCommandHandler::onRecordEventChanged)
