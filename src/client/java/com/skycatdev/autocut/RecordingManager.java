@@ -190,19 +190,21 @@ public class RecordingManager {
             valuesBuilder.append(", ?");
             rowValues.add(clip.object());
         }
-        if (clip.sourceLocation() != null) {
+        Vec3d sourceLocation = clip.sourceLocation();
+        if (sourceLocation != null) {
             columnsBuilder.append(", " + CLIPS_SOURCE_X_COLUMN + ", " + CLIPS_SOURCE_Y_COLUMN + ", " + CLIPS_SOURCE_Z_COLUMN);
             valuesBuilder.append(", ?, ?, ?");
-            rowValues.add(clip.sourceLocation().getX());
-            rowValues.add(clip.sourceLocation().getY());
-            rowValues.add(clip.sourceLocation().getZ());
+            rowValues.add(sourceLocation.getX());
+            rowValues.add(sourceLocation.getY());
+            rowValues.add(sourceLocation.getZ());
         }
-        if (clip.objectLocation() != null) {
+        Vec3d objectLocation = clip.objectLocation();
+        if (objectLocation != null) {
             columnsBuilder.append(", " + CLIPS_OBJECT_X_COLUMN + ", " + CLIPS_OBJECT_Y_COLUMN + ", " + CLIPS_OBJECT_Z_COLUMN);
             valuesBuilder.append(", ?, ?, ?");
-            rowValues.add(clip.objectLocation().getX());
-            rowValues.add(clip.objectLocation().getY());
-            rowValues.add(clip.objectLocation().getZ());
+            rowValues.add(objectLocation.getX());
+            rowValues.add(objectLocation.getY());
+            rowValues.add(objectLocation.getZ());
         }
 
         // Build statement
@@ -366,7 +368,8 @@ public class RecordingManager {
     }
 
     private void initializeDatabase(long startTime) throws IOException, SQLException {
-        database.createNewFile(); // TODO: Handle duplicate files
+        //noinspection ResultOfMethodCallIgnored
+        database.createNewFile();
         try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) {
             statement.execute(String.format("""
                             CREATE TABLE %s (
