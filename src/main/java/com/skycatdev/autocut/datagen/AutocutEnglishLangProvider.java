@@ -37,6 +37,9 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("recording.start.fail", "Failed to start autocut", tb);
         addText("recording.end.success", "Recording ended.", tb);
         addText("recording.end.fail.notStarted", "Warning: Recording was not started in autocut - no recording is saved.", tb);
+        addText("cutting.finish", "Finished cutting!", tb);
+        addText("cutting.progress", "Cutting: %s%%", tb);
+        addText("cutting.start", "Preparing to cut...", tb);
 
         addCommandMessage("autocut.finish.database", "fail.databaseDoesNotExist", "The given database does not exist.", tb);
         addCommandMessage("autocut.finish", "fail.noRecording", "No recording found. Did you connect, start recording, and stop recording?", tb);
