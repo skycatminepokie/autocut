@@ -9,7 +9,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
@@ -74,21 +73,21 @@ public class AutocutCommandHandler {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) {
+    private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) { // TODO: probably move to new thread
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
             assert AutocutClient.currentRecordingManager == null; // TODO: Error handling
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.start.success"));
+            AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.start.success"));
             try {
                 AutocutClient.currentRecordingManager = new RecordingManager();
             } catch (SQLException | IOException e) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.start.fail").setStyle(styleHoverException(e)));
+                AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.start.fail").setStyle(styleHoverException(e)));
             }
         } else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.end.success"));
+                AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.end.success"));
                 if (AutocutClient.currentRecordingManager == null) {
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.recording.end.fail.notStarted")); // TODO: Check at connect and warn
+                    AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.end.fail.notStarted")); // TODO: Check at connect and warn
                 } else {
                     AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
                 }

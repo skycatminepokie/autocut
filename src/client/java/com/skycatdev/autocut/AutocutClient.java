@@ -6,6 +6,7 @@ import com.skycatdev.autocut.clips.UseItemClip;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 
 public class AutocutClient implements ClientModInitializer {
+    public static final QueuedMessageHandler QUEUED_MESSAGE_HANDLER = new QueuedMessageHandler();
     @Nullable public static OBSRemoteController controller = null;
     @Nullable public static RecordingManager currentRecordingManager = null;
 
@@ -56,6 +58,8 @@ public class AutocutClient implements ClientModInitializer {
             }
             return TypedActionResult.pass(ItemStack.EMPTY);
         });
+        ClientTickEvents.START_CLIENT_TICK.register(QUEUED_MESSAGE_HANDLER);
 
     }
+
 }

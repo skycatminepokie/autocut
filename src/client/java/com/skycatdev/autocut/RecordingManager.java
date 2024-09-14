@@ -10,7 +10,6 @@ import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
@@ -309,20 +308,20 @@ public class RecordingManager {
                     final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips));
 
                     @Override
-                    public void progress(Progress progress) { // TODO: Chat messages are inconsistent, probably threading
+                    public void progress(Progress progress) {
                         if (progress.isEnd()) {
-                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.cutting.finish"));
+                            AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.cutting.finish"));
                         } else {
                             double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
                             if (percentDone < 0) {
                                 return;
                             }
-                            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone)));
+                            AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone)));
                         }
 
                     }
                 });
-                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.translatable("autocut.cutting.start"));
+                AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.cutting.start"));
                 job.run();
             } catch (IOException e) {
                 throw new RuntimeException(e);
