@@ -1,17 +1,19 @@
 Cut videos based on your gameplay!
 
 ## Usage
-1. Open OBS
-2. In OBS, go to Tools -> WebSocket Server Settings
-3. Enable web server
-4. Under Tools -> WebSocket Server Settings, go to Connection Information and copy the password
-5. In game, run `/autocut connect <password here>`
-6. Start Recording in OBS
-7. Do fun gameplay stuff
-8. Stop Recording in OBS
-9. (optional) Delete clips you don't want (see the [wiki](https://github.com/skycatminepokie/autocut/wiki/Database-structure))
-10. Run `/autocut finish`
-11. When it's finished a new video starting with `cut` will be in your recordings folder.
+1. Install [FFmpeg](https://ffmpeg.org/download.html)
+2. Install [OBS](https://obsproject.com/download)
+3. Open OBS
+4. In OBS, go to Tools -> WebSocket Server Settings
+5. Enable web server
+6. Under Tools -> WebSocket Server Settings, go to Connection Information and copy the password
+7. In game, run `/autocut connect <password here>`
+8. Start Recording in OBS
+9. Do fun gameplay stuff
+10. Stop Recording in OBS
+11. (optional) Delete clips you don't want (see the [wiki](https://github.com/skycatminepokie/autocut/wiki/Database-structure))
+12. Run `/autocut finish`
+13. When it's finished a new video starting with `cut` will be in your recordings folder.
 
 You can also optionally run `/autocut finish "path/to/database"` to cut an old video. This will fail if the original video is moved or deleted.
 
