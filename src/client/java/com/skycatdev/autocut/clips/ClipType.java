@@ -1,6 +1,5 @@
 package com.skycatdev.autocut.clips;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.datagen.AutocutEnglishLangProvider;
@@ -11,6 +10,7 @@ import dev.isxander.yacl3.api.controller.LongFieldControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A type of {@link Clip} to be recorded.
@@ -58,16 +58,41 @@ public abstract class ClipType {
      */
     private final long endOffsetDefault;
 
-    public ClipType(Identifier id, boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault) {
+    public ClipType(Identifier id, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault, @Nullable JsonObject json) {
         this.id = id;
-        this.active = active;
-        this.shouldRecord = shouldRecord;
-        this.startOffset = startOffset;
-        this.endOffset = endOffset;
         this.activeDefault = activeDefault;
         this.shouldRecordDefault = shouldRecordDefault;
         this.startOffsetDefault = startOffsetDefault;
         this.endOffsetDefault = endOffsetDefault;
+        deserialize(json);
+    }
+
+    /**
+     * Deserializes the type from json. Make sure to override this when adding your own config options:
+     * <pre>
+     *     {@code
+     *     super.deserialize(json);
+     *     if (json == null) {
+     *         this.myOption = this.myOptionDefault;
+     *     } else {
+     *         this.myOption = json.getAsJsonPrimitive(KEY).getAsBoolean();
+     *     }
+     *     }
+     * </pre>
+     * @param json The {@link JsonObject} representing this type.
+     */
+    public void deserialize(@Nullable JsonObject json) {
+        if (json == null) {
+            this.active = activeDefault;
+            this.shouldRecord = shouldRecordDefault;
+            this.startOffset = startOffsetDefault;
+            this.endOffset = endOffsetDefault;
+        } else {
+            this.active = json.getAsJsonPrimitive(ACTIVE.toString()).getAsBoolean();
+            this.shouldRecord = json.getAsJsonPrimitive(SHOULD_RECORD.toString()).getAsBoolean();
+            this.startOffset = json.getAsJsonPrimitive(START_OFFSET.toString()).getAsLong();
+            this.endOffset = json.getAsJsonPrimitive(END_OFFSET.toString()).getAsLong();
+        }
     }
 
     /**
@@ -163,7 +188,7 @@ public abstract class ClipType {
      *     }
      * </pre>
      */
-    public JsonElement serialize() {
+    public JsonObject serialize() {
         JsonObject json = new JsonObject();
         json.addProperty(SHOULD_RECORD.toString(), shouldRecord());
         json.addProperty(ACTIVE.toString(), isActive());
