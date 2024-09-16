@@ -8,7 +8,7 @@ import net.minecraft.registry.RegistryWrapper;
 import java.util.concurrent.CompletableFuture;
 
 public class AutocutEnglishLangProvider extends FabricLanguageProvider {
-    protected static final String YACL_PREFIX = "configurable." + Autocut.MOD_ID + ".yacl";
+    public static final String YACL_PREFIX = "configurable." + Autocut.MOD_ID + ".yacl";
 
     protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
         super(dataGenerator, "en_us", registryLookup);
