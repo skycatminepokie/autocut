@@ -12,6 +12,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
+/**
+ * A clip created by the user breaking a block
+ */
 public class BreakBlockClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "break_block");
     public static final Codec<BreakBlockClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, BreakBlockClipType::new));

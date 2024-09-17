@@ -8,7 +8,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-
+/**
+ * A clip created by attempting to attack an entity.
+ */
 public class AttackEntityClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "attack_entity");
     public static final Codec<AttackEntityClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, AttackEntityClipType::new));
