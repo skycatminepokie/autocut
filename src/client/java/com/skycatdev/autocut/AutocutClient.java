@@ -17,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 
+import static com.skycatdev.autocut.clips.ClipTypes.BREAK_BLOCK;
+
 public class AutocutClient implements ClientModInitializer {
     public static final QueuedMessageHandler QUEUED_MESSAGE_HANDLER = new QueuedMessageHandler();
     @Nullable public static OBSRemoteController controller = null;
@@ -29,7 +31,7 @@ public class AutocutClient implements ClientModInitializer {
             if (currentRecordingManager != null && BreakBlockClip.shouldRecord) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingManager.addClip(new BreakBlockClip(time, player, pos, state));
+                    currentRecordingManager.addClip(BREAK_BLOCK.createClip(time, player, pos, state));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store block break event", e);
                 }
