@@ -33,6 +33,7 @@ public class ClipTypes {
     public static final Registry<Codec<? extends ClipType>> CODEC_REGISTRY = new SimpleRegistry<>(RegistryKey.ofRegistry(CODEC_REGISTRY_ID), Lifecycle.stable());
     public static final BreakBlockClipType BREAK_BLOCK = registerClipType(BreakBlockClipType.ID, BreakBlockClipType.CODEC, BreakBlockClipType::new);
     public static final AttackEntityClipType ATTACK_ENTITY = registerClipType(AttackEntityClipType.ID, AttackEntityClipType.CODEC, AttackEntityClipType::new);
+    public static final DeathClipType DEATH = registerClipType(DeathClipType.ID, DeathClipType.CODEC, DeathClipType::new);
 
     /**
      * Adds the default fields to a {@code Codec<ClipType>}. Magic I cooked up with the help of Linguardium. Usage:
