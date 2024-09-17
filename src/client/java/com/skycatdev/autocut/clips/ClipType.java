@@ -58,13 +58,16 @@ public abstract class ClipType {
      */
     private final long endOffsetDefault;
 
-    public ClipType(Identifier id, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault, @Nullable JsonObject json) {
+    public ClipType(Identifier id, boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault) {
         this.id = id;
+        this.active = active;
+        this.shouldRecord = shouldRecord;
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
         this.activeDefault = activeDefault;
         this.shouldRecordDefault = shouldRecordDefault;
         this.startOffsetDefault = startOffsetDefault;
         this.endOffsetDefault = endOffsetDefault;
-        deserialize(json);
     }
 
     /**

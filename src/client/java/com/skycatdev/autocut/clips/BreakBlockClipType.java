@@ -1,5 +1,7 @@
 package com.skycatdev.autocut.clips;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.datagen.AutocutEnglishLangProvider;
 import dev.isxander.yacl3.api.OptionDescription;
@@ -13,8 +15,12 @@ import net.minecraft.util.math.Vec3d;
 
 public class BreakBlockClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "break_block");
+    public static final Codec<BreakBlockClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, BreakBlockClipType::new));
+    public BreakBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
+        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    }
     public BreakBlockClipType() {
-        super(ID, true, true, 100, 100, null);
+        super(ID, true, true, 100, 100, true, true, 100, 100);
     }
 
     @Override
