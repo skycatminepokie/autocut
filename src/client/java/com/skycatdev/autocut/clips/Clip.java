@@ -64,6 +64,15 @@ public class Clip {
         return String.format("between(%s\\,%f\\,%f)", variable, inSecs, outSecs);
     }
 
+    /**
+     * Converts the clip to a range for FFmpeg's trim filter.
+     * @param startTime The time the recording started at
+     * @return A range for FFmpeg's trim filter
+     */
+    public String toTrimRange(long startTime) {
+        return String.format("%dms:%dms", in - startTime, out - startTime);
+    }
+
     public static long totalDuration(Collection<Clip> clips) {
         long duration = 0;
         for (Clip clip : clips) {

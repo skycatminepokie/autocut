@@ -245,26 +245,26 @@ public class RecordingManager {
         filter.deleteOnExit();
         try (PrintWriter pw = new PrintWriter(filter)) {
 
-            String between = mergedClips.getFirst().toBetweenStatement("t", startTime);
+            String range = mergedClips.getFirst().toTrimRange(startTime);
             if (mergedClips.size() == 1) {
                 //noinspection SpellCheckingInspection
-                pw.printf("[0:v]select=%s,setpts=PTS-STARTPTS[outv];[0:a]aselect=%s,asetpts=PTS-STARTPTS[outa]", between, between);
+                pw.printf("[0:v]trim=%s,setpts=PTS-STARTPTS[outv];[0:a]atrim=%s,asetpts=PTS-STARTPTS[outa]", range, range);
             } else {
                 // First clip
                 String videoIn = "[0:v]";
                 String audioIn = "[0:a]";
                 //noinspection SpellCheckingInspection
-                pw.printf("%sselect=%s,setpts=PTS-STARTPTS%s;", videoIn, between, "[0v]");
+                pw.printf("%strim=%s,setpts=PTS-STARTPTS%s;", videoIn, range, "[0v]");
                 //noinspection SpellCheckingInspection
-                pw.printf("%saselect=%s,asetpts=PTS-STARTPTS%s", audioIn, between, "[0a]");
+                pw.printf("%satrim=%s,asetpts=PTS-STARTPTS%s", audioIn, range, "[0a]");
 
                 // Clips 2 thru n
                 for (int i = 1; i < mergedClips.size(); i++) {
-                    between = mergedClips.get(i).toBetweenStatement("t", startTime);
+                    range = mergedClips.get(i).toTrimRange(startTime);
                     //noinspection SpellCheckingInspection
-                    pw.printf(";%sselect=%s,setpts=PTS-STARTPTS[%dv]", videoIn, between, i);
+                    pw.printf(";%strim=%s,setpts=PTS-STARTPTS[%dv]", videoIn, range, i);
                     //noinspection SpellCheckingInspection
-                    pw.printf(";%saselect=%s,asetpts=PTS-STARTPTS[%da]", audioIn, between, i);
+                    pw.printf(";%satrim=%s,asetpts=PTS-STARTPTS[%da]", audioIn, range, i);
                 }
 
                 // Concat

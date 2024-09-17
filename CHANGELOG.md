@@ -1,4 +1,1 @@
-- Added an API for adding more clip types
-- Removed dependency on Configurable
-- Require YACL
-- Old configs will be lost!
+- Updated FFmpeg filters to use `trim` instead of `select`, exporting will likely be faster overall and takes less time to prep.
