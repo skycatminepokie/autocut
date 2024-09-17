@@ -18,6 +18,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
     public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder tb) {
         tb.add(YACL_PREFIX + ".category.clips", "Clips");
         tb.add(YACL_PREFIX + ".category.clips.tooltip", "Configure how sections of video are saved. Note that these settings only apply for future clips.");
+        tb.add("autocut.yacl.title", "Autocut configuration menu");
 
         addOptionGroup("place_block_clip", "Place block", "When you place a block", tb);
         addOptionGroup("shoot_player_clip", "Shoot player", "When you shoot a player. Note that some servers will \"fake\" this in order to play the sound that comes with it. On Hypixel, you'll notice this when you join a game. You can filter these out if you like - it seems to only happen when you're at x=8.5, z=8.5.", tb);

@@ -33,6 +33,7 @@
   "autocut.yacl.take_damage_clip.damage_precision": "Damage precision",
   "autocut.yacl.take_damage_clip.damage_precision.description": "How many decimal points of precision to record damage at.",
   "autocut.yacl.take_damage_clip.description": "Whenever you take damage from any source.",
+  "autocut.yacl.title": "Autocut configuration menu",
   "autocut.yacl.use_item_clip": "Use item",
   "autocut.yacl.use_item_clip.description": "When you use (right-click with) an item. This happens at the beginning of the click, and so it is not guaranteed to include the whole click if the button is held."
 }
