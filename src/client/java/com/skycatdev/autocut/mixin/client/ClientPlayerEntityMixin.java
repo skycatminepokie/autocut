@@ -4,12 +4,13 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.AutocutClient;
-import com.skycatdev.autocut.clips.TakeDamageClip;
 import net.minecraft.client.network.ClientPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 import java.sql.SQLException;
+
+import static com.skycatdev.autocut.clips.ClipTypes.TAKE_DAMAGE;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin {
@@ -19,8 +20,8 @@ public abstract class ClientPlayerEntityMixin {
         if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
-                if (player != null && TakeDamageClip.shouldRecord) {
-                    AutocutClient.currentRecordingManager.addClip(new TakeDamageClip(time, player, healthDifference));
+                if (player != null && TAKE_DAMAGE.shouldRecord()) {
+                    AutocutClient.currentRecordingManager.addClip(TAKE_DAMAGE.createClip(time, player, healthDifference));
                 }
             } catch (SQLException e) {
                 Autocut.LOGGER.warn("Unable to store take damage event", e);
