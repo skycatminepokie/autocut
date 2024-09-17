@@ -27,7 +27,7 @@ You can also optionally run `/autocut finish "path/to/database"` to cut an old v
 - Requires [Fabric API](https://modrinth.com/mod/fabric-api), used under [Apache 2.0](https://github.com/FabricMC/fabric/blob/1.21.1/LICENSE)
 - Requires [Fabric Loader](https://github.com/FabricMC/fabric-loader) 0.15.11 or later, used under [Apache 2.0](https://github.com/FabricMC/fabric-loader/blob/master/LICENSE)
 - Requires [YACL](https://modrinth.com/mod/yacl) 3.5.0+1.21-fabric or later, used under [LGPL 3.0 or later](https://github.com/isXander/YetAnotherConfigLib/blob/multiversion/dev/LICENSE)
-- Optionally integrates with [ModMenu](https://modrinth.com/mod/modmenu) 11.0.2 or later, used under [MIT](https://github.com/TerraformersMC/ModMenu/blob/1.21/LICENSE)
+- Optionally integrates with [Mod Menu](https://modrinth.com/mod/modmenu) 11.0.2 or later, used under [MIT](https://github.com/TerraformersMC/ModMenu/blob/1.21/LICENSE)
 
 ## Licensing
 ...is a mess.
@@ -58,3 +58,4 @@ It also requires a few other things, which are NOT included in the jar
   - There's no NOTICE file
 - YACL is used under LGPL 3.0 or greater
   - Covered by the LICENSE.lgpl and LICENSE.gpl from FFmpeg
+- Mod Menu is used under MIT
