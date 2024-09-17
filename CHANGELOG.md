@@ -1,0 +1,4 @@
+- Added an API for adding more clip types
+- Removed dependency on Configurable
+- Require YACL
+- Old configs will be lost!

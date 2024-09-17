@@ -25,9 +25,9 @@ You can also optionally run `/autocut finish "path/to/database"` to cut an old v
 - Includes [FFmpeg CLI Wrapper for Java](https://github.com/bramp/ffmpeg-cli-wrapper), used under [BSD 2-Clause "Simplified"](https://github.com/bramp/ffmpeg-cli-wrapper/blob/master/LICENCE)
 - Requires [FFmpeg](https://ffmpeg.org), used under [LGPL v2.1+](https://git.ffmpeg.org/gitweb/ffmpeg.git/blob/HEAD:/LICENSE.md)
 - Requires [Fabric API](https://modrinth.com/mod/fabric-api), used under [Apache 2.0](https://github.com/FabricMC/fabric/blob/1.21.1/LICENSE)
-- Requires [Fabric Loader](https://github.com/FabricMC/fabric-loader) 0.15.11 or greater, used under [Apache 2.0](https://github.com/FabricMC/fabric-loader/blob/master/LICENSE)
-- Requires [Configurable](https://modrinth.com/mod/configurable) 1.1.0+1.21.1 or greater, used under [MIT](https://modrinth.com/mod/configurable)
-- Optionally integrates with [YACL](https://modrinth.com/mod/yacl) 3.5.0+1.21-fabric or greater, used under [LGPL 3.0 or later](https://github.com/isXander/YetAnotherConfigLib/blob/multiversion/dev/LICENSE)
+- Requires [Fabric Loader](https://github.com/FabricMC/fabric-loader) 0.15.11 or later, used under [Apache 2.0](https://github.com/FabricMC/fabric-loader/blob/master/LICENSE)
+- Requires [YACL](https://modrinth.com/mod/yacl) 3.5.0+1.21-fabric or later, used under [LGPL 3.0 or later](https://github.com/isXander/YetAnotherConfigLib/blob/multiversion/dev/LICENSE)
+- Optionally integrates with [ModMenu](https://modrinth.com/mod/modmenu) 11.0.2 or later, used under [MIT](https://github.com/TerraformersMC/ModMenu/blob/1.21/LICENSE)
 
 ## Licensing
 ...is a mess.
@@ -56,6 +56,5 @@ It also requires a few other things, which are NOT included in the jar
   - There's no NOTICE file
 - Fabric Loader is used under Apache 2.0
   - There's no NOTICE file
-- Configurable is used under MIT
 - YACL is used under LGPL 3.0 or greater
   - Covered by the LICENSE.lgpl and LICENSE.gpl from FFmpeg
