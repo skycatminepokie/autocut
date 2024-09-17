@@ -26,12 +26,13 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class ClipTypes {
-    public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("autocut");
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("autocut");
     public static final Identifier TYPE_REGISTRY_ID = Identifier.of(Autocut.MOD_ID, "clip_types");
     public static final Identifier CODEC_REGISTRY_ID = Identifier.of(Autocut.MOD_ID, "clip_type_codecs");
     public static final Registry<ClipType> TYPE_REGISTRY = new SimpleRegistry<>(RegistryKey.ofRegistry(TYPE_REGISTRY_ID), Lifecycle.stable());
     public static final Registry<Codec<? extends ClipType>> CODEC_REGISTRY = new SimpleRegistry<>(RegistryKey.ofRegistry(CODEC_REGISTRY_ID), Lifecycle.stable());
     public static final BreakBlockClipType BREAK_BLOCK = registerClipType(BreakBlockClipType.ID, BreakBlockClipType.CODEC, BreakBlockClipType::new);
+    public static final AttackEntityClipType ATTACK_ENTITY = registerClipType(AttackEntityClipType.ID, AttackEntityClipType.CODEC, AttackEntityClipType::new);
 
     /**
      * Adds the default fields to a {@code Codec<ClipType>}. Magic I cooked up with the help of Linguardium. Usage:

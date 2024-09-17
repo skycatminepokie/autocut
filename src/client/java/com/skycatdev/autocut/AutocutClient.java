@@ -1,7 +1,7 @@
 package com.skycatdev.autocut;
 
-import com.skycatdev.autocut.clips.AttackEntityClip;
 import com.skycatdev.autocut.clips.BreakBlockClip;
+import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.clips.UseItemClip;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 
+import static com.skycatdev.autocut.clips.ClipTypes.ATTACK_ENTITY;
 import static com.skycatdev.autocut.clips.ClipTypes.BREAK_BLOCK;
 
 public class AutocutClient implements ClientModInitializer {
@@ -38,10 +39,10 @@ public class AutocutClient implements ClientModInitializer {
             }
         }));
         AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-            if (currentRecordingManager != null && entity != null && AttackEntityClip.shouldRecord) {
+            if (currentRecordingManager != null && entity != null && ClipTypes.ATTACK_ENTITY.shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingManager.addClip(new AttackEntityClip(time, player, entity));
+                    currentRecordingManager.addClip(ATTACK_ENTITY.createClip(time, player, entity));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store entity attack event", e);
                 }
