@@ -25,6 +25,9 @@
 		],
 		"fabric-datagen": [
 			"com.skycatdev.autocut.datagen.AutocutDataGenerator"
+		],
+		"modmenu": [
+			"com.skycatdev.autocut.ModMenuCompat"
 		]
 	},
 	"mixins": [
@@ -39,10 +42,9 @@
 		"minecraft": "1.21.1",
 		"java": ">=21",
 		"fabric-api": ">=0.104.0+1.21.1",
-		"configurable": ">=1.1.2+1.21.1"
+		"yet_another_config_lib_v3": ">=3.5.0+1.21-fabric"
 	},
 	"recommends": {
-		"yet_another_config_lib_v3": ">=3.5.0+1.21-fabric",
 		"modmenu": ">=11.0.2"
 	}
 }

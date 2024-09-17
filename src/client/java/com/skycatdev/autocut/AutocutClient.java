@@ -1,8 +1,6 @@
 package com.skycatdev.autocut;
 
-import com.skycatdev.autocut.clips.AttackEntityClip;
-import com.skycatdev.autocut.clips.BreakBlockClip;
-import com.skycatdev.autocut.clips.UseItemClip;
+import com.skycatdev.autocut.clips.ClipTypes;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -17,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 
+import static com.skycatdev.autocut.clips.ClipTypes.*;
+
 public class AutocutClient implements ClientModInitializer {
     public static final QueuedMessageHandler QUEUED_MESSAGE_HANDLER = new QueuedMessageHandler();
     @Nullable public static OBSRemoteController controller = null;
@@ -26,20 +26,20 @@ public class AutocutClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
         ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-            if (currentRecordingManager != null && BreakBlockClip.shouldRecord) {
+            if (currentRecordingManager != null && BREAK_BLOCK.shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingManager.addClip(new BreakBlockClip(time, player, pos, state));
+                    currentRecordingManager.addClip(BREAK_BLOCK.createClip(time, player, pos, state));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store block break event", e);
                 }
             }
         }));
         AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-            if (currentRecordingManager != null && entity != null && AttackEntityClip.shouldRecord) {
+            if (currentRecordingManager != null && entity != null && ClipTypes.ATTACK_ENTITY.shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingManager.addClip(new AttackEntityClip(time, player, entity));
+                    currentRecordingManager.addClip(ATTACK_ENTITY.createClip(time, player, entity));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store entity attack event", e);
                 }
@@ -47,11 +47,11 @@ public class AutocutClient implements ClientModInitializer {
             return ActionResult.PASS;
         }));
         UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (currentRecordingManager != null && UseItemClip.shouldRecord) {
+            if (currentRecordingManager != null && USE_ITEM.shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
                     ItemStack itemStack = player.getStackInHand(hand);
-                    currentRecordingManager.addClip(new UseItemClip(time, player, itemStack));
+                    currentRecordingManager.addClip(USE_ITEM.createClip(time, player, itemStack));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store use item event", e);
                 }
