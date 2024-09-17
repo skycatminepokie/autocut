@@ -1,7 +1,5 @@
 package com.skycatdev.autocut.clips;
 
-import com.google.gson.JsonObject;
-import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.datagen.AutocutEnglishLangProvider;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
@@ -10,17 +8,12 @@ import dev.isxander.yacl3.api.controller.LongFieldControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * A type of {@link Clip} to be recorded.
  * Every implementation of this should have a way to create a clip based on related data.
  */
 public abstract class ClipType {
-    public static final Identifier START_OFFSET = Identifier.of(Autocut.MOD_ID, "start_offset");
-    public static final Identifier END_OFFSET = Identifier.of(Autocut.MOD_ID, "end_offset");
-    public static final Identifier SHOULD_RECORD = Identifier.of(Autocut.MOD_ID, "should_record");
-    public static final Identifier ACTIVE = Identifier.of(Autocut.MOD_ID, "active");
     /**
      * The {@link Identifier} stored with clips of this type in the database.
      */
@@ -71,34 +64,6 @@ public abstract class ClipType {
     }
 
     /**
-     * Deserializes the type from json. Make sure to override this when adding your own config options:
-     * <pre>
-     *     {@code
-     *     super.deserialize(json);
-     *     if (json == null) {
-     *         this.myOption = this.myOptionDefault;
-     *     } else {
-     *         this.myOption = json.getAsJsonPrimitive(KEY).getAsBoolean();
-     *     }
-     *     }
-     * </pre>
-     * @param json The {@link JsonObject} representing this type.
-     */
-    public void deserialize(@Nullable JsonObject json) {
-        if (json == null) {
-            this.active = activeDefault;
-            this.shouldRecord = shouldRecordDefault;
-            this.startOffset = startOffsetDefault;
-            this.endOffset = endOffsetDefault;
-        } else {
-            this.active = json.getAsJsonPrimitive(ACTIVE.toString()).getAsBoolean();
-            this.shouldRecord = json.getAsJsonPrimitive(SHOULD_RECORD.toString()).getAsBoolean();
-            this.startOffset = json.getAsJsonPrimitive(START_OFFSET.toString()).getAsLong();
-            this.endOffset = json.getAsJsonPrimitive(END_OFFSET.toString()).getAsLong();
-        }
-    }
-
-    /**
      * Builds the YACL option group for this type. You should not need to touch this.
      */
     public OptionGroup buildOptionGroup() {
@@ -120,29 +85,29 @@ public abstract class ClipType {
      */
     public void addOptions(OptionGroup.Builder builder) {
         builder.option(Option.<Boolean>createBuilder()
-                .name(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.should_record"))
+                .name(Text.translatable("autocut.yacl.generic.should_record"))
                 .description(OptionDescription.of(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.should_record.description")))
                 .binding(shouldRecordDefault, this::shouldRecord, this::setShouldRecord)
                 .controller(TickBoxControllerBuilder::create)
                 .build()
         );
         builder.option(Option.<Boolean>createBuilder()
-                .name(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.active"))
+                .name(Text.translatable("autocut.yacl.generic.active"))
                 .description(OptionDescription.of(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.active.description")))
                 .binding(activeDefault, this::isActive, this::setActive)
                 .controller(TickBoxControllerBuilder::create)
                 .build()
         );
         builder.option(Option.<Long>createBuilder()
-                .name(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.start_offset"))
-                .description(OptionDescription.of(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.start_offset.description")))
+                .name(Text.translatable("autocut.yacl.generic.start_offset"))
+                .description(OptionDescription.of(Text.translatable("autocut.yacl.generic.start_offset.description")))
                 .binding(startOffsetDefault, this::getStartOffset, this::setStartOffset)
                 .controller(LongFieldControllerBuilder::create)
                 .build()
         );
         builder.option(Option.<Long>createBuilder()
-                .name(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.end_offset"))
-                .description(OptionDescription.of(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + ".generic.end_offset.description")))
+                .name(Text.translatable("autocut.yacl.generic.end_offset"))
+                .description(OptionDescription.of(Text.translatable("autocut.yacl.generic.end_offset.description")))
                 .binding(endOffsetDefault, this::getEndOffset, this::setEndOffset)
                 .controller(LongFieldControllerBuilder::create)
                 .build()
@@ -179,25 +144,6 @@ public abstract class ClipType {
 
     public void setActive(boolean active) {
         this.active = active;
-    }
-
-    /**
-     * Serializes the configuration for this type. Override this if you want to add your own options.
-     * <pre>
-     *     {@code
-     *     var json = super.serialize();
-     *     json.addProperty(Identifier.of(MyMod.MOD_ID, "my_option"), getMyOption());
-     *     return json;
-     *     }
-     * </pre>
-     */
-    public JsonObject serialize() {
-        JsonObject json = new JsonObject();
-        json.addProperty(SHOULD_RECORD.toString(), shouldRecord());
-        json.addProperty(ACTIVE.toString(), isActive());
-        json.addProperty(START_OFFSET.toString(), getStartOffset());
-        json.addProperty(END_OFFSET.toString(), getEndOffset());
-        return json;
     }
 
     public void setShouldRecord(boolean shouldRecord) {

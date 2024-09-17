@@ -3,7 +3,6 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
-import com.skycatdev.autocut.datagen.AutocutEnglishLangProvider;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -25,12 +24,12 @@ public class BreakBlockClipType extends ClipType {
 
     @Override
     public OptionDescription getOptionGroupDescription() {
-        return OptionDescription.of(Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + "break_block_clip.description"));
+        return OptionDescription.of(Text.translatable("autocut.yacl.break_block_clip.description"));
     }
 
     @Override
     public Text getOptionGroupName() {
-        return Text.translatable(AutocutEnglishLangProvider.YACL_PREFIX + "break_block_clip");
+        return Text.translatable("autocut.yacl.break_block_clip");
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, BlockPos pos, BlockState state) {
