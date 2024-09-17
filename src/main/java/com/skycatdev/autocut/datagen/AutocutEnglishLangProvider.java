@@ -31,7 +31,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOption("generic.end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
         addOption("generic.should_record", "Enable recording", "Whether this event should be recorded.", tb);
         addOption("generic.active", "Active", "Whether this event should be exported in the final recording.", tb);
-        addOption("damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
+        addOption("take_damage_clip.damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
 
         addText("recording.connect.success", "OBS connected.", tb);
         addText("recording.start.success", "Recording started.", tb);

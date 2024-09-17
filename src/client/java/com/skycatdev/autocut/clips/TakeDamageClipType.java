@@ -3,7 +3,10 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.OptionGroup;
+import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -34,6 +37,18 @@ public class TakeDamageClipType extends ClipType {
     @Override
     public OptionDescription getOptionGroupDescription() {
         return OptionDescription.of(Text.translatable("autocut.yacl.take_damage_clip.description"));
+    }
+
+    @Override
+    public void addOptions(OptionGroup.Builder builder) {
+        super.addOptions(builder);
+        builder.option(Option.<Integer>createBuilder()
+                .name(Text.translatable("autocut.yacl.take_damage_clip.damage_precision"))
+                .description(OptionDescription.of(Text.translatable("autocut.yacl.take_damage_clip.damage_precision.description")))
+                .binding(precision, this::getPrecision, this::setPrecision)
+                .controller(IntegerFieldControllerBuilder::create)
+                .build()
+        );
     }
 
     @Override

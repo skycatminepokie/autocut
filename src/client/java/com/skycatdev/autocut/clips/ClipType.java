@@ -77,7 +77,7 @@ public abstract class ClipType {
      * Creates the YACL options for this type. Override this if you want to add your own options.
      * <pre>
      *     {@code
-     *     super.buildOptions();
+     *     super.addOptions();
      *     builder.option(myOption);
      *     builder.option(myOtherOption);
      *     }
