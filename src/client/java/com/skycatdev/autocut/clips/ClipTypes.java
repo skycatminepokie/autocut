@@ -35,6 +35,7 @@ public class ClipTypes {
     public static final AttackEntityClipType ATTACK_ENTITY = registerClipType(AttackEntityClipType.ID, AttackEntityClipType.CODEC, AttackEntityClipType::new);
     public static final DeathClipType DEATH = registerClipType(DeathClipType.ID, DeathClipType.CODEC, DeathClipType::new);
     public static final PlaceBlockClipType PLACE_BLOCK = registerClipType(PlaceBlockClipType.ID, PlaceBlockClipType.CODEC, PlaceBlockClipType::new);
+    public static final ShootPlayerClipType SHOOT_PLAYER = registerClipType(ShootPlayerClipType.ID, ShootPlayerClipType.CODEC, ShootPlayerClipType::new);
 
     /**
      * Adds the default fields to a {@code Codec<ClipType>}. Magic I cooked up with the help of Linguardium. Usage:
