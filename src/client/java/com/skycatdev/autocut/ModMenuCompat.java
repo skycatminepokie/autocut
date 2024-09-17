@@ -15,7 +15,7 @@ public class ModMenuCompat implements ModMenuApi {
                 .tooltip(Text.translatable("autocut.yacl.category.clips.tooltip"));
         ClipTypes.TYPE_REGISTRY.forEach((clipType) -> clipsCategory.group(clipType.buildOptionGroup()));
         return parent -> YetAnotherConfigLib.createBuilder()
-                .title(Text.of("Autocut configuration menu"))
+                .title(Text.of("Autocut configuration menu")) // TODO: localize
                 .category(clipsCategory.build())
                 .build().generateScreen(parent);
     }

@@ -1,6 +1,5 @@
 package com.skycatdev.autocut;
 
-import com.skycatdev.autocut.clips.BreakBlockClip;
 import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.clips.UseItemClip;
 import io.obswebsocket.community.client.OBSRemoteController;
@@ -29,7 +28,7 @@ public class AutocutClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
         ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-            if (currentRecordingManager != null && BreakBlockClip.shouldRecord) {
+            if (currentRecordingManager != null && BREAK_BLOCK.shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
                     currentRecordingManager.addClip(BREAK_BLOCK.createClip(time, player, pos, state));
