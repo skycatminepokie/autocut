@@ -25,6 +25,9 @@
 		],
 		"fabric-datagen": [
 			"com.skycatdev.autocut.datagen.AutocutDataGenerator"
+		],
+		"modmenu": [
+			"com.skycatdev.autocut.ModMenuCompat"
 		]
 	},
 	"mixins": [
