@@ -1,7 +1,6 @@
 package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.clips.ClipTypes;
-import com.skycatdev.autocut.clips.UseItemClip;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -16,8 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 
-import static com.skycatdev.autocut.clips.ClipTypes.ATTACK_ENTITY;
-import static com.skycatdev.autocut.clips.ClipTypes.BREAK_BLOCK;
+import static com.skycatdev.autocut.clips.ClipTypes.*;
 
 public class AutocutClient implements ClientModInitializer {
     public static final QueuedMessageHandler QUEUED_MESSAGE_HANDLER = new QueuedMessageHandler();
@@ -49,11 +47,11 @@ public class AutocutClient implements ClientModInitializer {
             return ActionResult.PASS;
         }));
         UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (currentRecordingManager != null && UseItemClip.shouldRecord) {
+            if (currentRecordingManager != null && USE_ITEM.shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
                     ItemStack itemStack = player.getStackInHand(hand);
-                    currentRecordingManager.addClip(new UseItemClip(time, player, itemStack));
+                    currentRecordingManager.addClip(USE_ITEM.createClip(time, player, itemStack));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store use item event", e);
                 }
