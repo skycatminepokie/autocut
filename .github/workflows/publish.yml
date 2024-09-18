@@ -61,6 +61,10 @@ jobs:
       - name: Publish
         uses: Kir-Antipov/mc-publish@v3.3
         with:
+          files: |
+            build/libs/!(*-@(dev|sources|javadoc|all)).jar 
+            build/libs/*-@(dev|sources|javadoc).jar
+
           version-type: ${{ env.VERSION_TYPE }}
 
           modrinth-id: DZJzhD8k
