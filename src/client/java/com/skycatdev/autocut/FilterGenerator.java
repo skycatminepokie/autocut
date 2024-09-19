@@ -66,34 +66,12 @@ public class FilterGenerator {
 
             String range = mergedClips.getFirst().toTrimRange(startTime);
             int numberOfClips = mergedClips.size();
-            if (numberOfClips == 1) {
-                // Why is it written like this? Because we need to avoid both a leading and a trailing ';', so we need this logic for starting it properly.
-                if (videoStreams > 0) { // At least one video stream
-                    pw.print(videoFilter(0, 0, range, 0));
-                    for (int v = 1; v < videoStreams; v++) {
-                        pw.print(';');
-                        pw.print(videoFilter(0, v, range, 0));
-                    }
-                    for (int a = 0; a < audioStreams; a++) {
-                        pw.print(';');
-                        pw.print(audioFilter(0, a, range, 0));
-                    }
-                } else { // No video, audio is going to be our first
-                    if (audioStreams > 0) {
-                        pw.print(audioFilter(0, 0, range, 0));
-                        for (int a = 1; a < audioStreams; a++) {
-                            pw.print(';');
-                            pw.print(audioFilter(0, a, range, 0));
-                        }
-                    } else {
-                        throw new IllegalArgumentException("Can't handle zero audio and zero video streams.");
-                    }
-                }
-            } else { // Multiple clips
-                for (int i = 0; i < numberOfClips; i++) { // For each clip
+            writeFirstClip(videoStreams, pw, range, audioStreams);
+            if (numberOfClips != 1) { // Multiple clips
+                for (int i = 1; i < numberOfClips; i++) { // For each clip
                     range = mergedClips.get(i).toTrimRange(startTime);
                     for (int v = 0; v < videoStreams; v++) { // For each video stream
-                        pw.print(v == 0 && i == 0 ? "" : ";"); // Just don't print the first ;. Maybe inefficent, but it's cleaner. I'm ok if someone wants to fix this xd
+                        pw.print(';');
                         pw.print(videoFilter(0, v, range, i));
                     }
                     for (int a = 0; a < audioStreams; a++) { // For each audio stream
@@ -105,6 +83,31 @@ public class FilterGenerator {
             writeConcatAllClips(videoStreams, pw, numberOfClips, audioStreams);
         }
         return filter;
+    }
+
+    private static void writeFirstClip(int videoStreams, PrintWriter pw, String range, int audioStreams) {
+        // Why is it written like this? Because we need to avoid both a leading and a trailing ';', so we need this logic for starting it properly.
+        if (videoStreams > 0) { // At least one video stream
+            pw.print(videoFilter(0, 0, range, 0));
+            for (int v = 1; v < videoStreams; v++) {
+                pw.print(';');
+                pw.print(videoFilter(0, v, range, 0));
+            }
+            for (int a = 0; a < audioStreams; a++) {
+                pw.print(';');
+                pw.print(audioFilter(0, a, range, 0));
+            }
+        } else { // No video, audio is going to be our first
+            if (audioStreams > 0) {
+                pw.print(audioFilter(0, 0, range, 0));
+                for (int a = 1; a < audioStreams; a++) {
+                    pw.print(';');
+                    pw.print(audioFilter(0, a, range, 0));
+                }
+            } else {
+                throw new IllegalArgumentException("Can't handle zero audio and zero video streams.");
+            }
+        }
     }
 
     private static void writeConcatAllClips(int videoStreams, PrintWriter pw, int clips, int audioStreams) {
