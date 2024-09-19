@@ -6,16 +6,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import io.obswebsocket.community.client.OBSRemoteController;
-import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
@@ -23,27 +18,13 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class AutocutCommandHandler {
 
-    public static final int DEFAULT_PORT = 4455;
-    public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
-    public static final String DEFAULT_HOST = "localhost";
     // Exceptions are in the form of COMMAND_PATH_REASON_EXCEPTION
     private static final SimpleCommandExceptionType FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION = new SimpleCommandExceptionType(() -> Text.stringifiedTranslatable("autocut.command.autocut.finish.database.fail.databaseDoesNotExist").getString());
     private static final SimpleCommandExceptionType FINISH_NO_RECORDING_EXCEPTION = new SimpleCommandExceptionType(() -> Text.stringifiedTranslatable("autocut.command.autocut.finish.fail.noRecording").getString());
 
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) {
         String password = StringArgumentType.getString(context, "password");
-        AutocutClient.controller = OBSRemoteController.builder()
-                .host(DEFAULT_HOST)
-                .port(DEFAULT_PORT)
-                .password(password)
-                .connectionTimeout(DEFAULT_CONNECTION_TIMEOUT)
-                .lifecycle()
-                .onReady(() -> context.getSource().sendFeedback(Text.translatable("autocut.recording.connect.success")))
-                .and()
-                .autoConnect(true)
-                .registerEventListener(RecordStateChangedEvent.class, AutocutCommandHandler::onRecordEventChanged)
-                .build();
-        //controller.connect();
+        new Thread(() -> OBSHandler.createConnection(password), "Autocut OBS Connection Thread").start();
         return 1;
     }
 
@@ -71,32 +52,6 @@ public class AutocutCommandHandler {
             throw new RuntimeException(e);
         }
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) { // TODO: probably move to new thread
-        // Looks like output path is null if stopping or starting, but is not null when stopped or started
-        if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
-            assert AutocutClient.currentRecordingManager == null; // TODO: Error handling
-            AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.start.success"));
-            try {
-                AutocutClient.currentRecordingManager = new RecordingManager();
-            } catch (SQLException | IOException e) {
-                AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.start.fail").setStyle(styleHoverException(e)));
-            }
-        } else {
-            if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
-                AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.end.success"));
-                if (AutocutClient.currentRecordingManager == null) {
-                    AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.recording.end.fail.notStarted")); // TODO: Check at connect and warn
-                } else {
-                    AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
-                }
-            }
-        }
-    }
-
-    private static Style styleHoverException(Exception e) {
-        return Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of(e.getLocalizedMessage())));
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess ignoredCommandRegistryAccess) {

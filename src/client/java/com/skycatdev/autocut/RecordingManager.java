@@ -252,7 +252,7 @@ public class RecordingManager {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
+        }, "Autocut FFmpeg Export Thread").start();
     }
 
     public LinkedList<Clip> getActiveClips() throws SQLException {
@@ -344,7 +344,7 @@ public class RecordingManager {
         }
     }
 
-    public void onRecordingEnded(String outputPath) {
+    public void onRecordingEnded(String outputPath) { // Not on client thread
         this.outputPath = outputPath;
         try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META_TABLE))) {
             statement.setString(1, META_KEY_OUTPUT_PATH);

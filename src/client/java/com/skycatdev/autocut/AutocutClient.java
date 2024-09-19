@@ -59,7 +59,6 @@ public class AutocutClient implements ClientModInitializer {
             return TypedActionResult.pass(ItemStack.EMPTY);
         });
         ClientTickEvents.START_CLIENT_TICK.register(QUEUED_MESSAGE_HANDLER);
-
     }
 
 }
