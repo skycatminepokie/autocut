@@ -6,6 +6,7 @@
   "autocut.cutting.start": "Preparing to cut...",
   "autocut.recording.connect.success": "OBS connected.",
   "autocut.recording.end.fail.notStarted": "Warning: Recording was not started in autocut - no recording is saved.",
+  "autocut.recording.end.fail.sqlException": "Failed to save metadata for recording (SQLException)",
   "autocut.recording.end.success": "Recording ended.",
   "autocut.recording.start.fail": "Failed to start autocut",
   "autocut.recording.start.success": "Recording started.",
