@@ -26,20 +26,20 @@ public class AutocutClient implements ClientModInitializer {
     public void onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
         ClientPlayerBlockBreakEvents.AFTER.register(((world, player, pos, state) -> {
-            if (currentRecordingManager != null && BREAK_BLOCK.shouldRecord()) {
+            if (currentRecordingManager != null && BREAK_BLOCK.clipType().shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingManager.addClip(BREAK_BLOCK.createClip(time, player, pos, state));
+                    currentRecordingManager.addClip(BREAK_BLOCK.clipType().createClip(time, player, pos, state));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store block break event", e);
                 }
             }
         }));
         AttackEntityCallback.EVENT.register(((player, world, hand, entity, hitResult) -> {
-            if (currentRecordingManager != null && entity != null && ClipTypes.ATTACK_ENTITY.shouldRecord()) {
+            if (currentRecordingManager != null && entity != null && ClipTypes.ATTACK_ENTITY.clipType().shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
-                    currentRecordingManager.addClip(ATTACK_ENTITY.createClip(time, player, entity));
+                    currentRecordingManager.addClip(ATTACK_ENTITY.clipType().createClip(time, player, entity));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store entity attack event", e);
                 }
@@ -47,11 +47,11 @@ public class AutocutClient implements ClientModInitializer {
             return ActionResult.PASS;
         }));
         UseItemCallback.EVENT.register((player, world, hand) -> {
-            if (currentRecordingManager != null && USE_ITEM.shouldRecord()) {
+            if (currentRecordingManager != null && USE_ITEM.clipType().shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
                     ItemStack itemStack = player.getStackInHand(hand);
-                    currentRecordingManager.addClip(USE_ITEM.createClip(time, player, itemStack));
+                    currentRecordingManager.addClip(USE_ITEM.clipType().createClip(time, player, itemStack));
                 } catch (SQLException e) {
                     Autocut.LOGGER.warn("Unable to store use item event", e);
                 }
