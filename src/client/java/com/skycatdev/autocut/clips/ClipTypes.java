@@ -65,6 +65,7 @@ public class ClipTypes {
         return CONFIG_PATH.resolve(typeId.getNamespace()).resolve(typeId.getPath() + ".json");
     }
 
+    @SuppressWarnings("unused") // I want it around just in case
     private static <T extends ClipType> T readClipType(Identifier typeId, Codec<T> typeCodec) {
         File configFile = configPathForId(typeId).toFile();
         return readClipType(typeId, typeCodec, configFile);
