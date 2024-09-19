@@ -46,5 +46,14 @@
 	},
 	"recommends": {
 		"modmenu": ">=11.0.2"
+	},
+	"custom":{
+		"mc-publish": {
+			"dependencies": [
+				"fabric-api(required)",
+				"yet_another_config_lib_v3(required){modrinth:yacl}",
+				"modmenu(recommended)"
+			]
+		}
 	}
 }
