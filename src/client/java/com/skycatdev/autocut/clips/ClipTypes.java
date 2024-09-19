@@ -117,7 +117,7 @@ public class ClipTypes {
         saveClipType(clipTypeEntry.codec(), clipTypeEntry.clipType(), configFile);
     }
 
-    public static <T extends ClipType> void saveAllClipTypes() {
+    public static void saveAllClipTypes() {
         CLIP_TYPE_REGISTRY.forEach(ClipTypes::saveClipType);
     }
 
