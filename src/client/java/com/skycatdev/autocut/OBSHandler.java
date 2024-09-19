@@ -47,7 +47,11 @@ public class OBSHandler { // All this is likely on a thread other than the main 
                 if (AutocutClient.currentRecordingManager == null) {
                     sendMessageOnClientThread(client, Text.translatable("autocut.recording.end.fail.notStarted")); // TODO: Check at connect and warn
                 } else {
-                    AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
+                    try {
+                        AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
+                    } catch (SQLException e) {
+                        sendMessageOnClientThread(client, Text.translatable("autocut.recording.end.fail.sqlException").setStyle(styleHoverException(e)));
+                    }
                 }
             }
         }

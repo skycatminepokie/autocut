@@ -344,14 +344,12 @@ public class RecordingManager {
         }
     }
 
-    public void onRecordingEnded(String outputPath) { // Not on client thread
+    public void onRecordingEnded(String outputPath) throws SQLException { // Not on client thread
         this.outputPath = outputPath;
         try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META_TABLE))) {
             statement.setString(1, META_KEY_OUTPUT_PATH);
             statement.setString(2, outputPath);
             statement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e); // TODO: error handling
         }
     }
 }
