@@ -35,8 +35,7 @@ public class FilterGenerator {
      * @return A new temporary file containing the filter
      * @throws IOException If there's problems with the file
      */
-    @SuppressWarnings("SpellCheckingInspection") // Stop flagging my ffmpeg filters ty
-    protected static File buildComplexFilter(long startTime, Collection<Clip> clips, FFmpegProbeResult probeResult) throws IOException { // TODO: currently only handles one audio track
+    protected static File buildComplexFilter(long startTime, Collection<Clip> clips, FFmpegProbeResult probeResult) throws IOException {
         if (clips.isEmpty()) {
             throw new IllegalArgumentException("clips.isEmpty(), cannot build a (meaningful) filter out of no clips.");
         }
