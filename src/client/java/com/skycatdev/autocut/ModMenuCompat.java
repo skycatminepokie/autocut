@@ -13,10 +13,11 @@ public class ModMenuCompat implements ModMenuApi {
         ConfigCategory.Builder clipsCategory = ConfigCategory.createBuilder()
                 .name(Text.translatable("autocut.yacl.category.clips"))
                 .tooltip(Text.translatable("autocut.yacl.category.clips.tooltip"));
-        ClipTypes.TYPE_REGISTRY.forEach((clipType) -> clipsCategory.group(clipType.buildOptionGroup()));
+        ClipTypes.CLIP_TYPE_REGISTRY.forEach((clipType) -> clipsCategory.group(clipType.clipType().buildOptionGroup()));
         return parent -> YetAnotherConfigLib.createBuilder()
                 .title(Text.translatable("autocut.yacl.title"))
                 .category(clipsCategory.build())
+                .save(ClipTypes::saveAllClipTypes)
                 .build().generateScreen(parent);
     }
 }

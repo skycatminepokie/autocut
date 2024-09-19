@@ -35,8 +35,8 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
             long time = System.currentTimeMillis();
             try {
                 ClientPlayerEntity player = client.player;
-                if (player != null && SHOOT_PLAYER.shouldRecord()) {
-                    AutocutClient.currentRecordingManager.addClip(SHOOT_PLAYER.createClip(time, player));
+                if (player != null && SHOOT_PLAYER.clipType().shouldRecord()) {
+                    AutocutClient.currentRecordingManager.addClip(SHOOT_PLAYER.clipType().createClip(time, player));
                 }
             } catch (SQLException e) {
                 Autocut.LOGGER.warn("Unable to store player shot event", e);
@@ -50,8 +50,8 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
             long time = System.currentTimeMillis();
             try {
                 ClientPlayerEntity player = client.player;
-                if (player != null && DEATH.shouldRecord()) {
-                    AutocutClient.currentRecordingManager.addClip(DEATH.createClip(time, player, packet.message()));
+                if (player != null && DEATH.clipType().shouldRecord()) {
+                    AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.message()));
                 }
             } catch (SQLException e) {
                 Autocut.LOGGER.warn("Unable to store player death event", e);

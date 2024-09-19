@@ -27,17 +27,15 @@ import java.util.function.Supplier;
 
 public class ClipTypes {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("autocut");
-    public static final Identifier TYPE_REGISTRY_ID = Identifier.of(Autocut.MOD_ID, "clip_types");
-    public static final Identifier CODEC_REGISTRY_ID = Identifier.of(Autocut.MOD_ID, "clip_type_codecs");
-    public static final Registry<ClipType> TYPE_REGISTRY = new SimpleRegistry<>(RegistryKey.ofRegistry(TYPE_REGISTRY_ID), Lifecycle.stable());
-    public static final Registry<Codec<? extends ClipType>> CODEC_REGISTRY = new SimpleRegistry<>(RegistryKey.ofRegistry(CODEC_REGISTRY_ID), Lifecycle.stable());
-    public static final BreakBlockClipType BREAK_BLOCK = registerClipType(BreakBlockClipType.ID, BreakBlockClipType.CODEC, BreakBlockClipType::new);
-    public static final AttackEntityClipType ATTACK_ENTITY = registerClipType(AttackEntityClipType.ID, AttackEntityClipType.CODEC, AttackEntityClipType::new);
-    public static final DeathClipType DEATH = registerClipType(DeathClipType.ID, DeathClipType.CODEC, DeathClipType::new);
-    public static final PlaceBlockClipType PLACE_BLOCK = registerClipType(PlaceBlockClipType.ID, PlaceBlockClipType.CODEC, PlaceBlockClipType::new);
-    public static final ShootPlayerClipType SHOOT_PLAYER = registerClipType(ShootPlayerClipType.ID, ShootPlayerClipType.CODEC, ShootPlayerClipType::new);
-    public static final TakeDamageClipType TAKE_DAMAGE = registerClipType(TakeDamageClipType.ID, TakeDamageClipType.CODEC, TakeDamageClipType::new);
-    public static final UseItemClipType USE_ITEM = registerClipType(UseItemClipType.ID, UseItemClipType.CODEC, UseItemClipType::new);
+    public static final Identifier CLIP_TYPE_REGISTRY_ID = Identifier.of(Autocut.MOD_ID, "clip_types");
+    public static final Registry<ClipTypeEntry<?>> CLIP_TYPE_REGISTRY = new SimpleRegistry<>(RegistryKey.ofRegistry(CLIP_TYPE_REGISTRY_ID), Lifecycle.stable());
+    public static final ClipTypeEntry<BreakBlockClipType> BREAK_BLOCK = registerClipType(BreakBlockClipType.ID, BreakBlockClipType.CODEC, BreakBlockClipType::new);
+    public static final ClipTypeEntry<AttackEntityClipType> ATTACK_ENTITY = registerClipType(AttackEntityClipType.ID, AttackEntityClipType.CODEC, AttackEntityClipType::new);
+    public static final ClipTypeEntry<DeathClipType> DEATH = registerClipType(DeathClipType.ID, DeathClipType.CODEC, DeathClipType::new);
+    public static final ClipTypeEntry<PlaceBlockClipType> PLACE_BLOCK = registerClipType(PlaceBlockClipType.ID, PlaceBlockClipType.CODEC, PlaceBlockClipType::new);
+    public static final ClipTypeEntry<ShootPlayerClipType> SHOOT_PLAYER = registerClipType(ShootPlayerClipType.ID, ShootPlayerClipType.CODEC, ShootPlayerClipType::new);
+    public static final ClipTypeEntry<TakeDamageClipType> TAKE_DAMAGE = registerClipType(TakeDamageClipType.ID, TakeDamageClipType.CODEC, TakeDamageClipType::new);
+    public static final ClipTypeEntry<UseItemClipType> USE_ITEM = registerClipType(UseItemClipType.ID, UseItemClipType.CODEC, UseItemClipType::new);
 
     /**
      * Adds the default fields to a {@code Codec<ClipType>}. Magic I cooked up with the help of Linguardium. Usage:
@@ -92,7 +90,7 @@ public class ClipTypes {
      * @param defaultSupplier A {@link Supplier} to get a default {@link T}.
      * @return {@code typeCodec}
      */
-    public static <T extends ClipType> T registerClipType(Identifier typeId, Codec<T> typeCodec, Supplier<T> defaultSupplier) {
+    public static <T extends ClipType> ClipTypeEntry<T> registerClipType(Identifier typeId, Codec<T> typeCodec, Supplier<T> defaultSupplier) {
         T clipType;
         Path configPath = configPathForId(typeId);
         File configFile = configPath.toFile();
@@ -110,14 +108,17 @@ public class ClipTypes {
         } else {
             clipType = readClipType(typeId, typeCodec, configFile);
         }
-        Registry.register(CODEC_REGISTRY, typeId, typeCodec);
-        return Registry.register(TYPE_REGISTRY, typeId, clipType);
+        return Registry.register(CLIP_TYPE_REGISTRY, typeId, new ClipTypeEntry<>(typeCodec, clipType));
     }
 
-    private static <T extends ClipType> void saveClipType(Codec<T> typeCodec, T clipType) {
-        Identifier typeId = clipType.getId();
+    private static <T extends ClipType> void saveClipType(ClipTypeEntry<T> clipTypeEntry) {
+        Identifier typeId = clipTypeEntry.clipType().getId();
         File configFile = configPathForId(typeId).toFile();
-        saveClipType(typeCodec, clipType, configFile);
+        saveClipType(clipTypeEntry.codec(), clipTypeEntry.clipType(), configFile);
+    }
+
+    public static <T extends ClipType> void saveAllClipTypes() {
+        CLIP_TYPE_REGISTRY.forEach(ClipTypes::saveClipType);
     }
 
     private static <T extends ClipType> void saveClipType(Codec<T> typeCodec, T clipType, File configFile) {

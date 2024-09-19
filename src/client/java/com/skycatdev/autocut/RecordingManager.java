@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.sql.*;
 import java.time.Instant;
@@ -139,29 +138,6 @@ public class RecordingManager {
         return new RecordingManager(startTime, database, outputPath);
     }
 
-    /**
-     * Sort and merge all overlapping clips together.
-     *
-     * @param clips The clips to merge together.
-     * @return A new ArrayList of merged clips.
-     */
-    protected static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
-        ArrayList<Clip> mergedClips = new ArrayList<>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
-        int i = 0;
-        while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
-            Clip current = mergedClips.get(i);
-            Clip next = mergedClips.get(i + 1);
-            if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL).build(); // Take the union
-                mergedClips.set(i, newClip); // Replace the current
-                mergedClips.remove(i + 1); // Yeet the next, it's been combined
-                continue; // And check this clip for union with the next
-            }
-            i++; // This clip has no overlap, try the next one
-        }
-        return mergedClips;
-    }
-
     protected static PreparedStatement prepareClipStatement(Clip clip, Connection connection) throws SQLException {
         List<Object> rowValues = new LinkedList<>();
         // Required
@@ -230,56 +206,6 @@ public class RecordingManager {
     }
 
     /**
-     * Builds a filter that keeps and concatenates only the clips given.
-     *
-     * @param clips The clips to keep. Must not be empty.
-     * @return A new temporary file containing the filter
-     * @throws IOException If there's problems with the file
-     */
-    protected File buildComplexFilter(Collection<Clip> clips) throws IOException { // TODO: currently only handles one audio track
-        if (clips.isEmpty()) {
-            throw new IllegalArgumentException("clips.isEmpty(), cannot build a (meaningful) filter out of no clips.");
-        }
-        var mergedClips = mergeClips(clips);
-        File filter = File.createTempFile("autocutComplexFilter", null);
-        filter.deleteOnExit();
-        try (PrintWriter pw = new PrintWriter(filter)) {
-
-            String range = mergedClips.getFirst().toTrimRange(startTime);
-            if (mergedClips.size() == 1) {
-                //noinspection SpellCheckingInspection
-                pw.printf("[0:v]trim=%s,setpts=PTS-STARTPTS[outv];[0:a]atrim=%s,asetpts=PTS-STARTPTS[outa]", range, range);
-            } else {
-                // First clip
-                String videoIn = "[0:v]";
-                String audioIn = "[0:a]";
-                //noinspection SpellCheckingInspection
-                pw.printf("%strim=%s,setpts=PTS-STARTPTS%s;", videoIn, range, "[0v]");
-                //noinspection SpellCheckingInspection
-                pw.printf("%satrim=%s,asetpts=PTS-STARTPTS%s", audioIn, range, "[0a]");
-
-                // Clips 2 thru n
-                for (int i = 1; i < mergedClips.size(); i++) {
-                    range = mergedClips.get(i).toTrimRange(startTime);
-                    //noinspection SpellCheckingInspection
-                    pw.printf(";%strim=%s,setpts=PTS-STARTPTS[%dv]", videoIn, range, i);
-                    //noinspection SpellCheckingInspection
-                    pw.printf(";%satrim=%s,asetpts=PTS-STARTPTS[%da]", audioIn, range, i);
-                }
-
-                // Concat
-                pw.print(';');
-                for (int i = 0; i < mergedClips.size(); i++) { // List all the inputs
-                    pw.printf("[%dv][%da]", i, i);
-                }
-                //noinspection SpellCheckingInspection
-                pw.printf("concat=n=%d:v=1:a=1[outv][outa]", mergedClips.size());
-            }
-        }
-        return filter;
-    }
-
-    /**
      * Export all clips in the recording with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
      */
     public void export() throws SQLException {
@@ -297,7 +223,7 @@ public class RecordingManager {
                 FFmpegProbeResult in = ffprobe.probe(outputPath);
 
                 @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
-                        .addExtraArgs("-/filter_complex", buildComplexFilter(clips).getAbsolutePath())
+                        .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, clips, in).getAbsolutePath())
                         .setInput(in)
                         .addOutput(export.getAbsolutePath())
                         .addExtraArgs("-map", "[outv]", "-map", "[outa]")
