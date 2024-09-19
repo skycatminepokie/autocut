@@ -4,11 +4,11 @@ plugins {
 	id 'com.gradleup.shadow' version '8.3.0'
 }
 
-version = project.mod_version
-group = project.maven_group
+version = property("mod.id").toString()
+group = property("mod.group").toString()
 
 base {
-	archivesName = project.archives_base_name
+	archivesName = property("mod.name").toString()
 }
 
 repositories {
@@ -45,20 +45,20 @@ fabricApi {
 
 dependencies {
 	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	minecraft "com.mojang:minecraft:${property('deps.minecraft')}"
+	mappings "net.fabricmc:yarn:${property('deps.yarn_mappings')}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${property('deps.fabric_loader')}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	shadow implementation("io.obs-websocket.community:client:${project.obs_websocket_version}") {
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${property('deps.fabric_api')}"
+	shadow implementation("io.obs-websocket.community:client:${property('deps.obs_websocket_version')}") {
 		exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
-	include implementation("org.xerial:sqlite-jdbc:${project.sqlite_jdbc_version}")
-	shadow implementation("net.bramp.ffmpeg:ffmpeg:${project.ffmpeg_cli_wrapper_version}")
-	modImplementation("dev.isxander:yet-another-config-lib:${project.yacl_version}")
-	modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-	modRuntimeOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+	include implementation("org.xerial:sqlite-jdbc:${property('deps.sqlite_jdbc_version')}")
+	shadow implementation("net.bramp.ffmpeg:ffmpeg:${property('deps.ffmpeg_cli_wrapper_version')}")
+	modImplementation("dev.isxander:yet-another-config-lib:${property('deps.yacl_version')}")
+	modCompileOnly("com.terraformersmc:modmenu:${property('deps.modmenu_version')}")
+	modRuntimeOnly("com.terraformersmc:modmenu:${property('deps.modmenu_version')}")
 }
 
 shadowJar {
@@ -106,7 +106,7 @@ jar {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
+			artifactId = property("mod.name").toString()
 			from components.java
 		}
 	}
@@ -117,5 +117,12 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+	}
+}
+
+if (stonecutter.current.isActive) {
+	rootProject.tasks.register("buildActive") {
+		group = "project"
+		dependsOn(tasks.named("build"))
 	}
 }
