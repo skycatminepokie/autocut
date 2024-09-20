@@ -9,6 +9,7 @@ plugins {
 version = property("mod.id").toString()
 group = property("mod.group").toString()
 
+
 base {
 	archivesName = property("mod.name").toString()
 }
@@ -95,6 +96,8 @@ def mcVersion = stonecutter.current.version
 def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
 def fullVersion = version + "+" + mcVersion
 
+stonecutter.dependency("java", javaVersion.toString())
+
 processResources { // I don't know gradle enough to get the ModData class working. I tried defining it, but then property is in the wrong scope.
 	inputs.property("id", id)
 	inputs.property("name", name)
@@ -122,7 +125,7 @@ processResources { // I don't know gradle enough to get the ModData class workin
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = stonecutter.eval(mcVersion, ">=1.20.5") ? 21 : 17
 }
 
 java {
