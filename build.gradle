@@ -9,6 +9,20 @@ plugins {
 version = property("mod_id").toString()
 group = property("mod_group").toString()
 
+def id = property("mod_id").toString()
+def mod_name = property("mod_name").toString()
+def mod_version = property("mod_version").toString()
+def yacl = property("deps.yacl_version").toString()
+def fabric_api = property("deps.fabric_api").toString()
+def modmenu = property("deps.modmenu_version").toString()
+def supported_minecraft = property("supported_minecraft").toString()
+
+
+def mcVersion = stonecutter.current.version
+def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
+def fullVersion = mod_version + "+" + mcVersion
+
+stonecutter.dependency("java", javaVersion.toString())
 
 base {
 	archivesName = property("mod_name").toString()
@@ -83,25 +97,9 @@ remapJar {
 	inputFile = file(shadowJar.archivePath)
 }
 
-
-def id = property("mod_id").toString()
-def name = property("mod_name").toString()
-def version = property("mod_version").toString()
-def yacl = property("deps.yacl_version").toString()
-def fabric_api = property("deps.fabric_api").toString()
-def modmenu = property("deps.modmenu_version").toString()
-def supported_minecraft = property("supported_minecraft").toString()
-
-
-def mcVersion = stonecutter.current.version
-def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
-def fullVersion = version + "+" + mcVersion
-
-stonecutter.dependency("java", javaVersion.toString())
-
 processResources { // I don't know gradle enough to get the ModData class working. I tried defining it, but then property is in the wrong scope.
 	inputs.property("id", id)
-	inputs.property("name", name)
+	inputs.property("name", mod_name)
 	inputs.property("version", fullVersion)
 	inputs.property("supported_minecraft", supported_minecraft)
 	inputs.property("yacl_version", yacl)
@@ -111,7 +109,7 @@ processResources { // I don't know gradle enough to get the ModData class workin
 
 	def map = [
 	        "id": id,
-			"name": name,
+			"name": mod_name,
 			"version": fullVersion,
 			"supported_minecraft": supported_minecraft,
 			"yacl_version": yacl,
@@ -174,7 +172,7 @@ tasks.register('buildAndCollect', Copy) {
 	group = "build"
 	from(tasks.remapJar.archiveFile)
 	rename ("Autocut-(.*).jar", '$1' + "-${fullVersion}.jar") // A bit of a hack but it works
-	into(rootProject.layout.buildDirectory.file("libs/${version}"))
+	into(rootProject.layout.buildDirectory.file("libs/${mod_version}"))
 }
 
 publishMods {
@@ -182,7 +180,7 @@ publishMods {
 	modLoaders.add("fabric")
 	changelog = new File('CHANGELOG.md').text
 	type = STABLE
-	displayName = "${name} v${version} for Minecraft ${mcVersion}"
+	displayName = "${mod_name} v${mod_version} for Minecraft ${mcVersion}"
 	dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
 	/*github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
