@@ -170,21 +170,3 @@ tasks.register('buildAndCollect', Copy) {
 	from(tasks.remapJar.archiveFile)
 	into(rootProject.layout.buildDirectory.file("libs/${version}"))
 }
-
-publishMods {
-	file = remapJar.archiveFile
-	modLoaders.add("fabric")
-	changelog = new File('CHANGELOG.md').text
-	type = STABLE
-	displayName = "${name} v${version}+${mcVersion}"
-
-	github {
-		accessToken = providers.environmentVariable("GITHUB_TOKEN")
-		repository = "skycatminepokie/autocut"
-		commitish = "main"
-		print("TAG NAME: \"")
-		print("v${fullVersion}")
-		print("\"")
-		tagName = "v${fullVersion}"
-	}
-}
