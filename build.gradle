@@ -90,6 +90,7 @@ def version = property("mod.version").toString()
 def yacl = property("deps.yacl_version").toString()
 def fabric_api = property("deps.fabric_api").toString()
 def modmenu = property("deps.modmenu_version").toString()
+def supported_minecraft = property("mod.supported_minecraft").toString()
 
 
 def mcVersion = stonecutter.current.version
@@ -102,7 +103,7 @@ processResources { // I don't know gradle enough to get the ModData class workin
 	inputs.property("id", id)
 	inputs.property("name", name)
 	inputs.property("version", fullVersion)
-	inputs.property("mc_version", mcVersion)
+	inputs.property("supported_minecraft", supported_minecraft)
 	inputs.property("yacl_version", yacl)
 	inputs.property("fabric_api_version", fabric_api)
 	inputs.property("modmenu_version", modmenu)
@@ -112,7 +113,7 @@ processResources { // I don't know gradle enough to get the ModData class workin
 	        "id": id,
 			"name": name,
 			"version": fullVersion,
-			"mc_version": mcVersion,
+			"supported_minecraft": supported_minecraft,
 			"yacl_version": yacl,
 			"fabric_api_version": fabric_api,
 			"modmenu_version": modmenu,
