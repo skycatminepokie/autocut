@@ -3,6 +3,7 @@ plugins {
 	id 'maven-publish'
 	id 'com.gradleup.shadow' version '8.3.0'
 	id "dev.kikugie.j52j" version "1.0"
+	id "me.modmuss50.mod-publish-plugin" version "0.7.4"
 }
 
 version = property("mod.id").toString()
@@ -91,11 +92,12 @@ def modmenu = property("deps.modmenu_version").toString()
 
 def mcVersion = stonecutter.current.version
 def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
+def fullVersion = version + "+" + mcVersion
 
 processResources { // I don't know gradle enough to get the ModData class working. I tried defining it, but then property is in the wrong scope.
 	inputs.property("id", id)
 	inputs.property("name", name)
-	inputs.property("version", version)
+	inputs.property("version", fullVersion)
 	inputs.property("mc_version", mcVersion)
 	inputs.property("yacl_version", yacl)
 	inputs.property("fabric_api_version", fabric_api)
@@ -105,7 +107,7 @@ processResources { // I don't know gradle enough to get the ModData class workin
 	def map = [
 	        "id": id,
 			"name": name,
-			"version": version,
+			"version": fullVersion,
 			"mc_version": mcVersion,
 			"yacl_version": yacl,
 			"fabric_api_version": fabric_api,
@@ -167,4 +169,22 @@ tasks.register('buildAndCollect', Copy) {
 	group = "build"
 	from(tasks.remapJar.archiveFile)
 	into(rootProject.layout.buildDirectory.file("libs/${version}"))
+}
+
+publishMods {
+	file = remapJar.archiveFile
+	modLoaders.add("fabric")
+	changelog = new File('CHANGELOG.md').text
+	type = STABLE
+	displayName = "${name} v${version}+${mcVersion}"
+
+	github {
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		repository = "skycatminepokie/autocut"
+		commitish = "main"
+		print("TAG NAME: \"")
+		print("v${fullVersion}")
+		print("\"")
+		tagName = "v${fullVersion}"
+	}
 }
