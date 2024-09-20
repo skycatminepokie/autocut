@@ -15,7 +15,6 @@ def mod_version = property("mod_version").toString()
 def yacl = property("deps.yacl_version").toString()
 def fabric_api = property("deps.fabric_api").toString()
 def modmenu = property("deps.modmenu_version").toString()
-def supported_minecraft = property("supported_minecraft").toString()
 
 
 def mcVersion = stonecutter.current.version
@@ -101,7 +100,8 @@ processResources { // I don't know gradle enough to get the ModData class workin
 	inputs.property("id", id)
 	inputs.property("name", mod_name)
 	inputs.property("version", fullVersion)
-	inputs.property("supported_minecraft", supported_minecraft)
+	inputs.property("earliest_minecraft", earliest_minecraft)
+	inputs.property("latest_minecraft", latest_minecraft)
 	inputs.property("yacl_version", yacl)
 	inputs.property("fabric_api_version", fabric_api)
 	inputs.property("modmenu_version", modmenu)
@@ -111,7 +111,8 @@ processResources { // I don't know gradle enough to get the ModData class workin
 	        "id": id,
 			"name": mod_name,
 			"version": fullVersion,
-			"supported_minecraft": supported_minecraft,
+			"earliest_minecraft": earliest_minecraft,
+			"latest_minecraft": latest_minecraft,
 			"yacl_version": yacl,
 			"fabric_api_version": fabric_api,
 			"modmenu_version": modmenu,
@@ -179,9 +180,9 @@ publishMods {
 	file = remapJar.archiveFile
 	modLoaders.add("fabric")
 	changelog = new File('CHANGELOG.md').text
-	type = STABLE
+	type = BETA
 	displayName = "${mod_name} v${mod_version} for Minecraft ${mcVersion}"
-	dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
+	dryRun = providers.environmentVariable("DRY_RUN").getOrElse("true") != "false"
 	/*github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
 		repository = "skycatminepokie/autocut"
@@ -192,7 +193,23 @@ publishMods {
 		tagName = "v${fullVersion}"
 	}*/
 
+	modrinth {
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		projectId = "DZJzhD8k"
+		minecraftVersionRange {
+			start = earliest_minecraft
+			end = latest_minecraft
+		}
+
+		requires("yacl")
+		requires("fabric-api")
+		optional("modmenu")
+		announcementTitle = "Download version ${fullVersion}"
+	}
+
 	discord {
+		username = "Autocut has been updated!" // This was the only way I could get the changelog to be there too
+
 		webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 		dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
 	}
