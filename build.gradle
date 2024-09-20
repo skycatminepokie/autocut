@@ -178,7 +178,7 @@ publishMods {
 	changelog = new File('CHANGELOG.md').text
 	type = STABLE
 	displayName = "${name} v${version} for Minecraft ${mcVersion}"
-
+	dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
 	github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
 		repository = "skycatminepokie/autocut"
@@ -187,5 +187,10 @@ publishMods {
 		print("v${fullVersion}")
 		print("\"")
 		tagName = "v${fullVersion}"
+	}
+
+	discord {
+		webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+		dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
 	}
 }
