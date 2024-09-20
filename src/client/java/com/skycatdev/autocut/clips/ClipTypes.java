@@ -77,7 +77,7 @@ public class ClipTypes {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
             var result = typeCodec.decode(JsonOps.INSTANCE, json);
             // 1.12.1
-            //? if >=1.21.1 {
+            //? if >=1.21 {
             clipType = result.getOrThrow().getFirst();
             //?} else {
             /*clipType = result.getOrThrow(false, (a)-> {throw new RuntimeException(a);}).getFirst();
@@ -131,7 +131,7 @@ public class ClipTypes {
     private static <T extends ClipType> void saveClipType(Codec<T> typeCodec, T clipType, File configFile) {
         var dataResult = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty());
         // 1.12.1
-        //? if >=1.21.1 {
+        //? if >=1.21 {
         JsonElement serialized = dataResult.getOrThrow();
          //?} else {
         /*JsonElement serialized = dataResult.getOrThrow(false, (a)-> {throw new RuntimeException(a);});
