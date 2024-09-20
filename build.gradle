@@ -169,5 +169,29 @@ if (stonecutter.current.isActive) {
 tasks.register('buildAndCollect', Copy) {
 	group = "build"
 	from(tasks.remapJar.archiveFile)
+	rename ("Autocut-(.*).jar", '$1' + "-${fullVersion}.jar") // A bit of a hack but it works
 	into(rootProject.layout.buildDirectory.file("libs/${version}"))
 }
+
+/*publishMods {
+	file = remapJar.archiveFile
+	modLoaders.add("fabric")
+	changelog = new File('CHANGELOG.md').text
+	type = STABLE
+	displayName = "${name} v${version} for Minecraft ${mcVersion}"
+	dryRun = providers.environmentVariable("GITHUB_TOKEN").getOrNull() == null
+	github {
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		repository = "skycatminepokie/autocut"
+		commitish = "main"
+		print("TAG NAME: \"")
+		print("v${fullVersion}")
+		print("\"")
+		tagName = "v${fullVersion}"
+	}
+
+	discord {
+		webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+		dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
+	}
+}*/
