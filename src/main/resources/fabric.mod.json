@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "autocut",
+	"id": "${id}",
 	"version": "${version}",
 	"name": "${name}",
 	"description": "Cut your recordings based on in-game events.",
@@ -41,11 +41,11 @@
 		"fabricloader": ">=0.15.11",
 		"minecraft": "${mc_version}",
 		"java": ">=21",
-		"fabric-api": ">=0.104.0+1.21.1",
-		"yet_another_config_lib_v3": ">=3.5.0+1.21-fabric"
+		"fabric-api": ">=${fabric_api_version}",
+		"yet_another_config_lib_v3": ">=${yacl_version}"
 	},
 	"recommends": {
-		"modmenu": ">=11.0.2"
+		"modmenu": ">=${modmenu_version}"
 	},
 	"custom":{
 		"mc-publish": {

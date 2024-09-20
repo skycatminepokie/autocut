@@ -80,9 +80,12 @@ remapJar {
 }
 
 
-	def id = property("mod.id").toString()
-	def name = property("mod.name").toString()
-	def version = property("mod.version").toString()
+def id = property("mod.id").toString()
+def name = property("mod.name").toString()
+def version = property("mod.version").toString()
+def yacl = property("deps.yacl_version").toString()
+def fabric_api = property("deps.fabric_api").toString()
+def modmenu = property("deps.modmenu_version").toString()
 
 
 def mcVersion = stonecutter.current.version
@@ -92,12 +95,17 @@ processResources {
 	inputs.property("name", name)
 	inputs.property("version", version)
 	inputs.property("mc_version", mcVersion)
+	inputs.property("yacl_version", yacl)
+	inputs.property("fabric_api_version", fabric_api)
+	inputs.property("modmenu_version", modmenu)
 
 	def map = [
 	        "id": id,
 			"name": name,
 			"version": version,
-			"mc_version": mcVersion
+			"mc_version": mcVersion,
+			"yacl_version": yacl,
+			"fabric_api_version": fabric_api
 	]
 
 	filesMatching("fabric.mod.json") {
