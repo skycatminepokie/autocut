@@ -159,3 +159,9 @@ if (stonecutter.current.isActive) {
 		dependsOn(tasks.named("build"))
 	}
 }
+
+tasks.register('buildAndCollect', Copy) {
+	group = "build"
+	from(tasks.remapJar.archiveFile)
+	into(rootProject.layout.buildDirectory.file("libs/${version}"))
+}
