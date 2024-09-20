@@ -10,3 +10,8 @@ stonecutter.registerChiseled tasks.register("chiseledBuildAndCollect", stonecutt
     setGroup "project"
     ofTask "buildAndCollect"
 }
+
+stonecutter.registerChiseled tasks.register("chiseledPublishMods", stonecutter.chiseled) {
+    setGroup "project"
+    ofTask "publishMods"
+}
