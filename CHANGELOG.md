@@ -1,3 +1,1 @@
-- Updated FFmpeg filters to use `trim` instead of `select` - exporting will likely be faster overall and takes less time to prep.
-- Multiple video and audio streams are now supported
-- Fixed settings not saving
+- Game no longer hangs when connecting to OBS

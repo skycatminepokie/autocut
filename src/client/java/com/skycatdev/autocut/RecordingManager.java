@@ -252,7 +252,7 @@ public class RecordingManager {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
+        }, "Autocut FFmpeg Export Thread").start();
     }
 
     public LinkedList<Clip> getActiveClips() throws SQLException {
@@ -263,7 +263,11 @@ public class RecordingManager {
                 ClipBuilder builder = new ClipBuilder(results.getLong(CLIPS_INPOINT_COLUMN),
                         results.getLong(CLIPS_TIMESTAMP_COLUMN),
                         results.getLong(CLIPS_OUTPOINT_COLUMN),
-                        Identifier.of(results.getString(CLIPS_ID_COLUMN)));
+                        //? if >=1.21
+                        Identifier.of(results.getString(CLIPS_ID_COLUMN))
+                        //? if <1.21
+                        /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_ID_COLUMN)))*/
+                );
                 builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));
                 builder.setSource(results.getString(CLIPS_SOURCE_COLUMN));
                 builder.setObject(results.getString(CLIPS_OBJECT_COLUMN));
@@ -344,14 +348,12 @@ public class RecordingManager {
         }
     }
 
-    public void onRecordingEnded(String outputPath) {
+    public void onRecordingEnded(String outputPath) throws SQLException { // Not on client thread
         this.outputPath = outputPath;
         try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META_TABLE))) {
             statement.setString(1, META_KEY_OUTPUT_PATH);
             statement.setString(2, outputPath);
             statement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e); // TODO: error handling
         }
     }
 }

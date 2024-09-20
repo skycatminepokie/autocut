@@ -62,8 +62,10 @@ public class FilterGenerator {
         filter.deleteOnExit();
 
         try (PrintWriter pw = new PrintWriter(filter)) {
-
+            //? if java: >=21
             String range = mergedClips.getFirst().toTrimRange(startTime);
+            //? if java: <21
+            /*String range = mergedClips.get(0).toTrimRange(startTime);*/
             int numberOfClips = mergedClips.size();
             writeFirstClip(videoStreams, pw, range, audioStreams);
             if (numberOfClips != 1) { // Multiple clips

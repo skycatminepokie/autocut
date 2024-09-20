@@ -10,12 +10,22 @@ import java.util.concurrent.CompletableFuture;
 public class AutocutEnglishLangProvider extends FabricLanguageProvider {
     public static final String YACL_PREFIX = Autocut.MOD_ID + ".yacl";
 
+    //? if >=1.20.5 {
     protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
         super(dataGenerator, "en_us", registryLookup);
     }
+    //?} else {
+    /*protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator) {
+        super(dataGenerator, "en_us");
+    }
+    *///?}
 
     @Override
+    //? if >=1.20.5 {
     public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder tb) {
+    //?} else {
+    /*public void generateTranslations(TranslationBuilder tb) {
+    *///?}
         tb.add(YACL_PREFIX + ".category.clips", "Clips");
         tb.add(YACL_PREFIX + ".category.clips.tooltip", "Configure how sections of video are saved. Note that these settings only apply for future clips.");
         tb.add("autocut.yacl.title", "Autocut configuration menu");
@@ -39,6 +49,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("recording.start.fail", "Failed to start autocut", tb);
         addText("recording.end.success", "Recording ended.", tb);
         addText("recording.end.fail.notStarted", "Warning: Recording was not started in autocut - no recording is saved.", tb);
+        addText("recording.end.fail.sqlException", "Failed to save metadata for recording (SQLException)", tb);
         addText("cutting.finish", "Finished cutting!", tb);
         addText("cutting.progress", "Cutting: %s%%", tb);
         addText("cutting.start", "Preparing to cut...", tb);

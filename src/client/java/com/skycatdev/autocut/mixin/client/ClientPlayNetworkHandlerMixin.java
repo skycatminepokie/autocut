@@ -51,7 +51,11 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
             try {
                 ClientPlayerEntity player = client.player;
                 if (player != null && DEATH.clipType().shouldRecord()) {
+                    //? if >=1.20.5
                     AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.message()));
+                    //? if <1.20.5
+                    /*AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.getMessage()));*/
+
                 }
             } catch (SQLException e) {
                 Autocut.LOGGER.warn("Unable to store player death event", e);

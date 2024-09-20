@@ -65,6 +65,7 @@ public class ClipTypes {
         return CONFIG_PATH.resolve(typeId.getNamespace()).resolve(typeId.getPath() + ".json");
     }
 
+    @SuppressWarnings("unused") // I want it around just in case
     private static <T extends ClipType> T readClipType(Identifier typeId, Codec<T> typeCodec) {
         File configFile = configPathForId(typeId).toFile();
         return readClipType(typeId, typeCodec, configFile);
@@ -75,7 +76,13 @@ public class ClipTypes {
         try (FileReader reader = new FileReader(configFile)) {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
             var result = typeCodec.decode(JsonOps.INSTANCE, json);
+            // 1.12.1
+            //? if >=1.21 {
             clipType = result.getOrThrow().getFirst();
+            //?} else {
+            /*clipType = result.getOrThrow(false, (a)-> {throw new RuntimeException(a);}).getFirst();
+            *///?}
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to deserialize clipType of id " + typeId + ". For a quick fix, try deleting the config file " + configFile.getAbsolutePath() + ". You may lose configs.");
         }
@@ -117,12 +124,18 @@ public class ClipTypes {
         saveClipType(clipTypeEntry.codec(), clipTypeEntry.clipType(), configFile);
     }
 
-    public static <T extends ClipType> void saveAllClipTypes() {
+    public static void saveAllClipTypes() {
         CLIP_TYPE_REGISTRY.forEach(ClipTypes::saveClipType);
     }
 
     private static <T extends ClipType> void saveClipType(Codec<T> typeCodec, T clipType, File configFile) {
-        JsonElement serialized = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty()).getOrThrow();
+        var dataResult = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty());
+        // 1.12.1
+        //? if >=1.21 {
+        JsonElement serialized = dataResult.getOrThrow();
+         //?} else {
+        /*JsonElement serialized = dataResult.getOrThrow(false, (a)-> {throw new RuntimeException(a);});
+        *///?}
         try (PrintWriter writer = new PrintWriter(configFile); JsonWriter jsonWriter = new JsonWriter(writer)) {
             Streams.write(serialized, jsonWriter);
         } catch (IOException e) {

@@ -2,13 +2,29 @@ plugins {
 	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.gradleup.shadow' version '8.3.0'
+	id "dev.kikugie.j52j" version "1.0"
+	id "me.modmuss50.mod-publish-plugin" version "0.7.4"
 }
 
-version = project.mod_version
-group = project.maven_group
+version = property("mod_id").toString()
+group = property("mod_group").toString()
+
+def id = property("mod_id").toString()
+def mod_name = property("mod_name").toString()
+def mod_version = property("mod_version").toString()
+def yacl = property("deps.yacl_version").toString()
+def fabric_api = property("deps.fabric_api").toString()
+def modmenu = property("deps.modmenu_version").toString()
+
+
+def mcVersion = stonecutter.current.version
+def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
+def fullVersion = mod_version + "+" + mcVersion
+
+stonecutter.dependency("java", javaVersion.toString())
 
 base {
-	archivesName = project.archives_base_name
+	archivesName = property("mod_name").toString()
 }
 
 repositories {
@@ -37,6 +53,11 @@ loom {
 		}
 	}
 
+	runConfigs.all {
+		ideConfigGenerated true // Run configurations are not created for subprojects by default
+		runDir "../../run" // Use a shared run folder and just create separate worlds
+	}
+
 }
 
 fabricApi {
@@ -45,20 +66,20 @@ fabricApi {
 
 dependencies {
 	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	minecraft "com.mojang:minecraft:${property('deps.minecraft')}"
+	mappings "net.fabricmc:yarn:${property('deps.yarn_mappings')}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${property('deps.fabric_loader')}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	shadow implementation("io.obs-websocket.community:client:${project.obs_websocket_version}") {
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${property('deps.fabric_api')}"
+	shadow implementation("io.obs-websocket.community:client:${property('deps.obs_websocket_version')}") {
 		exclude group: 'org.slf4j', module: 'slf4j-simple'
 	}
-	include implementation("org.xerial:sqlite-jdbc:${project.sqlite_jdbc_version}")
-	shadow implementation("net.bramp.ffmpeg:ffmpeg:${project.ffmpeg_cli_wrapper_version}")
-	modImplementation("dev.isxander:yet-another-config-lib:${project.yacl_version}")
-	modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
-	modRuntimeOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+	include implementation("org.xerial:sqlite-jdbc:${property('deps.sqlite_jdbc_version')}")
+	shadow implementation("net.bramp.ffmpeg:ffmpeg:${property('deps.ffmpeg_cli_wrapper_version')}")
+	modImplementation("dev.isxander:yet-another-config-lib:${property('deps.yacl_version')}")
+	modCompileOnly("com.terraformersmc:modmenu:${property('deps.modmenu_version')}")
+	modRuntimeOnly("com.terraformersmc:modmenu:${property('deps.modmenu_version')}")
 }
 
 shadowJar {
@@ -66,6 +87,7 @@ shadowJar {
 	from sourceSets.client.output
 	configurations = [project.configurations.shadow]
 	//exclude("META-INF")
+	minimize()
 }
 
 remapJar {
@@ -74,16 +96,36 @@ remapJar {
 	inputFile = file(shadowJar.archivePath)
 }
 
-processResources {
-	inputs.property "version", project.version
+processResources { // I don't know gradle enough to get the ModData class working. I tried defining it, but then property is in the wrong scope.
+	inputs.property("id", id)
+	inputs.property("name", mod_name)
+	inputs.property("version", fullVersion)
+	inputs.property("earliest_minecraft", earliest_minecraft)
+	inputs.property("latest_minecraft", latest_minecraft)
+	inputs.property("yacl_version", yacl)
+	inputs.property("fabric_api_version", fabric_api)
+	inputs.property("modmenu_version", modmenu)
+	inputs.property("java_version", javaVersion)
+
+	def map = [
+	        "id": id,
+			"name": mod_name,
+			"version": fullVersion,
+			"earliest_minecraft": earliest_minecraft,
+			"latest_minecraft": latest_minecraft,
+			"yacl_version": yacl,
+			"fabric_api_version": fabric_api,
+			"modmenu_version": modmenu,
+			"java_version": javaVersion
+	]
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand(map)
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = stonecutter.eval(mcVersion, ">=1.20.5") ? 21 : 17
 }
 
 java {
@@ -92,8 +134,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = javaVersion
+	targetCompatibility = javaVersion
 }
 
 jar {
@@ -106,7 +148,7 @@ jar {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
+			artifactId = property("mod_name").toString()
 			from components.java
 		}
 	}
@@ -117,5 +159,58 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+	}
+}
+
+if (stonecutter.current.isActive) {
+	rootProject.tasks.register("buildActive") {
+		group = "project"
+		dependsOn(tasks.named("build"))
+	}
+}
+
+tasks.register('buildAndCollect', Copy) {
+	group = "build"
+	from(tasks.remapJar.archiveFile)
+	rename ("Autocut-(.*).jar", '$1' + "-${fullVersion}.jar") // A bit of a hack but it works
+	into(rootProject.layout.buildDirectory.file("libs/${mod_version}"))
+}
+
+publishMods {
+	file = remapJar.archiveFile
+	modLoaders.add("fabric")
+	changelog = new File('CHANGELOG.md').text
+	type = BETA
+	displayName = "${mod_name} v${mod_version} for Minecraft ${mcVersion}"
+	dryRun = providers.environmentVariable("DRY_RUN").getOrElse("true") != "false"
+	/*github {
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		repository = "skycatminepokie/autocut"
+		commitish = "main"
+		print("TAG NAME: \"")
+		print("v${fullVersion}")
+		print("\"")
+		tagName = "v${fullVersion}"
+	}*/
+
+	modrinth {
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		projectId = "DZJzhD8k"
+		minecraftVersionRange {
+			start = earliest_minecraft
+			end = latest_minecraft
+		}
+
+		requires("yacl")
+		requires("fabric-api")
+		optional("modmenu")
+		announcementTitle = "Download version ${fullVersion}"
+	}
+
+	discord {
+		username = "Autocut has been updated!" // This was the only way I could get the changelog to be there too
+
+		webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+		dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
 	}
 }
