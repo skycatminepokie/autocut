@@ -6,12 +6,12 @@ plugins {
 	id "me.modmuss50.mod-publish-plugin" version "0.7.4"
 }
 
-version = property("mod.id").toString()
-group = property("mod.group").toString()
+version = property("mod_id").toString()
+group = property("mod_group").toString()
 
 
 base {
-	archivesName = property("mod.name").toString()
+	archivesName = property("mod_name").toString()
 }
 
 repositories {
@@ -84,13 +84,13 @@ remapJar {
 }
 
 
-def id = property("mod.id").toString()
-def name = property("mod.name").toString()
-def version = property("mod.version").toString()
+def id = property("mod_id").toString()
+def name = property("mod_name").toString()
+def version = property("mod_version").toString()
 def yacl = property("deps.yacl_version").toString()
 def fabric_api = property("deps.fabric_api").toString()
 def modmenu = property("deps.modmenu_version").toString()
-def supported_minecraft = property("mod.supported_minecraft").toString()
+def supported_minecraft = property("supported_minecraft").toString()
 
 
 def mcVersion = stonecutter.current.version
@@ -149,7 +149,7 @@ jar {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
-			artifactId = property("mod.name").toString()
+			artifactId = property("mod_name").toString()
 			from components.java
 		}
 	}
