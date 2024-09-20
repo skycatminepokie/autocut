@@ -124,8 +124,9 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	def java = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
+	sourceCompatibility = java
+	targetCompatibility = java
 }
 
 jar {
