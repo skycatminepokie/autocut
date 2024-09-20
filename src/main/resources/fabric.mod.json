@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "autocut",
 	"version": "${version}",
-	"name": "Autocut",
+	"name": "${name}",
 	"description": "Cut your recordings based on in-game events.",
 	"authors": [
 		"skycatminepokie"
@@ -39,7 +39,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.15.11",
-		"minecraft": "1.21.1",
+		"minecraft": "${mc_version}",
 		"java": ">=21",
 		"fabric-api": ">=0.104.0+1.21.1",
 		"yet_another_config_lib_v3": ">=3.5.0+1.21-fabric"

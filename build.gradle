@@ -37,6 +37,11 @@ loom {
 		}
 	}
 
+	runConfigs.all {
+		ideConfigGenerated true // Run configurations are not created for subprojects by default
+		runDir "../../run" // Use a shared run folder and just create separate worlds
+	}
+
 }
 
 fabricApi {
@@ -74,11 +79,29 @@ remapJar {
 	inputFile = file(shadowJar.archivePath)
 }
 
+
+	def id = property("mod.id").toString()
+	def name = property("mod.name").toString()
+	def version = property("mod.version").toString()
+
+
+def mcVersion = stonecutter.current.version
+
 processResources {
-	inputs.property "version", project.version
+	inputs.property("id", id)
+	inputs.property("name", name)
+	inputs.property("version", version)
+	inputs.property("mc_version", mcVersion)
+
+	def map = [
+	        "id": id,
+			"name": name,
+			"version": version,
+			"mc_version": mcVersion
+	]
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand(map)
 	}
 }
 
