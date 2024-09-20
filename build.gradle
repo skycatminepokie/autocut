@@ -89,6 +89,7 @@ def modmenu = property("deps.modmenu_version").toString()
 
 
 def mcVersion = stonecutter.current.version
+def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
 
 processResources { // I don't know gradle enough to get the ModData class working. I tried defining it, but then property is in the wrong scope.
 	inputs.property("id", id)
@@ -98,6 +99,7 @@ processResources { // I don't know gradle enough to get the ModData class workin
 	inputs.property("yacl_version", yacl)
 	inputs.property("fabric_api_version", fabric_api)
 	inputs.property("modmenu_version", modmenu)
+	inputs.property("java_version", javaVersion)
 
 	def map = [
 	        "id": id,
@@ -106,7 +108,8 @@ processResources { // I don't know gradle enough to get the ModData class workin
 			"mc_version": mcVersion,
 			"yacl_version": yacl,
 			"fabric_api_version": fabric_api,
-			"modmenu_version": modmenu
+			"modmenu_version": modmenu,
+			"java_version": javaVersion
 	]
 
 	filesMatching("fabric.mod.json") {
@@ -124,9 +127,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	def java = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
-	sourceCompatibility = java
-	targetCompatibility = java
+	sourceCompatibility = javaVersion
+	targetCompatibility = javaVersion
 }
 
 jar {

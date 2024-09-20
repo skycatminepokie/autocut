@@ -40,7 +40,7 @@
 	"depends": {
 		"fabricloader": ">=0.15.11",
 		"minecraft": "${mc_version}",
-		"java": ">=21",
+		"java": ">=${java_version}",
 		"fabric-api": ">=${fabric_api_version}",
 		"yet_another_config_lib_v3": ">=${yacl_version}"
 	},
