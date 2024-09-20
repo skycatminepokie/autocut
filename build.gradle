@@ -90,7 +90,7 @@ def modmenu = property("deps.modmenu_version").toString()
 
 def mcVersion = stonecutter.current.version
 
-processResources {
+processResources { // I don't know gradle enough to get the ModData class working. I tried defining it, but then property is in the wrong scope.
 	inputs.property("id", id)
 	inputs.property("name", name)
 	inputs.property("version", version)

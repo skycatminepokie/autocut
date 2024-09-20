@@ -132,7 +132,7 @@ public class ClipTypes {
         var dataResult = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty());
         // 1.12.1
         //? if >=1.21.1 {
-        JsonElement serialized = result.getOrThrow().getFirst();
+        JsonElement serialized = dataResult.getOrThrow();
          //?} else {
         /*JsonElement serialized = dataResult.getOrThrow(false, (a)-> {throw new RuntimeException(a);});
         *///?}

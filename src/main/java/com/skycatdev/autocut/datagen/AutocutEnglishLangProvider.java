@@ -13,6 +13,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
     //? if >=1.20.5 {
     protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
         super(dataGenerator, "en_us", registryLookup);
+    }
     //?} else {
     /*protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator) {
         super(dataGenerator, "en_us");
