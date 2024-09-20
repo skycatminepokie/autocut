@@ -263,7 +263,11 @@ public class RecordingManager {
                 ClipBuilder builder = new ClipBuilder(results.getLong(CLIPS_INPOINT_COLUMN),
                         results.getLong(CLIPS_TIMESTAMP_COLUMN),
                         results.getLong(CLIPS_OUTPOINT_COLUMN),
-                        Identifier.of(results.getString(CLIPS_ID_COLUMN)));
+                        //? if >=1.21
+                        /*Identifier.of(results.getString(CLIPS_ID_COLUMN))*/
+                        //? if <1.21
+                        Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_ID_COLUMN)))
+                );
                 builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));
                 builder.setSource(results.getString(CLIPS_SOURCE_COLUMN));
                 builder.setObject(results.getString(CLIPS_OBJECT_COLUMN));

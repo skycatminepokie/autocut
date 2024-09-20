@@ -10,12 +10,21 @@ import java.util.concurrent.CompletableFuture;
 public class AutocutEnglishLangProvider extends FabricLanguageProvider {
     public static final String YACL_PREFIX = Autocut.MOD_ID + ".yacl";
 
-    protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
-        super(dataGenerator, "en_us", registryLookup);
+    //? if >=1.20.5 {
+    /*protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+        super(dataGenerator, "en_us", registryLookup);*/
+    //?} else {
+    protected AutocutEnglishLangProvider(FabricDataOutput dataGenerator) {
+        super(dataGenerator, "en_us");
     }
+    //?}
 
     @Override
-    public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder tb) {
+    //? if >=1.20.5 {
+    /*public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder tb) {*/
+    //?} else {
+    public void generateTranslations(TranslationBuilder tb) {
+    //?}
         tb.add(YACL_PREFIX + ".category.clips", "Clips");
         tb.add(YACL_PREFIX + ".category.clips.tooltip", "Configure how sections of video are saved. Note that these settings only apply for future clips.");
         tb.add("autocut.yacl.title", "Autocut configuration menu");

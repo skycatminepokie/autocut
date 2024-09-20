@@ -105,7 +105,8 @@ processResources {
 			"version": version,
 			"mc_version": mcVersion,
 			"yacl_version": yacl,
-			"fabric_api_version": fabric_api
+			"fabric_api_version": fabric_api,
+			"modmenu_version": modmenu
 	]
 
 	filesMatching("fabric.mod.json") {

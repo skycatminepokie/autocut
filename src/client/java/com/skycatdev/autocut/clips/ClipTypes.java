@@ -76,7 +76,13 @@ public class ClipTypes {
         try (FileReader reader = new FileReader(configFile)) {
             JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
             var result = typeCodec.decode(JsonOps.INSTANCE, json);
-            clipType = result.getOrThrow().getFirst();
+            // 1.12.1
+            //? if >=1.21.1 {
+            /*clipType = result.getOrThrow().getFirst();
+            *///?} else {
+            clipType = result.getOrThrow(false, (a)-> {throw new RuntimeException(a);}).getFirst();
+            //?}
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to deserialize clipType of id " + typeId + ". For a quick fix, try deleting the config file " + configFile.getAbsolutePath() + ". You may lose configs.");
         }
@@ -123,7 +129,13 @@ public class ClipTypes {
     }
 
     private static <T extends ClipType> void saveClipType(Codec<T> typeCodec, T clipType, File configFile) {
-        JsonElement serialized = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty()).getOrThrow();
+        var dataResult = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty());
+        // 1.12.1
+        //? if >=1.21.1 {
+        /*JsonElement serialized = result.getOrThrow().getFirst();
+         *///?} else {
+        JsonElement serialized = dataResult.getOrThrow(false, (a)-> {throw new RuntimeException(a);});
+        //?}
         try (PrintWriter writer = new PrintWriter(configFile); JsonWriter jsonWriter = new JsonWriter(writer)) {
             Streams.write(serialized, jsonWriter);
         } catch (IOException e) {
