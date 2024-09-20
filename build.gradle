@@ -73,6 +73,7 @@ shadowJar {
 	from sourceSets.client.output
 	configurations = [project.configurations.shadow]
 	//exclude("META-INF")
+	minimize()
 }
 
 remapJar {
