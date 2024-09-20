@@ -52,9 +52,9 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
                 ClientPlayerEntity player = client.player;
                 if (player != null && DEATH.clipType().shouldRecord()) {
                     //? if >=1.20.5
-                    /*AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.message()));*/
+                    AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.message()));
                     //? if <1.20.5
-                    AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.getMessage()));
+                    /*AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.getMessage()));*/
 
                 }
             } catch (SQLException e) {

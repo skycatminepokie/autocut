@@ -264,9 +264,9 @@ public class RecordingManager {
                         results.getLong(CLIPS_TIMESTAMP_COLUMN),
                         results.getLong(CLIPS_OUTPOINT_COLUMN),
                         //? if >=1.21
-                        /*Identifier.of(results.getString(CLIPS_ID_COLUMN))*/
+                        Identifier.of(results.getString(CLIPS_ID_COLUMN))
                         //? if <1.21
-                        Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_ID_COLUMN)))
+                        /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_ID_COLUMN)))*/
                 );
                 builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));
                 builder.setSource(results.getString(CLIPS_SOURCE_COLUMN));
