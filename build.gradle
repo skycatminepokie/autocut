@@ -173,7 +173,7 @@ tasks.register('buildAndCollect', Copy) {
 	into(rootProject.layout.buildDirectory.file("libs/${version}"))
 }
 
-/*publishMods {
+publishMods {
 	file = remapJar.archiveFile
 	modLoaders.add("fabric")
 	changelog = new File('CHANGELOG.md').text
@@ -194,4 +194,4 @@ tasks.register('buildAndCollect', Copy) {
 		webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 		dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
 	}
-}*/
+}
