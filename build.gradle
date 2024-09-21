@@ -6,7 +6,7 @@ plugins {
 	id "me.modmuss50.mod-publish-plugin" version "0.7.4"
 }
 
-version = property("mod_id").toString()
+version = property("mod_version").toString()
 group = property("mod_group").toString()
 
 def id = property("mod_id").toString()
@@ -172,7 +172,6 @@ if (stonecutter.current.isActive) {
 tasks.register('buildAndCollect', Copy) {
 	group = "build"
 	from(tasks.remapJar.archiveFile)
-	rename ("Autocut-(.*).jar", '$1' + "-${fullVersion}.jar") // A bit of a hack but it works
 	into(rootProject.layout.buildDirectory.file("libs/${mod_version}"))
 }
 
