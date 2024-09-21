@@ -4,6 +4,7 @@ import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.probe.FFmpegStream;
+import net.minecraft.util.Identifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,13 @@ import java.util.Collection;
 import java.util.Comparator;
 
 public class FilterGenerator {
+    /**
+     * A clip made for internal use. Should not end up being serialized.
+     *
+     * @see FilterGenerator#mergeClips(Collection)
+     */
+    public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
+
     /**
      * Creates a single {@code select} filter for a single audio stream.
      *
@@ -155,7 +163,7 @@ public class FilterGenerator {
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
             if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), RecordingManager.INTERNAL).build(); // Take the union
+                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL).build(); // Take the union
                 mergedClips.set(i, newClip); // Replace the current
                 mergedClips.remove(i + 1); // Yeet the next, it's been combined
                 continue; // And check this clip for union with the next

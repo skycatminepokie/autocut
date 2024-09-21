@@ -25,12 +25,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class RecordingManager {
-    /**
-     * A clip made for internal use. Should not end up being serialized.
-     *
-     * @see RecordingManager#mergeClips(Collection)
-     */
-    public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
     protected static final String CLIPS_TABLE = "clips"; // Keep this hardcoded
     protected static final String CLIPS_ID_COLUMN = "id"; // Keep this hardcoded
