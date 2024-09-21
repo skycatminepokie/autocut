@@ -24,7 +24,7 @@ def fullVersion = mod_version + "+" + mcVersion
 stonecutter.dependency("java", javaVersion.toString())
 
 base {
-	archivesName = property("mod_name").toString()
+	archivesName = property("mod_id").toString()
 }
 
 repositories {
@@ -148,7 +148,7 @@ jar {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
-			artifactId = property("mod_name").toString()
+			artifactId = property("mod_id").toString()
 			from components.java
 		}
 	}
