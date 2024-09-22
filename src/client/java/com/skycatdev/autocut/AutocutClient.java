@@ -64,7 +64,7 @@ public class AutocutClient implements ClientModInitializer {
             return TypedActionResult.pass(ItemStack.EMPTY);
         });
         ClientTickEvents.START_CLIENT_TICK.register(QUEUED_MESSAGE_HANDLER);
-        ClientTickEvents.END_CLIENT_TICK.register((client) -> { // TODO: Combine clips when held down
+        ClientTickEvents.END_CLIENT_TICK.register((client) -> { // TODO: Combine clips when held down, even if exporting separately
             if (CLIP_KEYBIND.wasPressed()) {
                 if (currentRecordingManager != null && MANUAL.clipType().shouldRecord()) {
                     long time = System.currentTimeMillis();
