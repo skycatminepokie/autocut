@@ -1,1 +1,1 @@
-- Game no longer hangs when connecting to OBS
+- Added keybind to make a new clip
