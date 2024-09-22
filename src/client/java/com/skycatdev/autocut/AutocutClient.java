@@ -16,7 +16,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.sql.SQLException;
 
@@ -26,7 +25,7 @@ public class AutocutClient implements ClientModInitializer {
     public static final QueuedMessageHandler QUEUED_MESSAGE_HANDLER = new QueuedMessageHandler();
     @Nullable public static OBSRemoteController controller = null;
     @Nullable public static RecordingManager currentRecordingManager = null;
-    private static final KeyBinding clipKeyBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.autocut.clip", InputUtil.UNKNOWN_KEY.getCode(), "key.category.autocut.autocut"));
+    public static final KeyBinding CLIP_KEYBIND = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.autocut.clip", InputUtil.UNKNOWN_KEY.getCode(), "key.category.autocut.autocut"));
 
     @Override
     public void onInitializeClient() {
@@ -66,8 +65,15 @@ public class AutocutClient implements ClientModInitializer {
         });
         ClientTickEvents.START_CLIENT_TICK.register(QUEUED_MESSAGE_HANDLER);
         ClientTickEvents.END_CLIENT_TICK.register((client) -> { // TODO: Combine clips when held down
-            if (clipKeyBind.wasPressed()) {
-                client.inGameHud.getChatHud().addMessage(Text.of("TEST"));
+            if (CLIP_KEYBIND.wasPressed()) {
+                if (currentRecordingManager != null && MANUAL.clipType().shouldRecord()) {
+                    long time = System.currentTimeMillis();
+                    try {
+                        currentRecordingManager.addClip(MANUAL.clipType().createClip(time));
+                    } catch (SQLException e) {
+                        Autocut.LOGGER.warn("Unable to store use item event", e);
+                    }
+                }
             }
         });
     }

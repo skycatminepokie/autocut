@@ -26,6 +26,8 @@
   "autocut.yacl.generic.should_record.description": "Whether this event should be recorded.",
   "autocut.yacl.generic.start_offset": "Default start offset",
   "autocut.yacl.generic.start_offset.description": "How many milliseconds before the event should be counted as part of the clip.",
+  "autocut.yacl.manual_clip": "Manual",
+  "autocut.yacl.manual_clip.description": "When you press the keybind.\nDefault: %s\nCurrent: %s",
   "autocut.yacl.place_block_clip": "Place block",
   "autocut.yacl.place_block_clip.description": "When you place a block",
   "autocut.yacl.shoot_player_clip": "Shoot player",
