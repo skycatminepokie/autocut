@@ -5,13 +5,18 @@ import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import java.sql.SQLException;
 
@@ -21,6 +26,7 @@ public class AutocutClient implements ClientModInitializer {
     public static final QueuedMessageHandler QUEUED_MESSAGE_HANDLER = new QueuedMessageHandler();
     @Nullable public static OBSRemoteController controller = null;
     @Nullable public static RecordingManager currentRecordingManager = null;
+    private static final KeyBinding clipKeyBind = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.autocut.clip", InputUtil.UNKNOWN_KEY.getCode(), "key.category.autocut.autocut"));
 
     @Override
     public void onInitializeClient() {
@@ -59,6 +65,11 @@ public class AutocutClient implements ClientModInitializer {
             return TypedActionResult.pass(ItemStack.EMPTY);
         });
         ClientTickEvents.START_CLIENT_TICK.register(QUEUED_MESSAGE_HANDLER);
+        ClientTickEvents.END_CLIENT_TICK.register((client) -> { // TODO: Combine clips when held down
+            if (clipKeyBind.wasPressed()) {
+                client.inGameHud.getChatHud().addMessage(Text.of("TEST"));
+            }
+        });
     }
 
 }
