@@ -40,3 +40,4 @@ replay_*.log
 *.jfr
 /src/main/generated/.cache/
 /versions/1.21/src/main/generated/.cache/
+/versions/1.20.4/src/main/generated/.cache/
