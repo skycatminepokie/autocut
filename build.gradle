@@ -6,7 +6,10 @@ plugins {
 	id "me.modmuss50.mod-publish-plugin" version "0.7.4"
 }
 
-version = property("mod_version").toString()
+def mcVersion = stonecutter.current.version
+def fullVersion = mod_version + "+" + mcVersion
+
+version = fullVersion
 group = property("mod_group").toString()
 
 def id = property("mod_id").toString()
@@ -17,9 +20,7 @@ def fabric_api = property("deps.fabric_api").toString()
 def modmenu = property("deps.modmenu_version").toString()
 
 
-def mcVersion = stonecutter.current.version
 def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
-def fullVersion = mod_version + "+" + mcVersion
 
 stonecutter.dependency("java", javaVersion.toString())
 
