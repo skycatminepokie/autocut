@@ -197,10 +197,12 @@ publishMods {
 			end = latest_minecraft
 		}
 
+		projectDescription = providers.fileContents(layout.projectDirectory.file("README.md")).asText
+
 		requires("yacl")
 		requires("fabric-api")
 		optional("modmenu")
-		announcementTitle = "Download version ${fullVersion}"
+		announcementTitle = "Download version ${fullVersion} from Modrinth"
 	}
 
 	discord {
