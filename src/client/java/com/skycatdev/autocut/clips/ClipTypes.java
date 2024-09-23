@@ -1,32 +1,19 @@
 package com.skycatdev.autocut.clips;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonWriter;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
-import net.fabricmc.loader.api.FabricLoader;
+import com.skycatdev.autocut.config.ConfigHandler;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class ClipTypes {
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("autocut");
     public static final Identifier CLIP_TYPE_REGISTRY_ID = Identifier.of(Autocut.MOD_ID, "clip_types");
     public static final Registry<ClipTypeEntry<?>> CLIP_TYPE_REGISTRY = new SimpleRegistry<>(RegistryKey.ofRegistry(CLIP_TYPE_REGISTRY_ID), Lifecycle.stable());
     public static final ClipTypeEntry<BreakBlockClipType> BREAK_BLOCK = registerClipType(BreakBlockClipType.ID, BreakBlockClipType.CODEC, BreakBlockClipType::new);
@@ -62,34 +49,6 @@ public class ClipTypes {
                 Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset));
     }
 
-    private static @NotNull Path configPathForId(Identifier typeId) {
-        return CONFIG_PATH.resolve(typeId.getNamespace()).resolve(typeId.getPath() + ".json");
-    }
-
-    @SuppressWarnings("unused") // I want it around just in case
-    private static <T extends ClipType> T readClipType(Identifier typeId, Codec<T> typeCodec) {
-        File configFile = configPathForId(typeId).toFile();
-        return readClipType(typeId, typeCodec, configFile);
-    }
-
-    private static <T extends ClipType> T readClipType(Identifier typeId, Codec<T> typeCodec, File configFile) {
-        T clipType;
-        try (FileReader reader = new FileReader(configFile)) {
-            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-            var result = typeCodec.decode(JsonOps.INSTANCE, json);
-            // 1.12.1
-            //? if >=1.21 {
-            clipType = result.getOrThrow().getFirst();
-            //?} else {
-            /*clipType = result.getOrThrow(false, (a)-> {throw new RuntimeException(a);}).getFirst();
-            *///?}
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to deserialize clipType of id " + typeId + ". For a quick fix, try deleting the config file " + configFile.getAbsolutePath() + ". You may lose configs.");
-        }
-        return clipType;
-    }
-
     /**
      * Registers a {@link ClipType} and its {@link Codec} for use in Autocut.
      *
@@ -100,47 +59,8 @@ public class ClipTypes {
      */
     public static <T extends ClipType> ClipTypeEntry<T> registerClipType(Identifier typeId, Codec<T> typeCodec, Supplier<T> defaultSupplier) {
         T clipType;
-        Path configPath = configPathForId(typeId);
-        File configFile = configPath.toFile();
-        if (!configFile.exists()) {
-            clipType = defaultSupplier.get();
-            //noinspection ResultOfMethodCallIgnored
-            configPath.getParent().toFile().mkdirs();
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                configFile.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            saveClipType(typeCodec, clipType, configFile);
-        } else {
-            clipType = readClipType(typeId, typeCodec, configFile);
-        }
+        clipType = ConfigHandler.readClipTypeOrDefault(typeId, typeCodec, defaultSupplier);
         return Registry.register(CLIP_TYPE_REGISTRY, typeId, new ClipTypeEntry<>(typeCodec, clipType));
     }
 
-    private static <T extends ClipType> void saveClipType(ClipTypeEntry<T> clipTypeEntry) {
-        Identifier typeId = clipTypeEntry.clipType().getId();
-        File configFile = configPathForId(typeId).toFile();
-        saveClipType(clipTypeEntry.codec(), clipTypeEntry.clipType(), configFile);
-    }
-
-    public static void saveAllClipTypes() {
-        CLIP_TYPE_REGISTRY.forEach(ClipTypes::saveClipType);
-    }
-
-    private static <T extends ClipType> void saveClipType(Codec<T> typeCodec, T clipType, File configFile) {
-        var dataResult = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty());
-        // 1.12.1
-        //? if >=1.21 {
-        JsonElement serialized = dataResult.getOrThrow();
-         //?} else {
-        /*JsonElement serialized = dataResult.getOrThrow(false, (a)-> {throw new RuntimeException(a);});
-        *///?}
-        try (PrintWriter writer = new PrintWriter(configFile); JsonWriter jsonWriter = new JsonWriter(writer)) {
-            Streams.write(serialized, jsonWriter);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save clip type " + clipType.getId() + ".");
-        }
-    }
 }
