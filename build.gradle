@@ -183,15 +183,11 @@ publishMods {
 	type = BETA
 	displayName = "${mod_name} v${mod_version} for Minecraft ${mcVersion}"
 	dryRun = providers.environmentVariable("DRY_RUN").getOrElse("true") != "false"
-	/*github {
+	github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
 		repository = "skycatminepokie/autocut"
-		commitish = "main"
-		print("TAG NAME: \"")
-		print("v${fullVersion}")
-		print("\"")
-		tagName = "v${fullVersion}"
-	}*/
+		commitish = providers.environmentVariable("GITHUB_REF_NAME").getOrElse("main")
+	}
 
 	modrinth {
 		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
