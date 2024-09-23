@@ -230,18 +230,18 @@ public class RecordingManager {
                     @Override
                     public void progress(Progress progress) {
                         if (progress.isEnd()) {
-                            AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.cutting.finish"));
+                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.finish"));
                         } else {
                             double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
                             if (percentDone < 0) {
                                 return;
                             }
-                            AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone)));
+                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone)));
                         }
 
                     }
                 });
-                AutocutClient.QUEUED_MESSAGE_HANDLER.queueMessage(Text.translatable("autocut.cutting.start"));
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.start"));
                 job.run();
             } catch (IOException e) {
                 throw new RuntimeException(e);
