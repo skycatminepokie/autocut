@@ -15,3 +15,8 @@ stonecutter.registerChiseled tasks.register("chiseledPublishMods", stonecutter.c
     setGroup "project"
     ofTask "publishMods"
 }
+
+stonecutter.registerChiseled tasks.register("chiseledRunDatagen", stonecutter.chiseled) {
+    setGroup "project"
+    ofTask "runDatagen"
+}

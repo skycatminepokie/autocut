@@ -1,0 +1,34 @@
+name: Publish
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Environment Variables
+        run: env
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v3.12.0
+        with:
+          distribution: "termurin"
+          java-version: 21
+
+      - name: Make Gradle Wrapper Executable
+        if: ${{ runner.os != 'Windows }}
+        run: chmod +x ./gradlew
+
+      - name: Datagen
+        run: ./gradlew chiseledRunDatagen
+
+      - name: Build and Publish
+        run: ./gradlew chiseledPublishMods
