@@ -31,8 +31,19 @@ public class Utils {
             //? if >=1.21 {
             t = result.getOrThrow(IOException::new).getFirst();
             //?} else {
-            /*t = result.getOrThrow(false, (message) -> {throw new IOException(message);}).getFirst();
-             *///?}
+            /*var optional = result.result();
+            if (optional.isPresent()) {
+                t = optional.get().getFirst();
+            } else {
+                Autocut.LOGGER.error("Autocut failed to load from JSON. Logging DFU message, then throwing error.");
+                try {
+                    result.getOrThrow(false, Autocut.LOGGER::error);
+                } catch (RuntimeException e) {
+                    throw new IOException("Autocut failed to read from JSON.", e);
+                }
+                throw new IllegalStateException("Bro, DFU was supposed to throw a RuntimeException. Ugh, well it failed, that's all the info I got for ya.");
+            }
+            *///?}
             return t;
         }
     }
@@ -49,8 +60,20 @@ public class Utils {
         //? if >=1.21 {
         JsonElement serialized = dataResult.getOrThrow(IOException::new);
         //?} else {
-        /*JsonElement serialized = dataResult.getOrThrow(false, (message)-> {throw new IOException(message);});
-         *///?}
+        /*var optional = dataResult.result();
+        JsonElement serialized;
+        if (optional.isPresent()) {
+            serialized = optional.get();
+        } else {
+            Autocut.LOGGER.error("Autocut failed to save to JSON. Logging DFU message, then throwing error.");
+            try {
+                dataResult.getOrThrow(false, Autocut.LOGGER::error);
+            } catch (RuntimeException e) {
+                throw new IOException("Autocut failed to write to JSON.", e);
+            }
+            throw new IllegalStateException("Bro, DFU was supposed to throw a RuntimeException. Ugh, well it failed, that's all the info I got for ya.");
+        }
+        *///?}
         try (PrintWriter writer = new PrintWriter(file); JsonWriter jsonWriter = new JsonWriter(writer)) {
             Streams.write(serialized, jsonWriter);
         }
