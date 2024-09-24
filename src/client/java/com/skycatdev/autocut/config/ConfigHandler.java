@@ -7,6 +7,7 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.skycatdev.autocut.Utils;
 import com.skycatdev.autocut.clips.ClipType;
 import com.skycatdev.autocut.clips.ClipTypeEntry;
 import com.skycatdev.autocut.clips.ClipTypes;
@@ -28,6 +29,7 @@ import java.util.function.Supplier;
 
 public class ConfigHandler {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("autocut");
+    public static ExportConfig EXPORT_CONFIG = ExportConfig.readOrDefault(CONFIG_PATH.resolve("export.json").toFile());
 
     protected static @NotNull Path getClipTypeConfigPath(Identifier typeId) {
         return CONFIG_PATH.resolve(typeId.getNamespace()).resolve(typeId.getPath() + ".json");
@@ -56,21 +58,11 @@ public class ConfigHandler {
     }
 
     public static <T extends ClipType> T readClipType(Identifier typeId, Codec<T> typeCodec, File configFile) {
-        T clipType;
-        try (FileReader reader = new FileReader(configFile)) {
-            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
-            var result = typeCodec.decode(JsonOps.INSTANCE, json);
-            // 1.12.1
-            //? if >=1.21 {
-            clipType = result.getOrThrow().getFirst();
-            //?} else {
-            /*clipType = result.getOrThrow(false, (a)-> {throw new RuntimeException(a);}).getFirst();
-             *///?}
-
+        try {
+            return Utils.readFromJson(configFile, typeCodec);
         } catch (IOException e) {
             throw new RuntimeException("Failed to deserialize clipType of id " + typeId + ". For a quick fix, try deleting the config file " + configFile.getAbsolutePath() + ". You may lose configs.");
         }
-        return clipType;
     }
 
     public static <T extends ClipType> T readClipTypeOrDefault(Identifier typeId, Codec<T> typeCodec, Supplier<T> defaultSupplier) {
