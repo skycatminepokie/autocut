@@ -1,12 +1,6 @@
 package com.skycatdev.autocut.config;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.internal.Streams;
-import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import com.skycatdev.autocut.Utils;
 import com.skycatdev.autocut.clips.ClipType;
 import com.skycatdev.autocut.clips.ClipTypeEntry;
@@ -21,15 +15,14 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class ConfigHandler {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("autocut");
-    public static ExportConfig EXPORT_CONFIG = ExportConfig.readOrDefault(CONFIG_PATH.resolve("export.json").toFile());
+    private static final File EXPORT_CONFIG_FILE = CONFIG_PATH.resolve("export.json").toFile();
+    private static ExportConfig EXPORT_CONFIG = ExportConfig.readOrDefault(EXPORT_CONFIG_FILE);
 
     protected static @NotNull Path getClipTypeConfigPath(Identifier typeId) {
         return CONFIG_PATH.resolve(typeId.getNamespace()).resolve(typeId.getPath() + ".json");
@@ -43,12 +36,22 @@ public class ConfigHandler {
         return parent -> YetAnotherConfigLib.createBuilder()
                 .title(Text.translatable("autocut.yacl.title"))
                 .category(clipsCategory.build())
+                .category(getExportConfig().generateConfigCategory())
                 .save(ConfigHandler::saveAll)
                 .build().generateScreen(parent);
     }
 
+    public static ExportConfig getExportConfig() {
+        return EXPORT_CONFIG;
+    }
+
     public static void saveAll() {
         saveAllClipTypes();
+        try {
+            getExportConfig().saveToFile(EXPORT_CONFIG_FILE);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unused") // I want it around just in case
@@ -96,17 +99,10 @@ public class ConfigHandler {
 
     public static <T extends ClipType> void saveClipType(Codec<T> typeCodec, T clipType) {
         File configFile = ConfigHandler.getClipTypeConfigPath(clipType.getId()).toFile();
-        var dataResult = typeCodec.encode(clipType, JsonOps.INSTANCE, JsonOps.INSTANCE.empty());
-        // 1.12.1
-        //? if >=1.21 {
-        JsonElement serialized = dataResult.getOrThrow();
-        //?} else {
-        /*JsonElement serialized = dataResult.getOrThrow(false, (a)-> {throw new RuntimeException(a);});
-         *///?}
-        try (PrintWriter writer = new PrintWriter(configFile); JsonWriter jsonWriter = new JsonWriter(writer)) {
-            Streams.write(serialized, jsonWriter);
+        try {
+            Utils.saveToJson(configFile, typeCodec, clipType);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save clip type " + clipType.getId() + ".");
+            throw new RuntimeException("Failed to save clip type " + clipType.getId() + ".", e);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
+import com.skycatdev.autocut.config.ConfigHandler;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -209,7 +210,8 @@ public class RecordingManager {
         LinkedList<Clip> clips = getActiveClips();
         new Thread(() -> {
             File recording = new File(outputPath);
-            File export = recording.toPath().resolveSibling("cut" + recording.getName()).toFile();
+            String recordingName = recording.getName().substring(0, recording.getName().lastIndexOf('.'));
+            File export = recording.toPath().resolveSibling(ConfigHandler.getExportConfig().getExportName(recordingName, clips.size())).toFile();
 
             try {
                 FFmpegExecutor executor = new FFmpegExecutor();
@@ -220,6 +222,7 @@ public class RecordingManager {
                         .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, clips, in).getAbsolutePath())
                         .setInput(in)
                         .addOutput(export.getAbsolutePath())
+                        .setFormat(ConfigHandler.getExportConfig().getFormat())
                         .addExtraArgs("-map", "[outv]", "-map", "[outa]")
                         .setConstantRateFactor(18)
                         //.setVideoCodec("libx264") requires gpl

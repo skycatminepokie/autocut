@@ -2,7 +2,6 @@ package com.skycatdev.autocut.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.Utils;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
@@ -59,12 +58,21 @@ public class ExportConfig {
         nameFormat = nameFormat.trim();
         nameFormat = nameFormat.replaceAll("\\{ORIGINAL}", "ORIGINAL");
         nameFormat = nameFormat.replaceAll("\\{CLIPS}", "132");
+        nameFormat = nameFormat.replaceAll("\\\\", "");
         try {
             Paths.get(nameFormat);
         } catch (InvalidPathException e) {
             return false;
         }
         return true;
+    }
+
+    public String getExportName(String recordingName, long clips) {
+        return nameFormat.trim()
+                .replaceAll("\\{ORIGINAL}", recordingName)
+                .replaceAll("\\{CLIPS}", String.valueOf(clips))
+                .replaceAll("\\\\", "")
+                .replaceAll("\\.", "") + "." + format;
     }
 
     /**
@@ -75,14 +83,12 @@ public class ExportConfig {
      */
     public static ExportConfig readOrDefault(File file) {
         if (!file.exists()) {
-            if (file.getParentFile().mkdirs()) {
-                try {
-                    //noinspection ResultOfMethodCallIgnored
-                    file.createNewFile();
-                } catch (IOException e) {
-                    throw new RuntimeException();
-                }
-            } else {
+            //noinspection ResultOfMethodCallIgnored
+            file.getParentFile().mkdirs();
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                file.createNewFile();
+            } catch (IOException e) {
                 throw new RuntimeException();
             }
             return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT);
@@ -97,7 +103,7 @@ public class ExportConfig {
     public ConfigCategory generateConfigCategory() { // TODO: Localize
         return ConfigCategory.createBuilder()
                 .name(Text.of("Export"))
-                .tooltip(Text.of("Change how videos are cut"))
+                .tooltip(Text.of("Configure the format videos are exported in"))
                 .option(Option.<String>createBuilder()
                         .name(Text.of("Format"))
                         .description(OptionDescription.of(Text.of("The video format to export to, eg \"mp4\", \"mkv\"")))
@@ -107,7 +113,7 @@ public class ExportConfig {
                 )
                 .option(Option.<String>createBuilder()
                         .name(Text.of("Output file"))
-                        .description(OptionDescription.of(Text.of("The name of the file to export to, not including the extension (like \".mp4\").\n{ORIGINAL} will be replaced with the file name of the recording\n{CLIPS} will be replaced with the number of clips.")))
+                        .description(OptionDescription.of(Text.of("The name of the file to export to, not including the extension (like \".mp4\").\nIt's recommended to include variables (see below), otherwise you'll start overwriting your videos.\n{ORIGINAL} will be replaced with the file name of the recording\n{CLIPS} will be replaced with the number of clips.\nBackslashes (\\) and periods (.) will be ignored.")))
                         .binding(DEFAULT_NAME_FORMAT, this::getNameFormat, this::setNameFormat)
                         .controller((option) -> () -> new PredicatedStringController(option, ExportConfig::isValidNameFormat))
                         .build()
@@ -129,6 +135,10 @@ public class ExportConfig {
 
     public void setNameFormat(String nameFormat) {
         this.nameFormat = nameFormat;
+    }
+
+    public void saveToFile(File file) throws IOException {
+        Utils.saveToJson(file, CODEC, this);
     }
 
 }
