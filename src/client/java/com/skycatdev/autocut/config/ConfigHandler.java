@@ -41,8 +41,12 @@ public class ConfigHandler {
         return parent -> YetAnotherConfigLib.createBuilder()
                 .title(Text.translatable("autocut.yacl.title"))
                 .category(clipsCategory.build())
-                .save(ConfigHandler::saveAllClipTypes)
+                .save(ConfigHandler::saveAll)
                 .build().generateScreen(parent);
+    }
+
+    public static void saveAll() {
+        saveAllClipTypes();
     }
 
     @SuppressWarnings("unused") // I want it around just in case
