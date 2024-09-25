@@ -248,7 +248,7 @@ public class RecordingManager {
                 try {
                     job.run();
                 } catch (Exception e) {
-                    AutocutClient.sendMessageOnClientThread(Text.of("Something went wrong while exporting. Check your logs for more info."));
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.fail"));
                     throw new RuntimeException("Something went wrong while exporting.", e);
                 }
             } catch (IOException e) {

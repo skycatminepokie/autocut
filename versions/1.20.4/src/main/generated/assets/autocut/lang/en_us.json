@@ -1,6 +1,7 @@
 {
   "autocut.command.autocut.finish.database.fail.databaseDoesNotExist": "The given database does not exist.",
   "autocut.command.autocut.finish.fail.noRecording": "No recording found. Did you connect, start recording, and stop recording?",
+  "autocut.cutting.fail": "Something went wrong while exporting. Check your logs for more info.",
   "autocut.cutting.finish": "Finished cutting!",
   "autocut.cutting.progress": "Cutting: %s%%",
   "autocut.cutting.start": "Preparing to cut...",
