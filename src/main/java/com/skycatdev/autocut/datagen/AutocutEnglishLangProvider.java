@@ -42,6 +42,8 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOptionGroup("take_damage_clip", "Take damage", "Whenever you take damage from any source.", tb);
         addOptionGroup("manual_clip", "Manual", "When you press the keybind.\nDefault: %s\nCurrent: %s", tb);
         addOptionGroup("receive_player_message_clip", "Receive player message", "When you receive a chat message from a player. This may be a direct message or a regular one. This may be triggered as a system message on some servers.", tb);
+        addOptionGroup("receive_server_message_clip", "Receive server message", "When you receive a chat message from the server or part of the game. Player messages may trigger this on some servers.", tb);
+
 
         addOption("generic.start_offset", "Default start offset", "How many milliseconds before the event should be counted as part of the clip.", tb);
         addOption("generic.end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
