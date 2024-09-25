@@ -25,6 +25,7 @@ public class ClipTypes {
     public static final ClipTypeEntry<UseItemClipType> USE_ITEM = registerClipType(UseItemClipType.ID, UseItemClipType.CODEC, UseItemClipType::new);
     public static final ClipTypeEntry<ManualClipType> MANUAL = registerClipType(ManualClipType.ID, ManualClipType.CODEC, ManualClipType::new);
     public static final ClipTypeEntry<ReceivePlayerMessageClipType> RECEIVE_PLAYER_MESSAGE = registerClipType(ReceivePlayerMessageClipType.ID, ReceivePlayerMessageClipType.CODEC, ReceivePlayerMessageClipType::new);
+    public static final ClipTypeEntry<ReceiveServerMessageClipType> RECEIVE_SERVER_MESSAGE = registerClipType(ReceiveServerMessageClipType.ID, ReceiveServerMessageClipType.CODEC, ReceiveServerMessageClipType::new);
 
     /**
      * Adds the default fields to a {@code Codec<ClipType>}. Magic I cooked up with the help of Linguardium. Usage:

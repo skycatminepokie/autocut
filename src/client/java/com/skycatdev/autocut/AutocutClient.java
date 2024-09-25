@@ -94,6 +94,16 @@ public class AutocutClient implements ClientModInitializer {
                 }
             }
         }));
+        ClientReceiveMessageEvents.GAME.register(((message, overlay) -> {
+            if (currentRecordingManager != null && RECEIVE_SERVER_MESSAGE.clipType().shouldRecord()) {
+                long time = System.currentTimeMillis();
+                try {
+                    currentRecordingManager.addClip(RECEIVE_SERVER_MESSAGE.clipType().createClip(time, message, overlay));
+                } catch (SQLException e) {
+                    Autocut.LOGGER.warn("Unable to store server chat message clip", e);
+                }
+            }
+        }));
     }
 
 }
