@@ -49,7 +49,7 @@ public class ClipTypes {
                 Codec.BOOL.fieldOf("active").forGetter(ClipType::isActive),
                 Codec.LONG.fieldOf("start_offset").forGetter(ClipType::getStartOffset),
                 Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset),
-                Codec.BOOL.fieldOf("inverse").forGetter(ClipType::isInverse));
+                Codec.BOOL.fieldOf("inverse").orElse(false).forGetter(ClipType::isInverse));
     }
 
     /**
