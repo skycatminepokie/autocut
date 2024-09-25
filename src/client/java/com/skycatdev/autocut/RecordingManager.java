@@ -245,7 +245,12 @@ public class RecordingManager {
                     }
                 });
                 AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.start"));
-                job.run();
+                try {
+                    job.run();
+                } catch (Exception e) {
+                    AutocutClient.sendMessageOnClientThread(Text.of("Something went wrong while exporting. Check your logs for more info."));
+                    throw new RuntimeException("Something went wrong while exporting.", e);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
