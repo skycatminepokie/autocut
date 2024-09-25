@@ -44,11 +44,12 @@ public class ClipTypes {
      * @return The thing that you {@code .and} or {@code .apply} on.
      * @see net.minecraft.loot.entry.LeafEntry#addLeafFields(RecordCodecBuilder.Instance)
      */
-    public static <T extends ClipType> Products.P4<RecordCodecBuilder.Mu<T>, Boolean, Boolean, Long, Long> addDefaultConfigFields(RecordCodecBuilder.Instance<T> instance) {
+    public static <T extends ClipType> Products.P5<RecordCodecBuilder.Mu<T>, Boolean, Boolean, Long, Long, Boolean> addDefaultConfigFields(RecordCodecBuilder.Instance<T> instance) {
         return instance.group(Codec.BOOL.fieldOf("should_record").forGetter(ClipType::shouldRecord),
                 Codec.BOOL.fieldOf("active").forGetter(ClipType::isActive),
                 Codec.LONG.fieldOf("start_offset").forGetter(ClipType::getStartOffset),
-                Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset));
+                Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset),
+                Codec.BOOL.fieldOf("inverse").forGetter(ClipType::isInverse));
     }
 
     /**

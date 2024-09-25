@@ -13,12 +13,12 @@ public class ReceivePlayerMessageClipType extends ClipType { // TODO: regex filt
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "receive_player_message");
     public static final Codec<ReceivePlayerMessageClipType> CODEC = RecordCodecBuilder.create((instance) -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ReceivePlayerMessageClipType::new));
 
-    public ReceivePlayerMessageClipType(boolean shouldRecord, boolean isActive, long startOffset, long endOffset) {
-        super(ID, isActive, shouldRecord, startOffset, endOffset, false, true, 100, 100);
+    public ReceivePlayerMessageClipType(boolean shouldRecord, boolean isActive, long startOffset, long endOffset, boolean inverse) {
+        super(ID, isActive, shouldRecord, startOffset, endOffset, inverse, false, true, 100, 100, false);
     }
 
     public ReceivePlayerMessageClipType() {
-        super(ID, false, true, 100, 100, false, true, 100, 100);
+        super(ID, false, true, 100, 100, false, false, true, 100, 100, false);
     }
 
     @Override

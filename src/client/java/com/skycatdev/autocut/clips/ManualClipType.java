@@ -18,16 +18,16 @@ public class ManualClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "manual_clip");
     public static final Codec<ManualClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ManualClipType::new));
 
-    public ManualClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3));
+    public ManualClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false);
     }
 
     public ManualClipType() {
-        super(ID, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), true, true,TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3) );
+        super(ID, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, true, true,TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false);
     }
 
     @Override
-    public OptionDescription getOptionGroupDescription() { // TODO: check
+    public OptionDescription getOptionGroupDescription() {
         return OptionDescription.of(Text.translatable("autocut.yacl.manual_clip.description", Text.translatable(CLIP_KEYBIND.getDefaultKey().getTranslationKey()), Text.keybind(CLIP_KEYBIND.getTranslationKey())));
     }
 

@@ -15,12 +15,12 @@ public class AttackEntityClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "attack_entity");
     public static final Codec<AttackEntityClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, AttackEntityClipType::new));
 
-    public AttackEntityClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    public AttackEntityClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
     }
 
     public AttackEntityClipType() {
-        super(ID, true, true, 100, 100, true, true, 100, 100);
+        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
     }
 
     @Override

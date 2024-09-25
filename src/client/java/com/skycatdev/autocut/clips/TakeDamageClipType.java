@@ -24,13 +24,13 @@ public class TakeDamageClipType extends ClipType {
      */
     private int precision;
 
-    public TakeDamageClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, int precision) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    public TakeDamageClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, int precision) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
         this.setPrecision(precision);
     }
 
     public TakeDamageClipType() {
-        super(ID, true, true, 100, 100, true, true, 100, 100);
+        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
         this.setPrecision(1);
     }
 

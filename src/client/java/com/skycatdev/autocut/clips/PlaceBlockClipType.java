@@ -19,12 +19,12 @@ public class PlaceBlockClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "place_block");
     public static final Codec<PlaceBlockClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, PlaceBlockClipType::new));
 
-    public PlaceBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    public PlaceBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
     }
 
     public PlaceBlockClipType() {
-        super(ID, true, true, 100, 100, true, true, 100, 100);
+        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
     }
 
     @Override
