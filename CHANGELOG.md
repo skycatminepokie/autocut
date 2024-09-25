@@ -1,3 +1,4 @@
 - Added keybind to make a new clip
 - Added export options
 - Better notifications for exporting errors
+- Added clips for receiving messages from players and from the server (not enabled by default)

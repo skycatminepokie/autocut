@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 public class ExportConfig {
     public static final String DEFAULT_FORMAT = "mp4";
     public static final String DEFAULT_NAME_FORMAT = "cut{ORIGINAL}";
-    public static Codec<ExportConfig> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
+    public static final Codec<ExportConfig> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             Codec.STRING.fieldOf("format").forGetter(ExportConfig::getFormat),
             Codec.STRING.fieldOf("nameFormat").forGetter(ExportConfig::getNameFormat)
     ).apply(instance, ExportConfig::new));

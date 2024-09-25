@@ -41,7 +41,6 @@ public class OBSHandler { // All this is likely on a thread other than the main 
             }
         } else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
-                MinecraftClient client = MinecraftClient.getInstance();
                 AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.end.success"));
                 if (AutocutClient.currentRecordingManager == null) {
                     AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.end.fail.notStarted")); // TODO: Check at connect and warn

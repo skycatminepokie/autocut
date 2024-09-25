@@ -32,8 +32,8 @@ public class ReceiveServerMessageClipType extends ClipType { // TODO: regex filt
         return Text.translatable("autocut.yacl.receive_server_message_clip");
     }
 
-    public Clip createClip(long time, Text message, boolean overlay) { // TODO: Show what server you are connected to
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Received a chat message from the server", "server", message.getString(), null, null);
+    public Clip createClip(long time, Text message, boolean actionBar) { // TODO: Show what server you are connected to, make a place for actionBar to go
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Received a chat message from the server" + (actionBar ? " in action bar" : ""), "server", message.getString(), null, null);
     }
 
 }
