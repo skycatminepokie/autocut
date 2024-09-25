@@ -26,13 +26,13 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
     //?} else {
     /*public void generateTranslations(TranslationBuilder tb) {
     *///?}
+        tb.add("key.category.autocut.autocut", "Autocut");
+        tb.add("key.autocut.clip", "Clip");
+        tb.add("autocut.yacl.title", "Autocut configuration menu");
         tb.add(YACL_PREFIX + ".category.clips", "Clips");
         tb.add(YACL_PREFIX + ".category.clips.tooltip", "Configure how sections of video are saved. Note that these settings only apply for future clips.");
-        tb.add("autocut.yacl.title", "Autocut configuration menu");
 
-        tb.add("key.autocut.clip", "Clip");
-        tb.add("key.category.autocut.autocut", "Autocut");
-
+        // TODO: Prefix with "clip."
         addOptionGroup("place_block_clip", "Place block", "When you place a block", tb);
         addOptionGroup("shoot_player_clip", "Shoot player", "When you shoot a player. Note that some servers will \"fake\" this in order to play the sound that comes with it. On Hypixel, you'll notice this when you join a game. You can filter these out if you like - it seems to only happen when you're at x=8.5, z=8.5.", tb);
         addOptionGroup("use_item_clip", "Use item", "When you use (right-click with) an item. This happens at the beginning of the click, and so it is not guaranteed to include the whole click if the button is held.", tb);
@@ -47,6 +47,17 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOption("generic.should_record", "Enable recording", "Whether this event should be recorded.", tb);
         addOption("generic.active", "Active", "Whether this event should be exported in the final recording.", tb);
         addOption("take_damage_clip.damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
+
+        tb.add(YACL_PREFIX + ".category.export", "Export");
+        tb.add(YACL_PREFIX + ".category.export.tooltip", "Configure the format videos are exported in");
+
+        addOption("export.format", "Format", "The video format to export to, eg \"mp4\", \"mkv\"", tb);
+        addOption("export.fileFormat", "Output file", """
+                The name of the file to export to, not including the extension (like ".mp4").
+                It's recommended to include variables (see below), otherwise you'll start overwriting your videos.
+                {ORIGINAL} will be replaced with the file name of the recording
+                {CLIPS} will be replaced with the number of clips.
+                Backslashes (\\) and periods (.) will be ignored.""", tb);
 
         addText("recording.connect.success", "OBS connected.", tb);
         addText("recording.start.success", "Recording started.", tb);

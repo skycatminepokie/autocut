@@ -100,20 +100,20 @@ public class ExportConfig {
         }
     }
 
-    public ConfigCategory generateConfigCategory() { // TODO: Localize
+    public ConfigCategory generateConfigCategory() {
         return ConfigCategory.createBuilder()
-                .name(Text.of("Export"))
-                .tooltip(Text.of("Configure the format videos are exported in"))
+                .name(Text.translatable("autocut.yacl.category.export"))
+                .tooltip(Text.translatable("autocut.yacl.category.export.tooltip"))
                 .option(Option.<String>createBuilder()
-                        .name(Text.of("Format"))
-                        .description(OptionDescription.of(Text.of("The video format to export to, eg \"mp4\", \"mkv\"")))
+                        .name(Text.translatable("autocut.yacl.export.format"))
+                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.format.description")))
                         .binding(DEFAULT_FORMAT, this::getFormat, this::setFormat)
                         .controller((option) -> () -> new PredicatedStringController(option, ExportConfig::isValidFormat))
                         .build()
                 )
                 .option(Option.<String>createBuilder()
-                        .name(Text.of("Output file"))
-                        .description(OptionDescription.of(Text.of("The name of the file to export to, not including the extension (like \".mp4\").\nIt's recommended to include variables (see below), otherwise you'll start overwriting your videos.\n{ORIGINAL} will be replaced with the file name of the recording\n{CLIPS} will be replaced with the number of clips.\nBackslashes (\\) and periods (.) will be ignored.")))
+                        .name(Text.translatable("autocut.yacl.export.fileFormat"))
+                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.fileFormat.description")))
                         .binding(DEFAULT_NAME_FORMAT, this::getNameFormat, this::setNameFormat)
                         .controller((option) -> () -> new PredicatedStringController(option, ExportConfig::isValidNameFormat))
                         .build()
