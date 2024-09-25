@@ -32,7 +32,7 @@ public class ReceivePlayerMessageClipType extends ClipType { // TODO: regex filt
     }
 
     public Clip createClip(long time, Text message, @Nullable GameProfile sender) { // TODO: Make sure we don't need MessageType.Parameters
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Received a chat message from a player", sender == null ? null : sender.getName(), message.getString(), null, null);
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Received a chat message from a player", sender == null ? null : sender.getName(), message.getString(), null, null);
     }
 
 }

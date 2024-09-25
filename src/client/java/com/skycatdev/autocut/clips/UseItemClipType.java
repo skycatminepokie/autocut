@@ -36,6 +36,6 @@ public class UseItemClipType extends ClipType {
     }
 
     public Clip createClip(long time, PlayerEntity player, ItemStack itemStack) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Used " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), null);
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Used " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), null);
     }
 }

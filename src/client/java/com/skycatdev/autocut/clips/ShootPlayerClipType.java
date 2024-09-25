@@ -34,6 +34,6 @@ public class ShootPlayerClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
     }
 }

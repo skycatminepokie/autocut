@@ -11,7 +11,7 @@ import java.util.Objects;
 /**
  * A period of time in a recording. Timestamps are UNIX time, not relative to the recording.
  */
-public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, @Nullable String description,
+public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse, @Nullable String description,
                    @Nullable String source, @Nullable String object, @Nullable Vec3d sourceLocation,
                    @Nullable Vec3d objectLocation) {
     public Clip {
@@ -22,7 +22,7 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
      * @return A deep copy of this clip
      */
     public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new Clip(in, time, out, type, active, description, source, object, sourceLocation, objectLocation);
+        return new Clip(in, time, out, type, active, inverse, description, source, object, sourceLocation, objectLocation);
     }
 
     /**

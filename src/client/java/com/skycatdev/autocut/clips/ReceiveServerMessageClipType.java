@@ -30,7 +30,7 @@ public class ReceiveServerMessageClipType extends ClipType { // TODO: regex filt
     }
 
     public Clip createClip(long time, Text message, boolean actionBar) { // TODO: Show what server you are connected to, make a place for actionBar to go
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Received a chat message from the server" + (actionBar ? " in action bar" : ""), "server", message.getString(), null, null);
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Received a chat message from the server" + (actionBar ? " in action bar" : ""), "server", message.getString(), null, null);
     }
 
 }

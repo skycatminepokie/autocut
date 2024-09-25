@@ -57,7 +57,7 @@ public class TakeDamageClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, float damageTaken) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), String.format(String.format("Took %%.%df damage", getPrecision()), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), String.format(String.format("Took %%.%df damage", getPrecision()), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
     }
 
     public int getPrecision() {

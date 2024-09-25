@@ -163,7 +163,7 @@ public class FilterGenerator {
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
             if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL).build(); // Take the union
+                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL, true, false).build(); // Take the union // TODO: make inversion work
                 mergedClips.set(i, newClip); // Replace the current
                 mergedClips.remove(i + 1); // Yeet the next, it's been combined
                 continue; // And check this clip for union with the next

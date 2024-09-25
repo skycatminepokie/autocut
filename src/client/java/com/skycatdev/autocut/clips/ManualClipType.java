@@ -37,6 +37,6 @@ public class ManualClipType extends ClipType {
     }
 
     public Clip createClip(long time) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Manual", null, null, null, null);
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Manual", null, null, null, null);
     }
 }
