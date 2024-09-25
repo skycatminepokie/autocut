@@ -78,7 +78,7 @@ public class AutocutClient implements ClientModInitializer {
                     try {
                         currentRecordingManager.addClip(MANUAL.clipType().createClip(time));
                     } catch (SQLException e) {
-                        Autocut.LOGGER.warn("Unable to store use manual clip", e);
+                        Autocut.LOGGER.warn("Unable to store manual clip", e);
                     }
                 }
             }
