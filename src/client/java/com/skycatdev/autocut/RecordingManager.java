@@ -203,7 +203,7 @@ public class RecordingManager {
     /**
      * Export all clips in the recording with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
      */
-    public void export() throws SQLException {
+    public void export() throws SQLException { // TODO: clean up this error handling, including checking that the outputPath != null
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
@@ -248,10 +248,11 @@ public class RecordingManager {
                 try {
                     job.run();
                 } catch (Exception e) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.fail"));
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
                     throw new RuntimeException("Something went wrong while exporting.", e);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.fail"));
                 throw new RuntimeException(e);
             }
         }, "Autocut FFmpeg Export Thread").start();

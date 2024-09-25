@@ -69,7 +69,8 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("cutting.finish", "Finished cutting!", tb);
         addText("cutting.progress", "Cutting: %s%%", tb);
         addText("cutting.start", "Preparing to cut...", tb);
-        addText("cutting.fail", "Something went wrong while exporting. Check your logs for more info.", tb);
+        addText("cutting.progress.fail", "Something went wrong while exporting. Check your logs for more info.", tb);
+        addText("cutting.fail", "Something went wrong while preparing to export. Check your logs for more info.", tb);
 
         addCommandMessage("autocut.finish.database", "fail.databaseDoesNotExist", "The given database does not exist.", tb);
         addCommandMessage("autocut.finish", "fail.noRecording", "No recording found. Did you connect, start recording, and stop recording?", tb);
