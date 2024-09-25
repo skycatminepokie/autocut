@@ -6,6 +6,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -83,6 +84,16 @@ public class AutocutClient implements ClientModInitializer {
                 }
             }
         });
+        ClientReceiveMessageEvents.CHAT.register(((message, signedMessage, sender, params, receptionTimestamp) -> {
+            if (currentRecordingManager != null && RECEIVE_PLAYER_MESSAGE.clipType().shouldRecord()) {
+                long time = System.currentTimeMillis();
+                try {
+                    currentRecordingManager.addClip(RECEIVE_PLAYER_MESSAGE.clipType().createClip(time, message, sender));
+                } catch (SQLException e) {
+                    Autocut.LOGGER.warn("Unable to store player chat message clip", e);
+                }
+            }
+        }));
     }
 
 }
