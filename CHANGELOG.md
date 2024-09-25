@@ -1,2 +1,3 @@
 - Added keybind to make a new clip
 - Added export options
+- Better notifications for exporting errors
