@@ -23,11 +23,11 @@ public class ExportConfig {
     /**
      * The file format to export the video to (eg .mp4, .mkv)
      */
-    public String format; // TODO use
+    public String format;
     /**
      * The format name of the exported file. For example, "cut_{ORIGINAL}".
      */
-    public String nameFormat; // TODO use
+    public String nameFormat;
 
     public ExportConfig(String format, String nameFormat) {
         this.format = format;
