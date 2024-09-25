@@ -1,14 +1,11 @@
 package com.skycatdev.autocut.clips;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
 import dev.isxander.yacl3.api.OptionDescription;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 
 public class ReceiveServerMessageClipType extends ClipType { // TODO: regex filter?
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "receive_server_message");
