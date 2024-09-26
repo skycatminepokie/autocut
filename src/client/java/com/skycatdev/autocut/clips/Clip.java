@@ -1,5 +1,6 @@
 package com.skycatdev.autocut.clips;
 
+import com.google.common.collect.Range;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +44,10 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
         double inSecs = (double) (in - recordingStartTime) / 1000;
         double outSecs = (double) (out - recordingStartTime) / 1000;
         return String.format("between(%s\\,%f\\,%f)", variable, inSecs, outSecs);
+    }
+
+    public Range<Long> toRange() {
+        return Range.closed(in, out);
     }
 
     /**

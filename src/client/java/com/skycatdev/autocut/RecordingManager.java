@@ -230,7 +230,7 @@ public class RecordingManager {
                         //.setVideoCodec("libx264") requires gpl
                         .done();
                 FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips));
+                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips)); // TODO: use the total duration of the merged clips instead
 
                     @Override
                     public void progress(Progress progress) {

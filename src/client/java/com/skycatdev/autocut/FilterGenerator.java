@@ -1,7 +1,11 @@
 package com.skycatdev.autocut;
 
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
+import com.sun.source.tree.Tree;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.probe.FFmpegStream;
 import net.minecraft.util.Identifier;
@@ -153,64 +157,28 @@ public class FilterGenerator {
     /**
      * Sort and merge all overlapping clips together.
      *
-     * @param clips The clips to merge together.
+     * @param clipCollection The clips to merge together.
      * @return A new ArrayList of merged clips.
      */
-    protected static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
-        ArrayList<Clip> mergedClips = new ArrayList<>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
-        ArrayList<Clip> inverseClips = new ArrayList<>(mergedClips.stream().filter(Clip::inverse).toList());
-        ArrayList<Clip> regularClips = new ArrayList<>(mergedClips.stream().filter((c) -> !c.inverse()).toList());
-
-        // Merge all the regular clips
-        mergeIgnoreInverse(regularClips);
-
-        // Merge all the inverse clips
-        mergeIgnoreInverse(inverseClips);
-
-        for (Clip inverseClip : inverseClips) { // I hate the branching-continue-ness of this, please fix it
-            int k = 0;
-            Clip regularClip;
-            boolean sort = false;
-            while (k < regularClips.size() && (regularClip = regularClips.get(k)).in() < inverseClip.out()) {
-                if (inverseClip.in() <= regularClip.in() && inverseClip.out() >= regularClip.out()) { // Regular is swallowed by inverse
-                    // Case B
-                    regularClips.remove(k);
-                    continue;
-                }
-
-
-                if (regularClip.in() < inverseClip.in() && regularClip.out() > inverseClip.out()) { // Inverse swallowed by regular
-                    // Case A
-                    Clip clipA = new ClipBuilder(regularClip.in(), regularClip.in(), inverseClip.in(), INTERNAL, true, false).build();
-                    Clip clipB = new ClipBuilder(inverseClip.out(), inverseClip.out(), regularClip.out(), INTERNAL, true, false).build();
-                    regularClips.set(k, clipA);
-                    regularClips.add(k + 1, clipB);
-                    k += 2; // We know it doesn't match this one or the next one now
-                    sort = true; // But we may have messed up the sorting for the next inverseClip
-                    continue;
-                }
-
-                if (regularClip.in() < inverseClip.in()) {
-                    // Case C
-                    Clip newClip = new ClipBuilder(regularClip.in(), regularClip.in(), inverseClip.in(), INTERNAL, true, false).build();
-                    regularClips.set(k, newClip);
-                    k++;
-                    continue;
-                }
-
-                // Case D
-                // assert inverseClip.in() <= regularClip.in();
-                // assert inverseClip.out() < regularClip.out();
-                Clip newClip = new ClipBuilder(inverseClip.out(), inverseClip.out(), regularClip.out(), INTERNAL, true, false).build();
-                regularClips.set(k, newClip);
-                k++;
-            }
-            if (sort) {
-                regularClips.sort(Comparator.comparing(Clip::in));
+    protected static ArrayList<Clip> mergeClips(Collection<Clip> clipCollection) {
+        ArrayList<Clip> clips = new ArrayList<>(clipCollection); // New list so that it's mutable
+        TreeRangeSet<Long> range = TreeRangeSet.create();
+        for (Clip clip : clips) {
+            if (!clip.inverse()) {
+                range.add(clip.toRange());
             }
         }
+        for (Clip clip : clips) {
+            if (clip.inverse()) {
+                range.remove(clip.toRange());
+            }
+        }
+        clips.clear();
+        for (Range<Long> singleRange : range.asRanges()) {
+            clips.add(new ClipBuilder(singleRange.lowerEndpoint(), singleRange.lowerEndpoint(), singleRange.upperEndpoint(), INTERNAL, true, false).build());
+        }
 
-        return regularClips;
+        return clips;
     }
 
     private static void mergeIgnoreInverse(ArrayList<Clip> inverseClips) {
