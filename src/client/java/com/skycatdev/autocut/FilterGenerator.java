@@ -6,7 +6,6 @@ import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.probe.FFmpegStream;
 import net.minecraft.util.Identifier;
 
-import javax.lang.model.type.UnionType;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -159,69 +158,74 @@ public class FilterGenerator {
      */
     protected static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
         ArrayList<Clip> mergedClips = new ArrayList<>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
-        int i = 0;
-        // TODO: for when they start at the same place
-        while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
-            Clip current = mergedClips.get(i);
-            Clip next = mergedClips.get(i + 1);
-            if (current.out() <= next.in()) { // Not overlapping
-                if (current.inverse()) {
-                    // Case A
-                    mergedClips.remove(i);
-                    continue;
-                } else {
+        ArrayList<Clip> inverseClips = new ArrayList<>(mergedClips.stream().filter(Clip::inverse).toList());
+        ArrayList<Clip> regularClips = new ArrayList<>(mergedClips.stream().filter((c) -> !c.inverse()).toList());
+
+        // Merge all the regular clips
+        mergeIgnoreInverse(regularClips);
+
+        // Merge all the inverse clips
+        mergeIgnoreInverse(inverseClips);
+
+        for (Clip inverseClip : inverseClips) { // I hate the branching-continue-ness of this, please fix it
+            int k = 0;
+            Clip regularClip;
+            boolean sort = false;
+            while (k < regularClips.size() && (regularClip = regularClips.get(k)).in() < inverseClip.out()) {
+                if (inverseClip.in() <= regularClip.in() && inverseClip.out() >= regularClip.out()) { // Regular is swallowed by inverse
                     // Case B
-                    i++;
+                    regularClips.remove(k);
                     continue;
                 }
-            } else { // Overlapping in some way
-                if (current.inverse() == next.inverse()) {
+
+
+                if (regularClip.in() < inverseClip.in() && regularClip.out() > inverseClip.out()) { // Inverse swallowed by regular
+                    // Case A
+                    Clip clipA = new ClipBuilder(regularClip.in(), regularClip.in(), inverseClip.in(), INTERNAL, true, false).build();
+                    Clip clipB = new ClipBuilder(inverseClip.out(), inverseClip.out(), regularClip.out(), INTERNAL, true, false).build();
+                    regularClips.set(k, clipA);
+                    regularClips.add(k + 1, clipB);
+                    k += 2; // We know it doesn't match this one or the next one now
+                    sort = true; // But we may have messed up the sorting for the next inverseClip
+                    continue;
+                }
+
+                if (regularClip.in() < inverseClip.in()) {
                     // Case C
-                    Clip newClip = new ClipBuilder(current.in(), current.time(), Math.max(current.out(), next.out()), INTERNAL, true, current.inverse()).build();
-                    mergedClips.set(i, newClip);
+                    Clip newClip = new ClipBuilder(regularClip.in(), regularClip.in(), inverseClip.in(), INTERNAL, true, false).build();
+                    regularClips.set(k, newClip);
+                    k++;
                     continue;
-                } else {
-                    if (current.inverse()) {
-                        // assert !next.inverse();
-                        if (current.out() < next.out()) {
-                            // Case D
-                            Clip newClip = new ClipBuilder(current.out(), current.out(), next.out(), INTERNAL, true, false).build();
-                            mergedClips.set(i, newClip);
-                            mergedClips.set(i + 1, current); // It needs a chance to eat the next one
-                            i++;
-                            continue;
-                        } else {
-                            // assert current.out >= next.out();
-                            // Case E
-                            mergedClips.remove(i + 1);
-                            continue;
-                        }
-                    } else {
-                        if (current.out() == next.out()) {
-                            // Case F
-                            mergedClips.remove(i);
-                            continue;
-                        } else {
-                            if (current.out() <= next.out()) {
-                                // Case G
-                                Clip newClip = new ClipBuilder(current.in(), current.in(), next.in(), INTERNAL, true, false).build();
-                                mergedClips.set(i, newClip);
-                                i++;
-                                continue;
-                            } else {
-                                // Case H
-                                Clip newClipA = new ClipBuilder(current.in(), current.in(), next.in(), INTERNAL, true, false).build();
-                                Clip newClipB = new ClipBuilder(next.in(), next.in(), current.out(), INTERNAL, true, false).build();
-                                mergedClips.set(i, newClipA);
-                                mergedClips.set(i + 1, newClipB);
-                                continue;
-                            }
-                        }
-                    }
                 }
+
+                // Case D
+                // assert inverseClip.in() <= regularClip.in();
+                // assert inverseClip.out() < regularClip.out();
+                Clip newClip = new ClipBuilder(inverseClip.out(), inverseClip.out(), regularClip.out(), INTERNAL, true, false).build();
+                regularClips.set(k, newClip);
+                k++;
+            }
+            if (sort) {
+                regularClips.sort(Comparator.comparing(Clip::in));
             }
         }
-        return mergedClips;
+
+        return regularClips;
+    }
+
+    private static void mergeIgnoreInverse(ArrayList<Clip> inverseClips) {
+        int j = 0;
+        while (j < inverseClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
+            Clip current = inverseClips.get(j);
+            Clip next = inverseClips.get(j + 1);
+            if (next.in() <= current.out()) { // If current overlaps next
+                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL, true, false).build(); // Take the union // TODO: make inversion work
+                inverseClips.set(j, newClip); // Replace the current
+                inverseClips.remove(j + 1); // Yeet the next, it's been combined
+                continue; // And check this clip for union with the next
+            }
+            j++; // This clip has no overlap, try the next one
+        }
     }
 
     /**
