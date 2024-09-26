@@ -6,6 +6,7 @@ import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.probe.FFmpegStream;
 import net.minecraft.util.Identifier;
 
+import javax.lang.model.type.UnionType;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -157,18 +158,68 @@ public class FilterGenerator {
      * @return A new ArrayList of merged clips.
      */
     protected static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
-        ArrayList<Clip> mergedClips = new ArrayList<Clip>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
+        ArrayList<Clip> mergedClips = new ArrayList<>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
         int i = 0;
+        // TODO: for when they start at the same place
         while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
             Clip current = mergedClips.get(i);
             Clip next = mergedClips.get(i + 1);
-            if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL, true, false).build(); // Take the union // TODO: make inversion work
-                mergedClips.set(i, newClip); // Replace the current
-                mergedClips.remove(i + 1); // Yeet the next, it's been combined
-                continue; // And check this clip for union with the next
+            if (current.out() <= next.in()) { // Not overlapping
+                if (current.inverse()) {
+                    // Case A
+                    mergedClips.remove(i);
+                    continue;
+                } else {
+                    // Case B
+                    i++;
+                    continue;
+                }
+            } else { // Overlapping in some way
+                if (current.inverse() == next.inverse()) {
+                    // Case C
+                    Clip newClip = new ClipBuilder(current.in(), current.time(), Math.max(current.out(), next.out()), INTERNAL, true, current.inverse()).build();
+                    mergedClips.set(i, newClip);
+                    continue;
+                } else {
+                    if (current.inverse()) {
+                        // assert !next.inverse();
+                        if (current.out() < next.out()) {
+                            // Case D
+                            Clip newClip = new ClipBuilder(current.out(), current.out(), next.out(), INTERNAL, true, false).build();
+                            mergedClips.set(i, newClip);
+                            mergedClips.set(i + 1, current); // It needs a chance to eat the next one
+                            i++;
+                            continue;
+                        } else {
+                            // assert current.out >= next.out();
+                            // Case E
+                            mergedClips.remove(i + 1);
+                            continue;
+                        }
+                    } else {
+                        if (current.out() == next.out()) {
+                            // Case F
+                            mergedClips.remove(i);
+                            continue;
+                        } else {
+                            if (current.out() <= next.out()) {
+                                // Case G
+                                Clip newClip = new ClipBuilder(current.in(), current.in(), next.in(), INTERNAL, true, false).build();
+                                mergedClips.set(i, newClip);
+                                i++;
+                                continue;
+                            } else {
+                                // Case H
+                                Clip newClipA = new ClipBuilder(current.in(), current.in(), next.in(), INTERNAL, true, false).build();
+                                Clip newClipB = new ClipBuilder(next.in(), next.in(), current.out(), INTERNAL, true, false).build();
+                                mergedClips.set(i, newClipA);
+                                mergedClips.set(i + 1, newClipB);
+                                continue;
+                            }
+                        }
+                    }
+                }
             }
-            i++; // This clip has no overlap, try the next one
         }
         return mergedClips;
     }
