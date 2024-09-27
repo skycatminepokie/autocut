@@ -182,7 +182,7 @@ publishMods {
 	changelog = new File('CHANGELOG.md').text
 	type = BETA
 	displayName = "${mod_name} v${mod_version} for Minecraft ${mcVersion}"
-	dryRun = providers.environmentVariable("DRY_RUN").getOrElse("false") != "true"
+	dryRun = providers.environmentVariable("DRY_RUN").getOrElse("false") == "true"
 	github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
 		repository = "skycatminepokie/autocut"
