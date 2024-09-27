@@ -186,7 +186,7 @@ publishMods {
 	github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
 		repository = "skycatminepokie/autocut"
-		commitish = providers.environmentVariable("GITHUB_REF_NAME").getOrElse("main")
+		commitish = providers.environmentVariable("GITHUB_REF_NAME").getOrElse("master")
 	}
 
 	modrinth {
