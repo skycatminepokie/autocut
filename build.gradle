@@ -206,9 +206,15 @@ publishMods {
 	}
 
 	discord {
-		username = "Autocut has been updated!" // This was the only way I could get the changelog to be there too
+		username = "Mod Updates"
+
+		avatarUrl = "https://cataas.com/cat?type=square"
 
 		webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
 		dryRunWebhookUrl = providers.environmentVariable("DISCORD_WEBHOOK_DRY_RUN")
+
+		content = changelog.map {
+			"# A new version of Autocut is out! \n" + it
+		}
 	}
 }
