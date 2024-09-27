@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 public class ConfigHandler {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("autocut");
     private static final File EXPORT_CONFIG_FILE = CONFIG_PATH.resolve("export.json").toFile();
-    private static ExportConfig EXPORT_CONFIG = ExportConfig.readOrDefault(EXPORT_CONFIG_FILE);
+    private static final ExportConfig EXPORT_CONFIG = ExportConfig.readOrDefault(EXPORT_CONFIG_FILE);
 
     protected static @NotNull Path getClipTypeConfigPath(Identifier typeId) {
         return CONFIG_PATH.resolve(typeId.getNamespace()).resolve(typeId.getPath() + ".json");

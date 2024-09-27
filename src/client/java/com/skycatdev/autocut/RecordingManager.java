@@ -1,5 +1,6 @@
 package com.skycatdev.autocut;
 
+import com.google.common.collect.Range;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.config.ConfigHandler;
@@ -209,11 +210,11 @@ public class RecordingManager {
         if (outputPath == null) {
             throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
         }
-        LinkedList<Clip> clips = getActiveClips();
+        Set<Range<Long>> rangeSet = Clip.toRange(getActiveClips()).asRanges();
         new Thread(() -> {
             File recording = new File(outputPath);
             String recordingName = recording.getName().substring(0, recording.getName().lastIndexOf('.'));
-            File export = recording.toPath().resolveSibling(ConfigHandler.getExportConfig().getExportName(recordingName, clips.size())).toFile();
+            File export = recording.toPath().resolveSibling(ConfigHandler.getExportConfig().getExportName(recordingName, rangeSet.size())).toFile();
 
             try {
                 FFmpegExecutor executor = new FFmpegExecutor();
@@ -221,7 +222,7 @@ public class RecordingManager {
                 FFmpegProbeResult in = ffprobe.probe(outputPath);
 
                 @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
-                        .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, clips, in).getAbsolutePath())
+                        .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, in, rangeSet).getAbsolutePath())
                         .setInput(in)
                         .addOutput(export.getAbsolutePath())
                         .setFormat(ConfigHandler.getExportConfig().getFormat())
@@ -230,7 +231,7 @@ public class RecordingManager {
                         //.setVideoCodec("libx264") requires gpl
                         .done();
                 FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips)); // TODO: use the total duration of the merged clips instead
+                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Utils.totalSpace(rangeSet));
 
                     @Override
                     public void progress(Progress progress) {
