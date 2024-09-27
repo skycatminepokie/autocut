@@ -2,3 +2,4 @@
 - Added export options
 - Better notifications for exporting errors
 - Added clips for receiving messages from players and from the server (not enabled by default)
+- Added inverse clips - basically "don't save this" instead of "save this"
