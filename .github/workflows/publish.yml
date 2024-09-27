@@ -30,7 +30,7 @@ jobs:
           java-version: 21
 
       - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows }}
+        if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
 
       - name: Datagen
