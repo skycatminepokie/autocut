@@ -18,11 +18,11 @@ import net.minecraft.util.math.Vec3d;
 public class BreakBlockClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "break_block");
     public static final Codec<BreakBlockClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, BreakBlockClipType::new));
-    public BreakBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    public BreakBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
     }
     public BreakBlockClipType() {
-        super(ID, true, true, 100, 100, true, true, 100, 100);
+        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
     }
 
     @Override
@@ -36,6 +36,6 @@ public class BreakBlockClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, BlockPos pos, BlockState state) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Broke " + state.getBlock().getName().getString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Broke " + state.getBlock().getName().getString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
     }
 }

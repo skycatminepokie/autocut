@@ -1,9 +1,14 @@
 package com.skycatdev.autocut;
 
+import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
+import com.sun.source.tree.Tree;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.probe.FFmpegStream;
+import net.minecraft.util.Identifier;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +18,13 @@ import java.util.Collection;
 import java.util.Comparator;
 
 public class FilterGenerator {
+    /**
+     * A clip made for internal use. Should not end up being serialized.
+     *
+     * @see FilterGenerator#mergeClips(Collection)
+     */
+    public static final Identifier INTERNAL = Identifier.of(Autocut.MOD_ID, "internal");
+
     /**
      * Creates a single {@code select} filter for a single audio stream.
      *
@@ -145,24 +157,43 @@ public class FilterGenerator {
     /**
      * Sort and merge all overlapping clips together.
      *
-     * @param clips The clips to merge together.
+     * @param clipCollection The clips to merge together.
      * @return A new ArrayList of merged clips.
      */
-    protected static ArrayList<Clip> mergeClips(Collection<Clip> clips) {
-        ArrayList<Clip> mergedClips = new ArrayList<Clip>(clips.stream().map(Clip::copy).sorted(Comparator.comparing(Clip::in)).toList()); // New list so that it's mutable
-        int i = 0;
-        while (i < mergedClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
-            Clip current = mergedClips.get(i);
-            Clip next = mergedClips.get(i + 1);
+    protected static ArrayList<Clip> mergeClips(Collection<Clip> clipCollection) {
+        ArrayList<Clip> clips = new ArrayList<>(clipCollection); // New list so that it's mutable
+        TreeRangeSet<Long> range = TreeRangeSet.create();
+        for (Clip clip : clips) {
+            if (!clip.inverse()) {
+                range.add(clip.toRange());
+            }
+        }
+        for (Clip clip : clips) {
+            if (clip.inverse()) {
+                range.remove(clip.toRange());
+            }
+        }
+        clips.clear();
+        for (Range<Long> singleRange : range.asRanges()) {
+            clips.add(new ClipBuilder(singleRange.lowerEndpoint(), singleRange.lowerEndpoint(), singleRange.upperEndpoint(), INTERNAL, true, false).build());
+        }
+
+        return clips;
+    }
+
+    private static void mergeIgnoreInverse(ArrayList<Clip> inverseClips) {
+        int j = 0;
+        while (j < inverseClips.size() - 1) { // Don't try to merge the last clip, there's nothing to merge it with
+            Clip current = inverseClips.get(j);
+            Clip next = inverseClips.get(j + 1);
             if (next.in() <= current.out()) { // If current overlaps next
-                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), RecordingManager.INTERNAL).build(); // Take the union
-                mergedClips.set(i, newClip); // Replace the current
-                mergedClips.remove(i + 1); // Yeet the next, it's been combined
+                Clip newClip = new ClipBuilder(current.in(), Math.min(current.out(), next.out()), Math.max(current.out(), next.out()), INTERNAL, true, false).build(); // Take the union // TODO: make inversion work
+                inverseClips.set(j, newClip); // Replace the current
+                inverseClips.remove(j + 1); // Yeet the next, it's been combined
                 continue; // And check this clip for union with the next
             }
-            i++; // This clip has no overlap, try the next one
+            j++; // This clip has no overlap, try the next one
         }
-        return mergedClips;
     }
 
     /**

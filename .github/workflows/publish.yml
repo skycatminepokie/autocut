@@ -1,0 +1,40 @@
+name: Publish
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' # @AnthonyWC on GH, https://github.com/orgs/community/discussions/26724#discussioncomment-3253096
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Environment Variables
+        run: env
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v3.12.0
+        with:
+          distribution: "termurin"
+          java-version: 21
+
+      - name: Make Gradle Wrapper Executable
+        if: ${{ runner.os != 'Windows }}
+        run: chmod +x ./gradlew
+
+      - name: Datagen
+        run: ./gradlew chiseledRunDatagen
+
+      - name: Build and Publish
+        run: ./gradlew chiseledPublishMods

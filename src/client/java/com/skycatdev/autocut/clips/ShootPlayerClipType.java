@@ -15,12 +15,12 @@ public class ShootPlayerClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "shoot_player");
     public static final Codec<ShootPlayerClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ShootPlayerClipType::new));
 
-    public ShootPlayerClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    public ShootPlayerClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
     }
 
     public ShootPlayerClipType() {
-        super(ID, true, true, 100, 100, true, true, 100, 100);
+        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
     }
 
     @Override
@@ -34,6 +34,6 @@ public class ShootPlayerClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Shot a player with an arrow", player.getNameForScoreboard(), null, player.getPos(), null);
     }
 }

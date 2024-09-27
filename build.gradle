@@ -6,7 +6,10 @@ plugins {
 	id "me.modmuss50.mod-publish-plugin" version "0.7.4"
 }
 
-version = property("mod_id").toString()
+def mcVersion = stonecutter.current.version
+def fullVersion = mod_version + "+" + mcVersion
+
+version = fullVersion
 group = property("mod_group").toString()
 
 def id = property("mod_id").toString()
@@ -17,14 +20,12 @@ def fabric_api = property("deps.fabric_api").toString()
 def modmenu = property("deps.modmenu_version").toString()
 
 
-def mcVersion = stonecutter.current.version
 def javaVersion = (stonecutter.eval(mcVersion, ">=1.20.5")) ? JavaVersion.VERSION_21 : JavaVersion.VERSION_17
-def fullVersion = mod_version + "+" + mcVersion
 
 stonecutter.dependency("java", javaVersion.toString())
 
 base {
-	archivesName = property("mod_name").toString()
+	archivesName = property("mod_id").toString()
 }
 
 repositories {
@@ -148,7 +149,7 @@ jar {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
-			artifactId = property("mod_name").toString()
+			artifactId = property("mod_id").toString()
 			from components.java
 		}
 	}
@@ -172,7 +173,6 @@ if (stonecutter.current.isActive) {
 tasks.register('buildAndCollect', Copy) {
 	group = "build"
 	from(tasks.remapJar.archiveFile)
-	rename ("Autocut-(.*).jar", '$1' + "-${fullVersion}.jar") // A bit of a hack but it works
 	into(rootProject.layout.buildDirectory.file("libs/${mod_version}"))
 }
 
@@ -183,15 +183,11 @@ publishMods {
 	type = BETA
 	displayName = "${mod_name} v${mod_version} for Minecraft ${mcVersion}"
 	dryRun = providers.environmentVariable("DRY_RUN").getOrElse("true") != "false"
-	/*github {
+	github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
 		repository = "skycatminepokie/autocut"
-		commitish = "main"
-		print("TAG NAME: \"")
-		print("v${fullVersion}")
-		print("\"")
-		tagName = "v${fullVersion}"
-	}*/
+		commitish = providers.environmentVariable("GITHUB_REF_NAME").getOrElse("main")
+	}
 
 	modrinth {
 		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
@@ -201,10 +197,12 @@ publishMods {
 			end = latest_minecraft
 		}
 
+		projectDescription = providers.fileContents(layout.projectDirectory.file("README.md")).asText
+
 		requires("yacl")
 		requires("fabric-api")
 		optional("modmenu")
-		announcementTitle = "Download version ${fullVersion}"
+		announcementTitle = "Download version ${fullVersion} from Modrinth"
 	}
 
 	discord {

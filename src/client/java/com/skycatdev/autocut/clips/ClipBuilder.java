@@ -11,26 +11,24 @@ public class ClipBuilder {
     private long out;
     private @NotNull Identifier type;
     private boolean active = true;
+    private boolean inverse;
     private @Nullable String description;
     private @Nullable String source;
     private @Nullable String object;
     private @Nullable Vec3d sourceLocation;
     private @Nullable Vec3d objectLocation;
 
-    public ClipBuilder(long in, long time, long out, @NotNull Identifier type) {
+    public ClipBuilder(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse) {
         this.in = in;
         this.time = time;
         this.out = out;
         this.type = type;
+        this.active = active;
+        this.inverse = inverse;
     }
 
     public Clip build() {
-        return new Clip(in, time, out, type, active, description, source, object, sourceLocation, objectLocation);
-    }
-
-    public ClipBuilder setDescription(@Nullable String description) {
-        this.description = description;
-        return this;
+        return new Clip(in, time, out, type, active, inverse, description, source, object, sourceLocation, objectLocation);
     }
 
     public ClipBuilder setActive(boolean active) {
@@ -38,8 +36,18 @@ public class ClipBuilder {
         return this;
     }
 
+    public ClipBuilder setDescription(@Nullable String description) {
+        this.description = description;
+        return this;
+    }
+
     public ClipBuilder setIn(long in) {
         this.in = in;
+        return this;
+    }
+
+    public ClipBuilder setInverse(boolean inverse) {
+        this.inverse = inverse;
         return this;
     }
 

@@ -19,12 +19,12 @@ public class PlaceBlockClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "place_block");
     public static final Codec<PlaceBlockClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, PlaceBlockClipType::new));
 
-    public PlaceBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    public PlaceBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
     }
 
     public PlaceBlockClipType() {
-        super(ID, true, true, 100, 100, true, true, 100, 100);
+        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
     }
 
     @Override
@@ -38,6 +38,6 @@ public class PlaceBlockClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, ItemStack itemStack, BlockPos placementLocation) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(),  "Placed " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), Vec3d.of(placementLocation));
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(),  isInverse(), "Placed " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), Vec3d.of(placementLocation));
     }
 }

@@ -21,6 +21,26 @@ public abstract class ClipType {
     /**
      * Whether new clips of this type should be marked as active.
      */
+    private final boolean activeDefault;
+    /**
+     * Whether new clips of this type should be recorded.
+     */
+    private final boolean shouldRecordDefault;
+    /**
+     * How many milliseconds before the actual event should start by default.
+     */
+    private final long startOffsetDefault;
+    /**
+     * How many milliseconds after the actual event should start by default.
+     */
+    private final long endOffsetDefault;
+    /**
+     * If the clip should be inverse by default.
+     */
+    private final boolean inverseDefault;
+    /**
+     * Whether new clips of this type should be marked as active.
+     */
     private boolean active;
     /**
      * Whether new clips of this type should be recorded.
@@ -35,42 +55,22 @@ public abstract class ClipType {
      */
     private long endOffset;
     /**
-     * Whether new clips of this type should be marked as active.
+     * If the clips of this type should be an inverted clip ("discard this footage")
      */
-    private final boolean activeDefault;
-    /**
-     * Whether new clips of this type should be recorded.
-     */
-    private final boolean shouldRecordDefault;
-    /**
-     * How many milliseconds before the actual event should start by default.
-     */
-    private final long startOffsetDefault;
-    /**
-     * How many milliseconds after the actual event should start by default.
-     */
-    private final long endOffsetDefault;
+    private boolean inverse;
 
-    public ClipType(Identifier id, boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault) {
+    public ClipType(Identifier id, boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault, boolean inverseDefault) {
         this.id = id;
         this.active = active;
         this.shouldRecord = shouldRecord;
         this.startOffset = startOffset;
         this.endOffset = endOffset;
+        this.inverse = inverse;
         this.activeDefault = activeDefault;
         this.shouldRecordDefault = shouldRecordDefault;
         this.startOffsetDefault = startOffsetDefault;
         this.endOffsetDefault = endOffsetDefault;
-    }
-
-    /**
-     * Builds the YACL option group for this type. You should not need to touch this.
-     */
-    public OptionGroup buildOptionGroup() {
-        OptionGroup.Builder builder = OptionGroup.createBuilder().name(getOptionGroupName())
-                .description(getOptionGroupDescription());
-        addOptions(builder);
-        return builder.build();
+        this.inverseDefault = inverseDefault;
     }
 
     /**
@@ -112,6 +112,23 @@ public abstract class ClipType {
                 .controller(LongFieldControllerBuilder::create)
                 .build()
         );
+        builder.option(Option.<Boolean>createBuilder() // TODO: Localization
+                .name(Text.of("Invert new clips"))
+                .description(OptionDescription.of(Text.of("If new clips should be the opposite of clips - the footage they cover will NOT be exported.")))
+                .binding(inverseDefault, this::isInverse, this::setInverse)
+                .controller(TickBoxControllerBuilder::create)
+                .build()
+        );
+    }
+
+    /**
+     * Builds the YACL option group for this type. You should not need to touch this.
+     */
+    public OptionGroup buildOptionGroup() {
+        OptionGroup.Builder builder = OptionGroup.createBuilder().name(getOptionGroupName())
+                .description(getOptionGroupDescription());
+        addOptions(builder);
+        return builder.build();
     }
 
     public long getEndOffset() {
@@ -122,14 +139,6 @@ public abstract class ClipType {
         this.endOffset = endOffset;
     }
 
-    public long getStartOffset() {
-        return startOffset;
-    }
-
-    public void setStartOffset(long startOffset) {
-        this.startOffset = startOffset;
-    }
-
     public Identifier getId() {
         return id;
     }
@@ -138,12 +147,28 @@ public abstract class ClipType {
 
     public abstract Text getOptionGroupName();
 
+    public long getStartOffset() {
+        return startOffset;
+    }
+
+    public void setStartOffset(long startOffset) {
+        this.startOffset = startOffset;
+    }
+
     public boolean isActive() {
         return active;
     }
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isInverse() {
+        return inverse;
+    }
+
+    public void setInverse(boolean inverse) {
+        this.inverse = inverse;
     }
 
     public void setShouldRecord(boolean shouldRecord) {

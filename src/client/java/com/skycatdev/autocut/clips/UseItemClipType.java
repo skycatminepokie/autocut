@@ -17,12 +17,12 @@ public class UseItemClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "use_item");
     public static final Codec<UseItemClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, UseItemClipType::new));
 
-    public UseItemClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset) {
-        super(ID, active, shouldRecord, startOffset, endOffset, true, true, 100, 100);
+    public UseItemClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
     }
 
     public UseItemClipType() {
-        super(ID, true, true, 100, 100, true, true, 100, 100);
+        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
     }
 
     @Override
@@ -36,6 +36,6 @@ public class UseItemClipType extends ClipType {
     }
 
     public Clip createClip(long time, PlayerEntity player, ItemStack itemStack) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), "Used " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), null);
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Used " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), null);
     }
 }
