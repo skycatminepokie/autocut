@@ -1,11 +1,14 @@
 package com.skycatdev.autocut.clips;
 
 import com.google.common.collect.Range;
+import com.google.common.collect.RangeSet;
+import com.google.common.collect.TreeRangeSet;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -48,6 +51,21 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
 
     public Range<Long> toRange() {
         return Range.closed(in, out);
+    }
+
+    public static TreeRangeSet<Long> toRange(Collection<Clip> clips) {
+        TreeRangeSet<Long> range = TreeRangeSet.create();
+        for (Clip clip : clips) {
+            if (!clip.inverse()) {
+                range.add(clip.toRange());
+            }
+        }
+        for (Clip clip : clips) {
+            if (clip.inverse()) {
+                range.remove(clip.toRange());
+            }
+        }
+        return range;
     }
 
     /**
