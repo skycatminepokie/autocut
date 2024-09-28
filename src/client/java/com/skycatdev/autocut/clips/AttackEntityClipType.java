@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,12 +16,12 @@ public class AttackEntityClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "attack_entity");
     public static final Codec<AttackEntityClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, AttackEntityClipType::new));
 
-    public AttackEntityClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
+    public AttackEntityClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     public AttackEntityClipType() {
-        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
+        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

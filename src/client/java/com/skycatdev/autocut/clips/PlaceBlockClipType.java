@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -19,12 +20,12 @@ public class PlaceBlockClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "place_block");
     public static final Codec<PlaceBlockClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, PlaceBlockClipType::new));
 
-    public PlaceBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
+    public PlaceBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     public PlaceBlockClipType() {
-        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
+        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

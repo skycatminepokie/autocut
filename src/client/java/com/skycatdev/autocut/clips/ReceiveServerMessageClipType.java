@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -11,12 +12,12 @@ public class ReceiveServerMessageClipType extends ClipType { // TODO: regex filt
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "receive_server_message");
     public static final Codec<ReceiveServerMessageClipType> CODEC = RecordCodecBuilder.create((instance) -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ReceiveServerMessageClipType::new));
 
-    public ReceiveServerMessageClipType(boolean shouldRecord, boolean isActive, long startOffset, long endOffset, boolean inverse) {
-        super(ID, isActive, shouldRecord, startOffset, endOffset, inverse, false, true, 100, 100, false);
+    public ReceiveServerMessageClipType(boolean shouldRecord, boolean isActive, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode) {
+        super(ID, isActive, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, false, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     public ReceiveServerMessageClipType() {
-        super(ID, false, true, 100, 100, false, false, true, 100, 100, false);
+        super(ID, false, true, 100, 100, false, ExportGroupingMode.NONE, false, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

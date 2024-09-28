@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -17,12 +18,12 @@ public class UseItemClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "use_item");
     public static final Codec<UseItemClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, UseItemClipType::new));
 
-    public UseItemClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
+    public UseItemClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     public UseItemClipType() {
-        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
+        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

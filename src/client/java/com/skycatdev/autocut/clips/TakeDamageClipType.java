@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
@@ -24,13 +25,13 @@ public class TakeDamageClipType extends ClipType {
      */
     private int precision;
 
-    public TakeDamageClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, int precision) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
+    public TakeDamageClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode, int precision) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, 100, 100, false, ExportGroupingMode.NONE);
         this.setPrecision(precision);
     }
 
     public TakeDamageClipType() {
-        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
+        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
         this.setPrecision(1);
     }
 

@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -18,12 +19,12 @@ public class ManualClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "manual_clip");
     public static final Codec<ManualClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ManualClipType::new));
 
-    public ManualClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false);
+    public ManualClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL);
     }
 
     public ManualClipType() {
-        super(ID, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, true, true,TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false);
+        super(ID, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL, true, true,TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -18,11 +19,11 @@ import net.minecraft.util.math.Vec3d;
 public class BreakBlockClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "break_block");
     public static final Codec<BreakBlockClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, BreakBlockClipType::new));
-    public BreakBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
+    public BreakBlockClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, 100, 100, false, exportGroupingMode);
     }
     public BreakBlockClipType() {
-        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
+        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override
