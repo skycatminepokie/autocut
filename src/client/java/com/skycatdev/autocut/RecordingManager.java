@@ -140,14 +140,21 @@ public class RecordingManager {
     protected static PreparedStatement prepareClipStatement(Clip clip, Connection connection) throws SQLException {
         List<Object> rowValues = new LinkedList<>();
         // Required
-        StringBuilder columnsBuilder = new StringBuilder("(" + CLIPS_INPOINT_COLUMN + ", " + CLIPS_TIMESTAMP_COLUMN + ", " + CLIPS_OUTPOINT_COLUMN + ", " + CLIPS_TYPE_COLUMN + ", " +  CLIPS_ACTIVE_COLUMN + ", " + CLIPS_INVERSE_COLUMN);
-        StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?, ?, ?");
+        StringBuilder columnsBuilder = new StringBuilder("(%s, %s, %s, %s, %s, %s, %s".formatted(CLIPS_INPOINT_COLUMN,
+                CLIPS_TIMESTAMP_COLUMN,
+                CLIPS_OUTPOINT_COLUMN,
+                CLIPS_TYPE_COLUMN,
+                CLIPS_ACTIVE_COLUMN,
+                CLIPS_INVERSE_COLUMN,
+                CLIPS_EXPORT_GROUPING_MODE_COLUMN));
+        StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?, ?, ?, ?");
         rowValues.add(clip.in());
         rowValues.add(clip.time());
         rowValues.add(clip.out());
         rowValues.add(clip.type());
         rowValues.add(clip.active());
         rowValues.add(clip.inverse());
+        rowValues.add(clip.exportGroupingMode().getId());
 
         // Optional
         if (clip.description() != null) {
