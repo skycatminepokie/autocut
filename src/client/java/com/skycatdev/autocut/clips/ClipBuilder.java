@@ -30,7 +30,7 @@ public class ClipBuilder {
     }
 
     public Clip build() {
-        return new Clip(in, time, out, type, active, inverse, , description, source, object, sourceLocation, objectLocation);
+        return new Clip(in, time, out, type, active, inverse, exportGroupingMode, description, source, object, sourceLocation, objectLocation);
     }
 
     public @NotNull ExportGroupingMode getExportGroupingMode() {
