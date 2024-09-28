@@ -85,7 +85,7 @@ public class Utils {
     public static String rangeToFFmpegRange(Range<Long> range, long startTime) {
         long rangeStart = range.lowerBoundType().equals(BoundType.OPEN) ? range.lowerEndpoint() + 1 : range.lowerEndpoint();
         long rangeEnd = range.upperBoundType().equals(BoundType.OPEN) ? range.upperEndpoint() - 1 : range.upperEndpoint();
-        return String.format("%dms:%dms", rangeStart + startTime, rangeEnd + startTime);
+        return String.format("%dms:%dms", rangeStart - startTime, rangeEnd - startTime);
     }
 
     /**

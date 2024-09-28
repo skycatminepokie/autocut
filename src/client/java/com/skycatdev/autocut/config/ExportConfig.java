@@ -131,12 +131,21 @@ public class ExportConfig {
                 .build();
     }
 
-    public String getExportName(String recordingName, long clips) {
-        return nameFormat.trim()
-                       .replaceAll("\\{ORIGINAL}", recordingName)
-                       .replaceAll("\\{CLIPS}", String.valueOf(clips))
-                       .replaceAll("\\\\", "")
-                       .replaceAll("\\.", "") + "." + format;
+    public File getExportFile(File original, long clips) {
+        String recordingName = original.getName();
+        String firstName = nameFormat.trim()
+                                   .replaceAll("\\{ORIGINAL}", recordingName)
+                                   .replaceAll("\\{CLIPS}", String.valueOf(clips))
+                                   .replaceAll("\\\\", "")
+                                   .replaceAll("\\.", "");
+        File export = original.toPath().resolveSibling(firstName + "." + format).toFile();
+        if (ConfigHandler.getExportConfig().shouldKeepOld()) {
+            int i = 1;
+            while (export.exists()) {
+                export = original.toPath().resolveSibling(firstName + i + "." + format).toFile();
+            }
+        }
+        return export;
     }
 
     public String getFormat() {

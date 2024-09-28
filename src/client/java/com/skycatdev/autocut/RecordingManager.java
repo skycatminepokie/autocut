@@ -213,8 +213,7 @@ public class RecordingManager {
         Set<Range<Long>> rangeSet = Clip.toRange(getActiveClips()).asRanges();
         new Thread(() -> {
             File recording = new File(outputPath);
-            String recordingName = recording.getName().substring(0, recording.getName().lastIndexOf('.'));
-            File export = recording.toPath().resolveSibling(ConfigHandler.getExportConfig().getExportName(recordingName, rangeSet.size())).toFile();
+            File export = ConfigHandler.getExportConfig().getExportFile(recording, rangeSet.size());
 
             try {
                 FFmpegExecutor executor = new FFmpegExecutor();
