@@ -2,10 +2,12 @@ package com.skycatdev.autocut.clips;
 
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.config.ConfigHandler;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
@@ -44,12 +46,16 @@ public class ClipTypes {
      * @return The thing that you {@code .and} or {@code .apply} on.
      * @see net.minecraft.loot.entry.LeafEntry#addLeafFields(RecordCodecBuilder.Instance)
      */
-    public static <T extends ClipType> Products.P5<RecordCodecBuilder.Mu<T>, Boolean, Boolean, Long, Long, Boolean> addDefaultConfigFields(RecordCodecBuilder.Instance<T> instance) {
+    public static <T extends ClipType> Products.P6<RecordCodecBuilder.Mu<T>, Boolean, Boolean, Long, Long, Boolean, ExportGroupingMode> addDefaultConfigFields(RecordCodecBuilder.Instance<T> instance) {
         return instance.group(Codec.BOOL.fieldOf("should_record").forGetter(ClipType::shouldRecord),
                 Codec.BOOL.fieldOf("active").forGetter(ClipType::isActive),
                 Codec.LONG.fieldOf("start_offset").forGetter(ClipType::getStartOffset),
                 Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset),
-                Codec.BOOL.fieldOf("inverse").orElse(false).forGetter(ClipType::isInverse));
+                Codec.BOOL.fieldOf("inverse").orElse(false).forGetter(ClipType::isInverse),
+                Identifier.CODEC.comapFlatMap((id) -> {
+                    ExportGroupingMode groupingMode = ExportGroupingMode.fromId(id);
+                    return groupingMode != null ? DataResult.success(groupingMode) : DataResult.error(() -> "Not a valid ExportGroupingMode: " + id);
+                }, ExportGroupingMode::getId).fieldOf("grouping_mode").orElse(ExportGroupingMode.NONE).forGetter(ClipType::getExportGroupingMode));
     }
 
     /**
