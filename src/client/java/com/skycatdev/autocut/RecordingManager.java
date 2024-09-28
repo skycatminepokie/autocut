@@ -4,6 +4,7 @@ import com.google.common.collect.Range;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.config.ConfigHandler;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -50,6 +51,7 @@ public class RecordingManager {
     protected static final String META_KEY_START_TIME = "start_time"; // Keep this hardcoded
     protected static final String META_KEY_OUTPUT_PATH = "output_path"; // Keep this hardcoded
     protected static final String CLIPS_INVERSE_COLUMN = "inverse"; // Keep this hardcoded
+    protected static final String CLIPS_EXPORT_GROUPING_MODE_COLUMN = "grouping_mode"; // Keep this hardcoded
 
     static {
         //noinspection ResultOfMethodCallIgnored
@@ -273,7 +275,13 @@ public class RecordingManager {
                         //? if <1.21
                         /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_ID_COLUMN))),*/
                         results.getBoolean(CLIPS_ACTIVE_COLUMN),
-                        results.getBoolean(CLIPS_INVERSE_COLUMN)
+                        results.getBoolean(CLIPS_INVERSE_COLUMN),
+                        ExportGroupingMode.fromId(
+                                //? if >=1.21
+                                Identifier.of(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN))
+                                //? if <1.21
+                                /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN))),*/
+                        )
                 );
                 builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));
                 builder.setSource(results.getString(CLIPS_SOURCE_COLUMN));
