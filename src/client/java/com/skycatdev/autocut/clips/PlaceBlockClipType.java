@@ -39,6 +39,6 @@ public class PlaceBlockClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, ItemStack itemStack, BlockPos placementLocation) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(),  isInverse(), "Placed " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), Vec3d.of(placementLocation));
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(),  isInverse(), getExportGroupingMode(), "Placed " + itemStack.getName().getString(), player.getNameForScoreboard(), Registries.ITEM.getId(itemStack.getItem()).toString(), player.getPos(), Vec3d.of(placementLocation));
     }
 }

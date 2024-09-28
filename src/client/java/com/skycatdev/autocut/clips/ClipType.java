@@ -15,7 +15,7 @@ import net.minecraft.util.Identifier;
  * A type of {@link Clip} to be recorded.
  * Every implementation of this should have a way to create a clip based on related data.
  */
-public abstract class ClipType {
+public abstract class ClipType { // TODO: Make a method that does the stuff it can on a ClipBuilder.
     /**
      * The {@link Identifier} stored with clips of this type in the database.
      */

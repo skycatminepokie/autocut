@@ -1,21 +1,20 @@
 package com.skycatdev.autocut.clips;
 
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 
 /**
  * A period of time in a recording. Timestamps are UNIX time, not relative to the recording.
  */
-public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse, @Nullable String description,
+public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse,
+                   @NotNull ExportGroupingMode exportGroupingMode, @Nullable String description,
                    @Nullable String source, @Nullable String object, @Nullable Vec3d sourceLocation,
                    @Nullable Vec3d objectLocation) {
     public Clip {
@@ -26,7 +25,7 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
      * @return A deep copy of this clip
      */
     public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new Clip(in, time, out, type, active, inverse, description, source, object, sourceLocation, objectLocation);
+        return new Clip(in, time, out, type, active, inverse, exportGroupingMode, description, source, object, sourceLocation, objectLocation);
     }
 
     /**

@@ -35,6 +35,6 @@ public class AttackEntityClipType extends ClipType {
     }
 
     public Clip createClip(long time, PlayerEntity player, Entity entity) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(),"Attacked " + entity.getNameForScoreboard(), player.getNameForScoreboard(), entity.getType().getName().getString(), player.getPos(), entity.getPos());
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), getExportGroupingMode(), "Attacked " + entity.getNameForScoreboard(), player.getNameForScoreboard(), entity.getType().getName().getString(), player.getPos(), entity.getPos());
     }
 }

@@ -37,6 +37,6 @@ public class BreakBlockClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, BlockPos pos, BlockState state) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), "Broke " + state.getBlock().getName().getString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), getExportGroupingMode(), "Broke " + state.getBlock().getName().getString(), player.getNameForScoreboard(), Registries.BLOCK.getId(state.getBlock()).toString(), player.getPos(), Vec3d.of(pos));
     }
 }

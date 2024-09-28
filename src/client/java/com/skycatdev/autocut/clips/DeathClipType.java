@@ -34,6 +34,6 @@ public class DeathClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, Text deathMessage) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), deathMessage.getString(), null, player.getNameForScoreboard(), null, player.getPos());
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), getExportGroupingMode(), deathMessage.getString(), null, player.getNameForScoreboard(), null, player.getPos());
     }
 }

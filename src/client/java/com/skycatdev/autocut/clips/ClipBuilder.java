@@ -1,5 +1,6 @@
 package com.skycatdev.autocut.clips;
 
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -12,23 +13,32 @@ public class ClipBuilder {
     private @NotNull Identifier type;
     private boolean active = true;
     private boolean inverse;
+    private @NotNull ExportGroupingMode exportGroupingMode;
     private @Nullable String description;
     private @Nullable String source;
     private @Nullable String object;
     private @Nullable Vec3d sourceLocation;
     private @Nullable Vec3d objectLocation;
-
-    public ClipBuilder(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse) {
+    public ClipBuilder(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse, ExportGroupingMode exportGroupingMode) {
         this.in = in;
         this.time = time;
         this.out = out;
         this.type = type;
         this.active = active;
         this.inverse = inverse;
+        this.exportGroupingMode = exportGroupingMode;
     }
 
     public Clip build() {
-        return new Clip(in, time, out, type, active, inverse, description, source, object, sourceLocation, objectLocation);
+        return new Clip(in, time, out, type, active, inverse, , description, source, object, sourceLocation, objectLocation);
+    }
+
+    public @NotNull ExportGroupingMode getExportGroupingMode() {
+        return exportGroupingMode;
+    }
+
+    public void setExportGroupingMode(@NotNull ExportGroupingMode exportGroupingMode) {
+        this.exportGroupingMode = exportGroupingMode;
     }
 
     public ClipBuilder setActive(boolean active) {
