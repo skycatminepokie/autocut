@@ -1,1 +1,2 @@
 - Better progress info
+- Option to not overwrite on conflict
