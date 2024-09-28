@@ -29,7 +29,7 @@ public enum ExportGroupingMode { // TODO: Localize
         this.name = displayName;
     }
 
-    public static @Nullable ExportGroupingMode fromId(Identifier id) {
+    public static @Nullable ExportGroupingMode fromId(Identifier id) { // Maybe bad? Idk
         for (ExportGroupingMode mode : ExportGroupingMode.values()) {
             if (mode.getId().equals(id)) {
                 return mode;
