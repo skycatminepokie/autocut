@@ -61,6 +61,10 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
                 {ORIGINAL} will be replaced with the file name of the recording
                 {CLIPS} will be replaced with the number of clips.
                 Backslashes (\\) and periods (.) will be ignored.""", tb);
+        addOption("export.existingFiles", "Existing files", "Defines what happens when trying to export something with the same name as an already existing file.", tb);
+        tb.add("autocut.yacl.export.existingFiles.keep", "Keep both");
+        tb.add("autocut.yacl.export.existingFiles.overwrite", "Overwrite old");
+
 
         addText("recording.connect.success", "OBS connected.", tb);
         addText("recording.start.success", "Recording started.", tb);
