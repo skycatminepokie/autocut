@@ -1,8 +1,8 @@
-package com.skycatdev.autocut;
+package com.skycatdev.autocut.record;
 
+import com.skycatdev.autocut.AutocutClient;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -15,7 +15,7 @@ public class OBSHandler { // All this is likely on a thread other than the main 
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
 
-    static void createConnection(String password) {
+    public static void createConnection(String password) {
         AutocutClient.controller = OBSRemoteController.builder()
                 .host(DEFAULT_HOST)
                 .port(DEFAULT_PORT)

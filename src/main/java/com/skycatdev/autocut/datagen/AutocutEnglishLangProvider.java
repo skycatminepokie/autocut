@@ -47,8 +47,8 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
 
         addOption("generic.start_offset", "Default start offset", "How many milliseconds before the event should be counted as part of the clip.", tb);
         addOption("generic.end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
-        addOption("generic.should_record", "Enable recording", "Whether this event should be recorded.", tb);
-        addOption("generic.active", "Active", "Whether this event should be exported in the final recording.", tb);
+        addOption("generic.should_record", "Enable record", "Whether this event should be recorded.", tb);
+        addOption("generic.active", "Active", "Whether this event should be exported in the final record.", tb);
         addOption("take_damage_clip.damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
 
         tb.add(YACL_PREFIX + ".category.export", "Export");
@@ -58,7 +58,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOption("export.fileFormat", "Output file", """
                 The name of the file to export to, not including the extension (like ".mp4").
                 It's recommended to include variables (see below), otherwise you'll start overwriting your videos.
-                {ORIGINAL} will be replaced with the file name of the recording
+                {ORIGINAL} will be replaced with the file name of the record
                 {CLIPS} will be replaced with the number of clips.
                 Backslashes (\\) and periods (.) will be ignored.""", tb);
         addOption("export.existingFiles", "Existing files", "Defines what happens when trying to export something with the same name as an already existing file.", tb);
@@ -66,12 +66,12 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         tb.add("autocut.yacl.export.existingFiles.overwrite", "Overwrite old");
 
 
-        addText("recording.connect.success", "OBS connected.", tb);
-        addText("recording.start.success", "Recording started.", tb);
-        addText("recording.start.fail", "Failed to start autocut", tb);
-        addText("recording.end.success", "Recording ended.", tb);
-        addText("recording.end.fail.notStarted", "Warning: Recording was not started in autocut - no recording is saved.", tb);
-        addText("recording.end.fail.sqlException", "Failed to save metadata for recording (SQLException)", tb);
+        addText("record.connect.success", "OBS connected.", tb);
+        addText("record.start.success", "Recording started.", tb);
+        addText("record.start.fail", "Failed to start autocut", tb);
+        addText("record.end.success", "Recording ended.", tb);
+        addText("record.end.fail.notStarted", "Warning: Recording was not started in autocut - no record is saved.", tb);
+        addText("record.end.fail.sqlException", "Failed to save metadata for record (SQLException)", tb);
         addText("cutting.finish", "Finished cutting!", tb);
         addText("cutting.progress", "Cutting: %s%%", tb);
         addText("cutting.start", "Preparing to cut...", tb);
@@ -79,7 +79,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("cutting.fail", "Something went wrong while preparing to export. Check your logs for more info.", tb);
 
         addCommandMessage("autocut.finish.database", "fail.databaseDoesNotExist", "The given database does not exist.", tb);
-        addCommandMessage("autocut.finish", "fail.noRecording", "No recording found. Did you connect, start recording, and stop recording?", tb);
+        addCommandMessage("autocut.finish", "fail.noRecording", "No record found. Did you connect, start record, and stop record?", tb);
 
     }
 

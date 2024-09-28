@@ -1,6 +1,7 @@
 package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.clips.ClipTypes;
+import com.skycatdev.autocut.record.RecordingManager;
 import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;

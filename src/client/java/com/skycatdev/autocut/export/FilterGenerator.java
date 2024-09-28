@@ -1,6 +1,7 @@
-package com.skycatdev.autocut;
+package com.skycatdev.autocut.export;
 
 import com.google.common.collect.Range;
+import com.skycatdev.autocut.Utils;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.probe.FFmpegStream;
 
@@ -27,8 +28,8 @@ public class FilterGenerator {
     /**
      * Builds a filter that keeps and concatenates only the clips given.
      *
-     * @param startTime   The time the recording started
-     * @param probeResult The result from probing the raw recording file. Must not have errors, and must have at least one video or audio stream.
+     * @param startTime   The time the record started
+     * @param probeResult The result from probing the raw record file. Must not have errors, and must have at least one video or audio stream.
      * @param clipsRange The set of {@link Range}s describing what to export
      * @return A new temporary file containing the filter
      * @throws IOException If there's problems with the file

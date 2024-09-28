@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 /**
- * A period of time in a recording. Timestamps are UNIX time, not relative to the recording.
+ * A period of time in a record. Timestamps are UNIX time, not relative to the record.
  */
 public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse,
                    @NotNull ExportGroupingMode exportGroupingMode, @Nullable String description,
@@ -39,7 +39,7 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
      * Converts the clip to a {@code between} statement for ffmpeg.
      *
      * @param variable           The variable for time in seconds.
-     * @param recordingStartTime The time the relevant recording started, used for offsetting the clip time
+     * @param recordingStartTime The time the relevant record started, used for offsetting the clip time
      * @return a {@code between} statement for ffmpeg statements.
      */
     public String toBetweenStatement(String variable, long recordingStartTime) {
@@ -70,7 +70,7 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
     /**
      * Converts the clip to a range for FFmpeg's trim filter.
      *
-     * @param startTime The time the recording started at
+     * @param startTime The time the record started at
      * @return A range for FFmpeg's trim filter
      */
     public String toTrimRange(long startTime) {

@@ -1,19 +1,11 @@
-package com.skycatdev.autocut;
+package com.skycatdev.autocut.record;
 
-import com.google.common.collect.Range;
+import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
-import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.config.ExportGroupingMode;
-import net.bramp.ffmpeg.FFmpegExecutor;
-import net.bramp.ffmpeg.FFprobe;
-import net.bramp.ffmpeg.builder.FFmpegBuilder;
-import net.bramp.ffmpeg.job.FFmpegJob;
-import net.bramp.ffmpeg.probe.FFmpegProbeResult;
-import net.bramp.ffmpeg.progress.Progress;
-import net.bramp.ffmpeg.progress.ProgressListener;
+import com.skycatdev.autocut.export.ExportHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +17,6 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class RecordingManager {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
@@ -65,7 +56,7 @@ public class RecordingManager {
     protected @NotNull File database;
     protected @NotNull String sqlUrl;
     /**
-     * Where the video file of the recording is stored. {@code null} when recording has not finished. Probably needs a better name.
+     * Where the video file of the record is stored. {@code null} when record has not finished. Probably needs a better name.
      */
     @SuppressWarnings("UnusedAssignment")
     @Nullable
@@ -74,9 +65,9 @@ public class RecordingManager {
     /**
      * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
      *
-     * @param startTime  The UNIX time the recording started. Make sure it matches the time in the database's meta table.
-     * @param database   The database for this recording.
-     * @param outputPath Where the raw video recording is stored. Make sure it matches the path in the database's meta table.
+     * @param startTime  The UNIX time the record started. Make sure it matches the time in the database's meta table.
+     * @param database   The database for this record.
+     * @param outputPath Where the raw video record is stored. Make sure it matches the path in the database's meta table.
      */
     private RecordingManager(long startTime, @NotNull File database, @Nullable String outputPath) {
         this.startTime = startTime;
@@ -88,8 +79,8 @@ public class RecordingManager {
     /**
      * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
      *
-     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
-     * @param database  The database for this recording.
+     * @param startTime The UNIX time the record started. Make sure it matches the time in the database's meta table.
+     * @param database  The database for this record.
      */
     private RecordingManager(long startTime, @NotNull File database) {
         this(startTime, database, null);
@@ -98,7 +89,7 @@ public class RecordingManager {
     /**
      * Create a RecordingManager and initialize its database.
      *
-     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
+     * @param startTime The UNIX time the record started. Make sure it matches the time in the database's meta table.
      */
     private RecordingManager(long startTime) throws IOException, SQLException {
         this(startTime, RECORDING_DIRECTORY.resolve("autocut_" + Instant.ofEpochMilli(startTime).toString().replace(':', '_').replace('T', '_').replace('.', '_') + ".sqlite").toFile()); // Also initializes sqlUrl
@@ -126,7 +117,7 @@ public class RecordingManager {
             startTimeResult.next();
             startTime = Long.parseLong(startTimeResult.getString(META_VALUE));
             startTimeResult.close();
-            // Get recording path
+            // Get record path
             ResultSet recordingPathResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = \"%s\"", META_VALUE, META_TABLE, META_KEY, META_KEY_OUTPUT_PATH));
             if (recordingPathResult.next()) {
                 outputPath = recordingPathResult.getString(META_VALUE);
@@ -202,7 +193,7 @@ public class RecordingManager {
     }
 
     /**
-     * Adds a new clip to the recording.
+     * Adds a new clip to the record.
      *
      * @param clip The clip to add.
      */
@@ -213,60 +204,11 @@ public class RecordingManager {
     }
 
     /**
-     * Export all clips in the recording with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
+     * Asks {@link com.skycatdev.autocut.export.ExportHelper} to export clips as configured
      */
-    public void export() throws SQLException { // TODO: clean up this error handling, including checking that the outputPath != null
-        if (outputPath == null) {
-            throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
-        }
-        Set<Range<Long>> rangeSet = Clip.toRange(getActiveClips()).asRanges();
-        new Thread(() -> {
-            File recording = new File(outputPath);
-            File export = ConfigHandler.getExportConfig().getExportFile(recording, rangeSet.size());
+    public void export() throws SQLException {
+        ExportHelper.export(getActiveClips(), outputPath, startTime);
 
-            try {
-                FFmpegExecutor executor = new FFmpegExecutor();
-                FFprobe ffprobe = new FFprobe();
-                FFmpegProbeResult in = ffprobe.probe(outputPath);
-
-                @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
-                        .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, in, rangeSet).getAbsolutePath())
-                        .setInput(in)
-                        .addOutput(export.getAbsolutePath())
-                        .setFormat(ConfigHandler.getExportConfig().getFormat())
-                        .addExtraArgs("-map", "[outv]", "-map", "[outa]")
-                        .setConstantRateFactor(18)
-                        //.setVideoCodec("libx264") requires gpl
-                        .done();
-                FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Utils.totalSpace(rangeSet));
-
-                    @Override
-                    public void progress(Progress progress) {
-                        if (progress.isEnd()) {
-                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.finish"));
-                        } else {
-                            double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
-                            if (percentDone < 0) {
-                                return;
-                            }
-                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone)));
-                        }
-
-                    }
-                });
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.start"));
-                try {
-                    job.run();
-                } catch (Exception e) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
-                    throw new RuntimeException("Something went wrong while exporting.", e);
-                }
-            } catch (Exception e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.fail"));
-                throw new RuntimeException(e);
-            }
-        }, "Autocut FFmpeg Export Thread").start();
     }
 
     public LinkedList<Clip> getActiveClips() throws SQLException {
@@ -310,7 +252,7 @@ public class RecordingManager {
     }
 
     /**
-     * @return how long this has been recording, in milliseconds
+     * @return how long this has been record, in milliseconds
      */
     @SuppressWarnings("unused")
     public long getRecordingTime() {
