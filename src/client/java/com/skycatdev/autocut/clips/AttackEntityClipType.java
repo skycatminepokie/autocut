@@ -21,7 +21,7 @@ public class AttackEntityClipType extends ClipType {
     }
 
     public AttackEntityClipType() {
-        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
+        this(true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class ReceiveServerMessageClipType extends ClipType { // TODO: regex filt
     }
 
     public ReceiveServerMessageClipType() {
-        super(ID, false, true, 100, 100, false, ExportGroupingMode.NONE, false, true, 100, 100, false, ExportGroupingMode.NONE);
+        this(false, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

@@ -25,7 +25,7 @@ public class PlaceBlockClipType extends ClipType {
     }
 
     public PlaceBlockClipType() {
-        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
+        this(true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

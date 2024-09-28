@@ -21,7 +21,7 @@ public class ShootPlayerClipType extends ClipType {
     }
 
     public ShootPlayerClipType() {
-        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
+        this(true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override

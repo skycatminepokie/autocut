@@ -24,7 +24,7 @@ public class ManualClipType extends ClipType {
     }
 
     public ManualClipType() {
-        super(ID, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL, true, true,TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL);
+        this(true, true,TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL);
     }
 
     @Override

@@ -31,8 +31,7 @@ public class TakeDamageClipType extends ClipType {
     }
 
     public TakeDamageClipType() {
-        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
-        this.setPrecision(1);
+        this(true, true, 100, 100, false, ExportGroupingMode.NONE, 1);
     }
 
     @Override

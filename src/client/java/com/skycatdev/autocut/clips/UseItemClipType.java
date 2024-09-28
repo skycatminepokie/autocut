@@ -23,7 +23,7 @@ public class UseItemClipType extends ClipType {
     }
 
     public UseItemClipType() {
-        super(ID, true, true, 100, 100, false, ExportGroupingMode.NONE, true, true, 100, 100, false, ExportGroupingMode.NONE);
+        this(true, true, 100, 100, false, ExportGroupingMode.NONE);
     }
 
     @Override
