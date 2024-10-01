@@ -4,6 +4,8 @@ import com.google.common.collect.Range;
 import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.Utils;
 import com.skycatdev.autocut.clips.Clip;
+import com.skycatdev.autocut.clips.ClipType;
+import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.record.RecordingManager;
 import net.bramp.ffmpeg.FFmpegExecutor;
@@ -14,11 +16,14 @@ import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -26,53 +31,53 @@ public class ExportHelper {
     /**
      * Export all clips in the record with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
      *
-     * @param clips All the clips to be considered when exporting. Don't include inactive clips.
+     * @param clips         All the clips to be considered when exporting. Don't include inactive clips.
      * @param recordingPath The path to the video recording
-     * @param startTime The time the recording was started
+     * @param startTime     The time the recording was started
      */
-    public static void export(LinkedList<Clip> clips, @Nullable String recordingPath, long startTime) { // TODO: clean up this error handling, including checking that the recordingPath != null
-        if (recordingPath == null) {
-            throw new IllegalStateException("recordingPath was null and it must not be. Has the record finished/onRecordingEnded been called?");
-        }
-        Set<Range<Long>> rangeSet = Clip.toRange(clips).asRanges();
+    public static void export(LinkedList<Clip> clips, @NotNull String recordingPath, long startTime) {
         new Thread(() -> {
             File recording = new File(recordingPath);
-            File export = ConfigHandler.getExportConfig().getExportFile(recording, rangeSet.size());
 
             try {
                 FFmpegExecutor executor = new FFmpegExecutor();
                 FFprobe ffprobe = new FFprobe();
                 FFmpegProbeResult in = ffprobe.probe(recordingPath);
 
-                @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
-                        .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, in, rangeSet).getAbsolutePath())
-                        .setInput(in)
-                        .addOutput(export.getAbsolutePath())
-                        .setFormat(ConfigHandler.getExportConfig().getFormat())
-                        .addExtraArgs("-map", "[outv]", "-map", "[outa]")
-                        .setConstantRateFactor(18)
-                        //.setVideoCodec("libx264") requires gpl
-                        .done();
-                FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Utils.totalSpace(rangeSet));
+                // Split clips into export sets
+                HashMap<ClipType, LinkedList<Clip>> typedExportSets = new HashMap<>();
+                LinkedList<Clip> mainSet = new LinkedList<>();
+                LinkedList<Clip> individualSet = new LinkedList<>();
 
-                    @Override
-                    public void progress(Progress progress) {
-                        if (progress.isEnd()) {
-                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.finish"));
-                        } else {
-                            double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
-                            if (percentDone < 0) {
-                                return;
-                            }
-                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone)));
-                        }
-
+                for (Clip clip : clips) {
+                    ClipType clipType = Objects.requireNonNull(ClipTypes.CLIP_TYPE_REGISTRY.get(clip.type())).clipType();
+                    switch (clipType.getExportGroupingMode()) {
+                        case NONE -> mainSet.add(clip);
+                        case TYPE -> typedExportSets.computeIfAbsent(clipType, k -> new LinkedList<>()).add(clip);
+                        case INDIVIDUAL -> individualSet.add(clip);
+                        case null, default ->
+                                throw new IllegalArgumentException("Export grouping mode was unrecognized: " + clipType.getExportGroupingMode());
                     }
-                });
+                }
+                int totalJobs = (mainSet.isEmpty() ? 0 : 1) + individualSet.size() + typedExportSets.size();
+                int jobIndex = 0;
+
                 AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.start"));
+
                 try {
-                    job.run();
+                    // For each set create a job
+                    if (!mainSet.isEmpty()) {
+                        makeFFmpegJob(mainSet, startTime, recording, in, executor, totalJobs, ++jobIndex).run();
+                    }
+                    for (LinkedList<Clip> typedExportClips : typedExportSets.values()) {
+                        makeFFmpegJob(typedExportClips, startTime, recording, in, executor, totalJobs, ++jobIndex).run();
+                    }
+                    for (Clip clip : individualSet) {
+                        LinkedList<Clip> dummyList = new LinkedList<>();
+                        dummyList.add(clip);
+                        makeFFmpegJob(dummyList, startTime, recording, in, executor, totalJobs, ++jobIndex).run();
+                    }
+
                 } catch (Exception e) {
                     AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
                     throw new RuntimeException("Something went wrong while exporting.", e);
@@ -82,5 +87,37 @@ public class ExportHelper {
                 throw new RuntimeException(e);
             }
         }, "Autocut FFmpeg Export Thread").start();
+    }
+
+    private static FFmpegJob makeFFmpegJob(LinkedList<Clip> clips, long startTime, File recording, FFmpegProbeResult in, FFmpegExecutor executor, int totalJobs, int jobNumber) throws IOException {
+        Set<Range<Long>> rangeSet = Clip.toRange(clips).asRanges();
+        File export = ConfigHandler.getExportConfig().getExportFile(recording, rangeSet.size());
+        @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
+                .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, in, rangeSet).getAbsolutePath())
+                .setInput(in)
+                .addOutput(export.getAbsolutePath())
+                .setFormat(ConfigHandler.getExportConfig().getFormat())
+                .addExtraArgs("-map", "[outv]", "-map", "[outa]")
+                .setConstantRateFactor(18)
+                //.setVideoCodec("libx264") requires gpl
+                .done();
+        FFmpegJob job = executor.createJob(builder, new ProgressListener() {
+            final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Utils.totalSpace(rangeSet));
+
+            @Override
+            public void progress(Progress progress) {
+                if (progress.isEnd()) {
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.finish", jobNumber, totalJobs));
+                } else {
+                    double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
+                    if (percentDone < 0) {
+                        return;
+                    }
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone), jobNumber, totalJobs));
+                }
+
+            }
+        });
+        return job;
     }
 }

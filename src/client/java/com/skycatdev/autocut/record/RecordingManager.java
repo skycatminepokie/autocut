@@ -205,8 +205,12 @@ public class RecordingManager {
 
     /**
      * Asks {@link com.skycatdev.autocut.export.ExportHelper} to export clips as configured
+     * @throws IllegalStateException When {@link outputPath} is {@code null}.
      */
     public void export() throws SQLException {
+        if (outputPath == null) {
+            throw new IllegalStateException("outputPath is null, and it should not be. Has the recording finished/onRecordingEnded been called?");
+        }
         ExportHelper.export(getActiveClips(), outputPath, startTime);
 
     }
@@ -220,9 +224,9 @@ public class RecordingManager {
                         results.getLong(CLIPS_TIMESTAMP_COLUMN),
                         results.getLong(CLIPS_OUTPOINT_COLUMN),
                         //? if >=1.21
-                        Identifier.of(results.getString(CLIPS_ID_COLUMN)),
+                        Identifier.of(results.getString(CLIPS_TYPE_COLUMN)),
                         //? if <1.21
-                        /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_ID_COLUMN))),*/
+                        /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_TYPE_COLUMN))),*/
                         results.getBoolean(CLIPS_ACTIVE_COLUMN),
                         results.getBoolean(CLIPS_INVERSE_COLUMN),
                         ExportGroupingMode.fromId(

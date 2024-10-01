@@ -140,8 +140,9 @@ public class ExportConfig {
                                    .replaceAll("\\.", "");
         File export = original.toPath().resolveSibling(firstName + "." + format).toFile();
         if (ConfigHandler.getExportConfig().shouldKeepOld()) {
-            int i = 1;
-            while (export.exists()) {
+            int i = 0;
+            while (export.exists()) { // TODO: Cache this? Few file system queries.
+                i++;
                 export = original.toPath().resolveSibling(firstName + i + "." + format).toFile();
             }
         }
