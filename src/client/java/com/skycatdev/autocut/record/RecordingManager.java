@@ -233,7 +233,7 @@ public class RecordingManager {
                                 //? if >=1.21
                                 Identifier.of(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN))
                                 //? if <1.21
-                                /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN))),*/
+                                /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN)))*/
                         )
                 );
                 builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));

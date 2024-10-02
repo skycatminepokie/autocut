@@ -55,8 +55,7 @@ public class ExportHelper {
                         case NONE -> mainSet.add(clip);
                         case TYPE -> typedExportSets.computeIfAbsent(clipType, k -> new LinkedList<>()).add(clip);
                         case INDIVIDUAL -> individualSet.add(clip);
-                        case null, default ->
-                                throw new IllegalArgumentException("Export grouping mode was unrecognized: " + clipType.getExportGroupingMode());
+                        default -> throw new IllegalArgumentException("Export grouping mode was unrecognized: " + clipType.getExportGroupingMode());
                     }
                 }
                 int totalJobs = (mainSet.isEmpty() ? 0 : 1) + individualSet.size() + typedExportSets.size();
