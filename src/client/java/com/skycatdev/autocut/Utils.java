@@ -1,5 +1,7 @@
 package com.skycatdev.autocut;
 
+import com.google.common.collect.BoundType;
+import com.google.common.collect.Range;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -14,6 +16,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 
 public class Utils {
     /**
@@ -77,5 +80,26 @@ public class Utils {
         try (PrintWriter writer = new PrintWriter(file); JsonWriter jsonWriter = new JsonWriter(writer)) {
             Streams.write(serialized, jsonWriter);
         }
+    }
+
+    public static String rangeToFFmpegRange(Range<Long> range, long startTime) {
+        long rangeStart = range.lowerBoundType().equals(BoundType.OPEN) ? range.lowerEndpoint() + 1 : range.lowerEndpoint();
+        long rangeEnd = range.upperBoundType().equals(BoundType.OPEN) ? range.upperEndpoint() - 1 : range.upperEndpoint();
+        return String.format("%dms:%dms", rangeStart - startTime, rangeEnd - startTime);
+    }
+
+    /**
+     * Calculates the total space covered by a set of non-overlapping ranges
+     * @param ranges A collection of non-overlapping ranges
+     * @return The total space covered by a set of non-overlapping ranges
+     */
+    public static long totalSpace(Collection<Range<Long>> ranges) {
+        long totalSpace = 0;
+        for (Range<Long> range : ranges) {
+            long rangeStart = range.lowerBoundType().equals(BoundType.OPEN) ? range.lowerEndpoint() + 1 : range.lowerEndpoint();
+            long rangeEnd = range.upperBoundType().equals(BoundType.OPEN) ? range.upperEndpoint() - 1 : range.upperEndpoint();
+            totalSpace += rangeEnd - rangeStart;
+        }
+        return totalSpace;
     }
 }

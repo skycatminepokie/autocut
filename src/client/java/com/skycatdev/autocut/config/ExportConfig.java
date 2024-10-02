@@ -6,6 +6,7 @@ import com.skycatdev.autocut.Utils;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import net.minecraft.text.Text;
 
 import java.io.File;
@@ -16,9 +17,11 @@ import java.nio.file.Paths;
 public class ExportConfig {
     public static final String DEFAULT_FORMAT = "mp4";
     public static final String DEFAULT_NAME_FORMAT = "cut{ORIGINAL}";
+    public static final boolean DEFAULT_KEEP_OLD = true;
     public static final Codec<ExportConfig> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             Codec.STRING.fieldOf("format").forGetter(ExportConfig::getFormat),
-            Codec.STRING.fieldOf("nameFormat").forGetter(ExportConfig::getNameFormat)
+            Codec.STRING.fieldOf("nameFormat").forGetter(ExportConfig::getNameFormat),
+            Codec.BOOL.fieldOf("keepOld").orElse(true).forGetter(ExportConfig::shouldKeepOld)
     ).apply(instance, ExportConfig::new));
     /**
      * The file format to export the video to (eg .mp4, .mkv)
@@ -28,10 +31,15 @@ public class ExportConfig {
      * The format name of the exported file. For example, "cut_{ORIGINAL}".
      */
     public String nameFormat;
+    /**
+     * Whether old files should be kept (true, rename the current one) or overwritten (false)
+     */
+    public boolean keepOld;
 
-    public ExportConfig(String format, String nameFormat) {
+    public ExportConfig(String format, String nameFormat, boolean keepOld) {
         this.format = format;
         this.nameFormat = nameFormat;
+        this.keepOld = keepOld;
     }
 
     public static boolean isValidFormat(String format) {
@@ -67,14 +75,6 @@ public class ExportConfig {
         return true;
     }
 
-    public String getExportName(String recordingName, long clips) {
-        return nameFormat.trim()
-                .replaceAll("\\{ORIGINAL}", recordingName)
-                .replaceAll("\\{CLIPS}", String.valueOf(clips))
-                .replaceAll("\\\\", "")
-                .replaceAll("\\.", "") + "." + format;
-    }
-
     /**
      * Reads an {@link ExportConfig} from a file, or returns a default.
      *
@@ -91,7 +91,7 @@ public class ExportConfig {
             } catch (IOException e) {
                 throw new RuntimeException();
             }
-            return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT);
+            return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
         }
         try {
             return Utils.readFromJson(file, CODEC);
@@ -118,7 +118,35 @@ public class ExportConfig {
                         .controller((option) -> () -> new PredicatedStringController(option, ExportConfig::isValidNameFormat))
                         .build()
                 )
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.translatable("autocut.yacl.export.existingFiles"))
+                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.existingFiles.description")))
+                        .binding(DEFAULT_KEEP_OLD, this::shouldKeepOld, this::setKeepOld)
+                        .controller(option -> BooleanControllerBuilder.create(option)
+                                .formatValue(bool -> bool ? Text.translatable("autocut.yacl.export.existingFiles.keep") : Text.translatable("autocut.yacl.export.existingFiles.overwrite"))
+                                .coloured(true)
+                        )
+                        .build()
+                )
                 .build();
+    }
+
+    public File getExportFile(File original, long clips) {
+        String recordingName = original.getName();
+        String firstName = nameFormat.trim()
+                                   .replaceAll("\\{ORIGINAL}", recordingName)
+                                   .replaceAll("\\{CLIPS}", String.valueOf(clips))
+                                   .replaceAll("\\\\", "")
+                                   .replaceAll("\\.", "");
+        File export = original.toPath().resolveSibling(firstName + "." + format).toFile();
+        if (ConfigHandler.getExportConfig().shouldKeepOld()) {
+            int i = 0;
+            while (export.exists()) { // TODO: Cache this? Few file system queries.
+                i++;
+                export = original.toPath().resolveSibling(firstName + i + "." + format).toFile();
+            }
+        }
+        return export;
     }
 
     public String getFormat() {
@@ -139,6 +167,14 @@ public class ExportConfig {
 
     public void saveToFile(File file) throws IOException {
         Utils.saveToJson(file, CODEC, this);
+    }
+
+    public void setKeepOld(boolean keepOld) {
+        this.keepOld = keepOld;
+    }
+
+    public boolean shouldKeepOld() {
+        return keepOld;
     }
 
 }

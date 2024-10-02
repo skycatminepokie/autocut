@@ -1,9 +1,11 @@
 package com.skycatdev.autocut.clips;
 
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import com.skycatdev.autocut.datagen.AutocutEnglishLangProvider;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
 import dev.isxander.yacl3.api.controller.LongFieldControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import net.minecraft.text.Text;
@@ -13,7 +15,7 @@ import net.minecraft.util.Identifier;
  * A type of {@link Clip} to be recorded.
  * Every implementation of this should have a way to create a clip based on related data.
  */
-public abstract class ClipType {
+public abstract class ClipType { // TODO: Make a method that does the stuff it can on a ClipBuilder.
     /**
      * The {@link Identifier} stored with clips of this type in the database.
      */
@@ -39,6 +41,12 @@ public abstract class ClipType {
      */
     private final boolean inverseDefault;
     /**
+     * What group a clip should be exported with by default
+     *
+     * @see ExportGroupingMode
+     */
+    private final ExportGroupingMode exportGroupingModeDefault;
+    /**
      * Whether new clips of this type should be marked as active.
      */
     private boolean active;
@@ -58,19 +66,29 @@ public abstract class ClipType {
      * If the clips of this type should be an inverted clip ("discard this footage")
      */
     private boolean inverse;
+    /**
+     * What group a clip should be exported with
+     *
+     * @see ExportGroupingMode
+     */
+    private ExportGroupingMode exportGroupingMode;
 
-    public ClipType(Identifier id, boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault, boolean inverseDefault) {
+    public ClipType(Identifier id, boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode, boolean activeDefault, boolean shouldRecordDefault, long startOffsetDefault, long endOffsetDefault, boolean inverseDefault, ExportGroupingMode exportGroupingModeDefault) {
         this.id = id;
+
         this.active = active;
         this.shouldRecord = shouldRecord;
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.inverse = inverse;
+        this.exportGroupingMode = exportGroupingMode;
+
         this.activeDefault = activeDefault;
         this.shouldRecordDefault = shouldRecordDefault;
         this.startOffsetDefault = startOffsetDefault;
         this.endOffsetDefault = endOffsetDefault;
         this.inverseDefault = inverseDefault;
+        this.exportGroupingModeDefault = exportGroupingModeDefault;
     }
 
     /**
@@ -112,11 +130,18 @@ public abstract class ClipType {
                 .controller(LongFieldControllerBuilder::create)
                 .build()
         );
-        builder.option(Option.<Boolean>createBuilder() // TODO: Localization
+        builder.option(Option.<Boolean>createBuilder() // TODO: Localize
                 .name(Text.of("Invert new clips"))
                 .description(OptionDescription.of(Text.of("If new clips should be the opposite of clips - the footage they cover will NOT be exported.")))
                 .binding(inverseDefault, this::isInverse, this::setInverse)
                 .controller(TickBoxControllerBuilder::create)
+                .build()
+        );
+        builder.option(Option.<ExportGroupingMode>createBuilder() // TODO: Localize
+                .name(Text.of("Grouping mode"))
+                .description(OptionDescription.of(Text.of("What clips this group should be exported with.")))
+                .binding(exportGroupingModeDefault, this::getExportGroupingMode, this::setExportGroupingMode)
+                .controller((option) -> EnumControllerBuilder.create(option).enumClass(ExportGroupingMode.class).formatValue(ExportGroupingMode::getName))
                 .build()
         );
     }
@@ -137,6 +162,14 @@ public abstract class ClipType {
 
     public void setEndOffset(long endOffset) {
         this.endOffset = endOffset;
+    }
+
+    public ExportGroupingMode getExportGroupingMode() {
+        return exportGroupingMode;
+    }
+
+    public void setExportGroupingMode(ExportGroupingMode exportGroupingMode) {
+        this.exportGroupingMode = exportGroupingMode;
     }
 
     public Identifier getId() {

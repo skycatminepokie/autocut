@@ -1,18 +1,20 @@
 package com.skycatdev.autocut.clips;
 
 import com.google.common.collect.Range;
+import com.google.common.collect.TreeRangeSet;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Objects;
 
 /**
- * A period of time in a recording. Timestamps are UNIX time, not relative to the recording.
+ * A period of time in a record. Timestamps are UNIX time, not relative to the record.
  */
-public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse, @Nullable String description,
+public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse,
+                   @NotNull ExportGroupingMode exportGroupingMode, @Nullable String description,
                    @Nullable String source, @Nullable String object, @Nullable Vec3d sourceLocation,
                    @Nullable Vec3d objectLocation) {
     public Clip {
@@ -23,7 +25,7 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
      * @return A deep copy of this clip
      */
     public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new Clip(in, time, out, type, active, inverse, description, source, object, sourceLocation, objectLocation);
+        return new Clip(in, time, out, type, active, inverse, exportGroupingMode, description, source, object, sourceLocation, objectLocation);
     }
 
     /**
@@ -37,7 +39,7 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
      * Converts the clip to a {@code between} statement for ffmpeg.
      *
      * @param variable           The variable for time in seconds.
-     * @param recordingStartTime The time the relevant recording started, used for offsetting the clip time
+     * @param recordingStartTime The time the relevant record started, used for offsetting the clip time
      * @return a {@code between} statement for ffmpeg statements.
      */
     public String toBetweenStatement(String variable, long recordingStartTime) {
@@ -50,10 +52,25 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
         return Range.closed(in, out);
     }
 
+    public static TreeRangeSet<Long> toRange(Collection<Clip> clips) {
+        TreeRangeSet<Long> range = TreeRangeSet.create();
+        for (Clip clip : clips) {
+            if (!clip.inverse()) {
+                range.add(clip.toRange());
+            }
+        }
+        for (Clip clip : clips) {
+            if (clip.inverse()) {
+                range.remove(clip.toRange());
+            }
+        }
+        return range;
+    }
+
     /**
      * Converts the clip to a range for FFmpeg's trim filter.
      *
-     * @param startTime The time the recording started at
+     * @param startTime The time the record started at
      * @return A range for FFmpeg's trim filter
      */
     public String toTrimRange(long startTime) {

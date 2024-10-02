@@ -1,17 +1,11 @@
-package com.skycatdev.autocut;
+package com.skycatdev.autocut.record;
 
+import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
-import com.skycatdev.autocut.config.ConfigHandler;
-import net.bramp.ffmpeg.FFmpegExecutor;
-import net.bramp.ffmpeg.FFprobe;
-import net.bramp.ffmpeg.builder.FFmpegBuilder;
-import net.bramp.ffmpeg.job.FFmpegJob;
-import net.bramp.ffmpeg.probe.FFmpegProbeResult;
-import net.bramp.ffmpeg.progress.Progress;
-import net.bramp.ffmpeg.progress.ProgressListener;
+import com.skycatdev.autocut.config.ExportGroupingMode;
+import com.skycatdev.autocut.export.ExportHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +17,6 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class RecordingManager {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
@@ -49,6 +42,7 @@ public class RecordingManager {
     protected static final String META_KEY_START_TIME = "start_time"; // Keep this hardcoded
     protected static final String META_KEY_OUTPUT_PATH = "output_path"; // Keep this hardcoded
     protected static final String CLIPS_INVERSE_COLUMN = "inverse"; // Keep this hardcoded
+    protected static final String CLIPS_EXPORT_GROUPING_MODE_COLUMN = "grouping_mode"; // Keep this hardcoded
 
     static {
         //noinspection ResultOfMethodCallIgnored
@@ -62,7 +56,7 @@ public class RecordingManager {
     protected @NotNull File database;
     protected @NotNull String sqlUrl;
     /**
-     * Where the video file of the recording is stored. {@code null} when recording has not finished. Probably needs a better name.
+     * Where the video file of the record is stored. {@code null} when record has not finished. Probably needs a better name.
      */
     @SuppressWarnings("UnusedAssignment")
     @Nullable
@@ -71,9 +65,9 @@ public class RecordingManager {
     /**
      * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
      *
-     * @param startTime  The UNIX time the recording started. Make sure it matches the time in the database's meta table.
-     * @param database   The database for this recording.
-     * @param outputPath Where the raw video recording is stored. Make sure it matches the path in the database's meta table.
+     * @param startTime  The UNIX time the record started. Make sure it matches the time in the database's meta table.
+     * @param database   The database for this record.
+     * @param outputPath Where the raw video record is stored. Make sure it matches the path in the database's meta table.
      */
     private RecordingManager(long startTime, @NotNull File database, @Nullable String outputPath) {
         this.startTime = startTime;
@@ -85,8 +79,8 @@ public class RecordingManager {
     /**
      * Create a RecordingManager WITHOUT INITIALIZING THE DATABASE.
      *
-     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
-     * @param database  The database for this recording.
+     * @param startTime The UNIX time the record started. Make sure it matches the time in the database's meta table.
+     * @param database  The database for this record.
      */
     private RecordingManager(long startTime, @NotNull File database) {
         this(startTime, database, null);
@@ -95,7 +89,7 @@ public class RecordingManager {
     /**
      * Create a RecordingManager and initialize its database.
      *
-     * @param startTime The UNIX time the recording started. Make sure it matches the time in the database's meta table.
+     * @param startTime The UNIX time the record started. Make sure it matches the time in the database's meta table.
      */
     private RecordingManager(long startTime) throws IOException, SQLException {
         this(startTime, RECORDING_DIRECTORY.resolve("autocut_" + Instant.ofEpochMilli(startTime).toString().replace(':', '_').replace('T', '_').replace('.', '_') + ".sqlite").toFile()); // Also initializes sqlUrl
@@ -123,7 +117,7 @@ public class RecordingManager {
             startTimeResult.next();
             startTime = Long.parseLong(startTimeResult.getString(META_VALUE));
             startTimeResult.close();
-            // Get recording path
+            // Get record path
             ResultSet recordingPathResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = \"%s\"", META_VALUE, META_TABLE, META_KEY, META_KEY_OUTPUT_PATH));
             if (recordingPathResult.next()) {
                 outputPath = recordingPathResult.getString(META_VALUE);
@@ -137,14 +131,21 @@ public class RecordingManager {
     protected static PreparedStatement prepareClipStatement(Clip clip, Connection connection) throws SQLException {
         List<Object> rowValues = new LinkedList<>();
         // Required
-        StringBuilder columnsBuilder = new StringBuilder("(" + CLIPS_INPOINT_COLUMN + ", " + CLIPS_TIMESTAMP_COLUMN + ", " + CLIPS_OUTPOINT_COLUMN + ", " + CLIPS_TYPE_COLUMN + ", " +  CLIPS_ACTIVE_COLUMN + ", " + CLIPS_INVERSE_COLUMN);
-        StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?, ?, ?");
+        StringBuilder columnsBuilder = new StringBuilder("(%s, %s, %s, %s, %s, %s, %s".formatted(CLIPS_INPOINT_COLUMN,
+                CLIPS_TIMESTAMP_COLUMN,
+                CLIPS_OUTPOINT_COLUMN,
+                CLIPS_TYPE_COLUMN,
+                CLIPS_ACTIVE_COLUMN,
+                CLIPS_INVERSE_COLUMN,
+                CLIPS_EXPORT_GROUPING_MODE_COLUMN));
+        StringBuilder valuesBuilder = new StringBuilder("(?, ?, ?, ?, ?, ?, ?");
         rowValues.add(clip.in());
         rowValues.add(clip.time());
         rowValues.add(clip.out());
         rowValues.add(clip.type());
         rowValues.add(clip.active());
         rowValues.add(clip.inverse());
+        rowValues.add(clip.exportGroupingMode().getId());
 
         // Optional
         if (clip.description() != null) {
@@ -192,7 +193,7 @@ public class RecordingManager {
     }
 
     /**
-     * Adds a new clip to the recording.
+     * Adds a new clip to the record.
      *
      * @param clip The clip to add.
      */
@@ -203,61 +204,15 @@ public class RecordingManager {
     }
 
     /**
-     * Export all clips in the recording with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
+     * Asks {@link com.skycatdev.autocut.export.ExportHelper} to export clips as configured
+     * @throws IllegalStateException When {@link outputPath} is {@code null}.
      */
-    public void export() throws SQLException { // TODO: clean up this error handling, including checking that the outputPath != null
+    public void export() throws SQLException {
         if (outputPath == null) {
-            throw new IllegalStateException("outputPath was null and it must not be. Has the recording finished/onRecordingEnded been called?");
+            throw new IllegalStateException("outputPath is null, and it should not be. Has the recording finished/onRecordingEnded been called?");
         }
-        LinkedList<Clip> clips = getActiveClips();
-        new Thread(() -> {
-            File recording = new File(outputPath);
-            String recordingName = recording.getName().substring(0, recording.getName().lastIndexOf('.'));
-            File export = recording.toPath().resolveSibling(ConfigHandler.getExportConfig().getExportName(recordingName, clips.size())).toFile();
+        ExportHelper.export(getActiveClips(), outputPath, startTime);
 
-            try {
-                FFmpegExecutor executor = new FFmpegExecutor();
-                FFprobe ffprobe = new FFprobe();
-                FFmpegProbeResult in = ffprobe.probe(outputPath);
-
-                @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
-                        .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, clips, in).getAbsolutePath())
-                        .setInput(in)
-                        .addOutput(export.getAbsolutePath())
-                        .setFormat(ConfigHandler.getExportConfig().getFormat())
-                        .addExtraArgs("-map", "[outv]", "-map", "[outa]")
-                        .setConstantRateFactor(18)
-                        //.setVideoCodec("libx264") requires gpl
-                        .done();
-                FFmpegJob job = executor.createJob(builder, new ProgressListener() {
-                    final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Clip.totalDuration(clips)); // TODO: use the total duration of the merged clips instead
-
-                    @Override
-                    public void progress(Progress progress) {
-                        if (progress.isEnd()) {
-                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.finish"));
-                        } else {
-                            double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
-                            if (percentDone < 0) {
-                                return;
-                            }
-                            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone)));
-                        }
-
-                    }
-                });
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.start"));
-                try {
-                    job.run();
-                } catch (Exception e) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
-                    throw new RuntimeException("Something went wrong while exporting.", e);
-                }
-            } catch (Exception e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.fail"));
-                throw new RuntimeException(e);
-            }
-        }, "Autocut FFmpeg Export Thread").start();
     }
 
     public LinkedList<Clip> getActiveClips() throws SQLException {
@@ -269,11 +224,17 @@ public class RecordingManager {
                         results.getLong(CLIPS_TIMESTAMP_COLUMN),
                         results.getLong(CLIPS_OUTPOINT_COLUMN),
                         //? if >=1.21
-                        Identifier.of(results.getString(CLIPS_ID_COLUMN)),
+                        Identifier.of(results.getString(CLIPS_TYPE_COLUMN)),
                         //? if <1.21
-                        /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_ID_COLUMN))),*/
+                        /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_TYPE_COLUMN))),*/
                         results.getBoolean(CLIPS_ACTIVE_COLUMN),
-                        results.getBoolean(CLIPS_INVERSE_COLUMN)
+                        results.getBoolean(CLIPS_INVERSE_COLUMN),
+                        ExportGroupingMode.fromId(
+                                //? if >=1.21
+                                Identifier.of(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN))
+                                //? if <1.21
+                                /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN)))*/
+                        )
                 );
                 builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));
                 builder.setSource(results.getString(CLIPS_SOURCE_COLUMN));
@@ -295,7 +256,7 @@ public class RecordingManager {
     }
 
     /**
-     * @return how long this has been recording, in milliseconds
+     * @return how long this has been record, in milliseconds
      */
     @SuppressWarnings("unused")
     public long getRecordingTime() {
@@ -315,6 +276,7 @@ public class RecordingManager {
                                 %s TEXT NOT NULL,
                                 %s INTEGER NOT NULL,
                                 %s INTEGER NOT NULL,
+                                %s TEXT NOT NULL,
                                 %s TEXT,
                                 %s TEXT,
                                 %s TEXT,
@@ -333,6 +295,7 @@ public class RecordingManager {
                     CLIPS_TYPE_COLUMN,
                     CLIPS_ACTIVE_COLUMN,
                     CLIPS_INVERSE_COLUMN,
+                    CLIPS_EXPORT_GROUPING_MODE_COLUMN,
                     CLIPS_DESCRIPTION_COLUMN,
                     CLIPS_SOURCE_COLUMN,
                     CLIPS_OBJECT_COLUMN,

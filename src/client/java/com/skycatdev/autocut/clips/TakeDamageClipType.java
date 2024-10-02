@@ -3,6 +3,7 @@ package com.skycatdev.autocut.clips;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.config.ExportGroupingMode;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
@@ -24,14 +25,13 @@ public class TakeDamageClipType extends ClipType {
      */
     private int precision;
 
-    public TakeDamageClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, int precision) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, true, true, 100, 100, false);
+    public TakeDamageClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode, int precision) {
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, 100, 100, false, ExportGroupingMode.NONE);
         this.setPrecision(precision);
     }
 
     public TakeDamageClipType() {
-        super(ID, true, true, 100, 100, false, true, true, 100, 100, false);
-        this.setPrecision(1);
+        this(true, true, 100, 100, false, ExportGroupingMode.NONE, 1);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TakeDamageClipType extends ClipType {
     }
 
     public Clip createClip(long time, ClientPlayerEntity player, float damageTaken) {
-        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), String.format(String.format("Took %%.%df damage", getPrecision()), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
+        return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), getExportGroupingMode(), String.format(String.format("Took %%.%df damage", getPrecision()), damageTaken), null, player.getNameForScoreboard(), null, player.getPos());
     }
 
     public int getPrecision() {

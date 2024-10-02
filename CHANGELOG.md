@@ -1,5 +1,3 @@
-- Added keybind to make a new clip
-- Added export options
-- Better notifications for exporting errors
-- Added clips for receiving messages from players and from the server (not enabled by default)
-- Added inverse clips - basically "don't save this" instead of "save this"
+- Better progress info
+- Option to not overwrite on conflict
+- Added an export grouping mode - export clips to one file or to multiple files
