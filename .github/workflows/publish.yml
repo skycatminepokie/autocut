@@ -38,3 +38,5 @@ jobs:
 
       - name: Build and Publish
         run: ./gradlew chiseledPublishMods
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
