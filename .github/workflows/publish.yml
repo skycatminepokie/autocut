@@ -40,3 +40,6 @@ jobs:
         run: ./gradlew chiseledPublishMods
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODRINTH_TOKEN: $${{ secrets.MODRINTH_TOKEN }}
+          DISCORD_WEBHOOK: $${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK_DRY_RUN: $${{ secrets.DISCORD_WEBHOOK_DRY_RUN }}
