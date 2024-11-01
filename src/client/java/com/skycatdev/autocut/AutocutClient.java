@@ -1,5 +1,6 @@
 package com.skycatdev.autocut;
 
+import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.record.RecordingManager;
 import io.obswebsocket.community.client.OBSRemoteController;
@@ -8,12 +9,14 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -105,6 +108,24 @@ public class AutocutClient implements ClientModInitializer {
                 }
             }
         }));
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            if (currentRecordingManager != null && NOT_IN_WORLD.clipType().shouldRecord()) {
+                long time = System.currentTimeMillis();
+                try {
+                    Clip clip = NOT_IN_WORLD.clipType().enterWorld(time);
+                    if (clip != null) {
+                        currentRecordingManager.addClip(clip);
+                    }
+                } catch (SQLException e) {
+                    Autocut.LOGGER.warn("Unable to store not in world clip", e);
+                }
+            }
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            if (currentRecordingManager != null && NOT_IN_WORLD.clipType().shouldRecord()) {
+                NOT_IN_WORLD.clipType().leaveWorld(System.currentTimeMillis());
+            }
+        });
     }
 
 }

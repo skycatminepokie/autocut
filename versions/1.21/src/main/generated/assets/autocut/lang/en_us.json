@@ -40,6 +40,8 @@
   "autocut.yacl.generic.start_offset.description": "How many milliseconds before the event should be counted as part of the clip.",
   "autocut.yacl.manual_clip": "Manual",
   "autocut.yacl.manual_clip.description": "When you press the keybind.\nDefault: %s\nCurrent: %s",
+  "autocut.yacl.not_in_world": "Not in world",
+  "autocut.yacl.not_in_world.description": "When you're in a world, or paused in single player.",
   "autocut.yacl.place_block_clip": "Place block",
   "autocut.yacl.place_block_clip.description": "When you place a block",
   "autocut.yacl.receive_player_message_clip": "Receive player message",
