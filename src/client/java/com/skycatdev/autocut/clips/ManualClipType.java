@@ -20,11 +20,11 @@ public class ManualClipType extends ClipType {
     public static final Codec<ManualClipType> CODEC = RecordCodecBuilder.create(instance -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ManualClipType::new));
 
     public ManualClipType(boolean active, boolean shouldRecord, long startOffset, long endOffset, boolean inverse, ExportGroupingMode exportGroupingMode) {
-        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL);
+        super(ID, active, shouldRecord, startOffset, endOffset, inverse, exportGroupingMode, true, true, TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(3), false, ExportGroupingMode.INDIVIDUAL);
     }
 
     public ManualClipType() {
-        this(true, true,TimeUnit.SECONDS.toMicros(30), TimeUnit.SECONDS.toMicros(3), false, ExportGroupingMode.INDIVIDUAL);
+        this(true, true,TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(3), false, ExportGroupingMode.INDIVIDUAL);
     }
 
     @Override
