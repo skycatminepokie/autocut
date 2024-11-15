@@ -7,8 +7,7 @@
   /*"compatibilityLevel": "JAVA_17",*/
   "client": [
     "ClientPlayerEntityMixin",
-    "ClientPlayNetworkHandlerMixin",
-    "MinecraftClientMixin"
+    "ClientPlayNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
