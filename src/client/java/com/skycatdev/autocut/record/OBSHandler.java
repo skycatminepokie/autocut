@@ -22,7 +22,7 @@ public class OBSHandler { // All this is likely on a thread other than the main 
                 .password(password)
                 .connectionTimeout(DEFAULT_CONNECTION_TIMEOUT)
                 .lifecycle()
-                .onReady(() -> AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.connect.success")))
+                .onReady(() -> AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.connect.success")))
                 .and()
                 .autoConnect(true)
                 .registerEventListener(RecordStateChangedEvent.class, OBSHandler::onRecordEventChanged)
@@ -33,22 +33,22 @@ public class OBSHandler { // All this is likely on a thread other than the main 
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
             assert AutocutClient.currentRecordingManager == null; // TODO: Error handling
-            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.start.success"));
+            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.success"));
             try {
                 AutocutClient.currentRecordingManager = new RecordingManager();
             } catch (SQLException | IOException e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.start.fail").setStyle(styleHoverException(e)));
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.fail").setStyle(styleHoverException(e)));
             }
         } else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.end.success"));
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.success"));
                 if (AutocutClient.currentRecordingManager == null) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.end.fail.notStarted")); // TODO: Check at connect and warn
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.fail.notStarted")); // TODO: Check at connect and warn
                 } else {
                     try {
                         AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
                     } catch (SQLException e) {
-                        AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.recording.end.fail.sqlException").setStyle(styleHoverException(e)));
+                        AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.fail.sqlException").setStyle(styleHoverException(e)));
                     }
                 }
             }
