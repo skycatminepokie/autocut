@@ -2,6 +2,7 @@ package com.skycatdev.autocut.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.Utils;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
@@ -96,7 +97,8 @@ public class ExportConfig {
         try {
             return Utils.readFromJson(file, CODEC);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Autocut.LOGGER.warn("Failed to load old export config, making a default one (instead of crashing)");
+            return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
         }
     }
 

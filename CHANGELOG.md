@@ -1,2 +1,1 @@
-- Not In World Clip
-- Fixed broken translations
+- Fixed crash with broken config
