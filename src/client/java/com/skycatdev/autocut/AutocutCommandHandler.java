@@ -6,7 +6,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.skycatdev.autocut.export.ExportHelper;
 import com.skycatdev.autocut.record.OBSHandler;
 import com.skycatdev.autocut.record.RecordingManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -22,13 +21,17 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 public class AutocutCommandHandler {
 
     // Exceptions are in the form of COMMAND_PATH_REASON_EXCEPTION
-    private static final SimpleCommandExceptionType FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION = new SimpleCommandExceptionType(() -> Text.stringifiedTranslatable("autocut.command.autocut.finish.database.fail.databaseDoesNotExist").getString());
-    private static final SimpleCommandExceptionType FINISH_NO_RECORDING_EXCEPTION = new SimpleCommandExceptionType(() -> Text.stringifiedTranslatable("autocut.command.autocut.finish.fail.noRecording").getString());
+    private static final SimpleCommandExceptionType FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION = new SimpleCommandExceptionType(() -> Text.translatable("autocut.command.autocut.finish.database.fail.databaseDoesNotExist").getString());
+    private static final SimpleCommandExceptionType FINISH_NO_RECORDING_EXCEPTION = new SimpleCommandExceptionType(() -> Text.translatable("autocut.command.autocut.finish.fail.noRecording").getString());
+    private static final SimpleCommandExceptionType CONNECT_ALREADY_CONNECTED = new SimpleCommandExceptionType(() -> Text.translatable("autocut.command.autocut.connect.password.fail.alreadyConnected").getString());
 
-    private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) {
+    private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         String password = StringArgumentType.getString(context, "password");
-        new Thread(() -> OBSHandler.createConnection(password), "Autocut OBS Connection Thread").start();
-        return Command.SINGLE_SUCCESS;
+        if (AutocutClient.controller == null) {
+            new Thread(() -> OBSHandler.createConnection(password), "Autocut OBS Connection Thread").start();
+            return Command.SINGLE_SUCCESS;
+        }
+        throw CONNECT_ALREADY_CONNECTED.create();
     }
 
     private static int finish(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {

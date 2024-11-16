@@ -23,6 +23,10 @@ public class OBSHandler { // All this is likely on a thread other than the main 
                 .connectionTimeout(DEFAULT_CONNECTION_TIMEOUT)
                 .lifecycle()
                 .onReady(() -> AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.connect.success")))
+                .onClose((closeCode) -> {
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.disconnect"));
+                    AutocutClient.controller = null;
+                })
                 .and()
                 .autoConnect(true)
                 .registerEventListener(RecordStateChangedEvent.class, OBSHandler::onRecordEventChanged)

@@ -1,4 +1,5 @@
 {
+  "autocut.command.autocut.connect.password.fail.alreadyConnected": "Already connected.",
   "autocut.command.autocut.finish.database.fail.databaseDoesNotExist": "The given database does not exist.",
   "autocut.command.autocut.finish.fail.noRecording": "No record found. Did you connect, start record, and stop record?",
   "autocut.cutting.fail": "Something went wrong while preparing to export. Check your logs for more info.",
@@ -7,6 +8,7 @@
   "autocut.cutting.progress.fail": "Something went wrong while exporting. Check your logs for more info.",
   "autocut.cutting.start": "Preparing to cut...",
   "autocut.record.connect.success": "OBS connected.",
+  "autocut.record.disconnect": "OBS disconnected",
   "autocut.record.end.fail.notStarted": "Warning: Recording was not started in autocut - no record is saved.",
   "autocut.record.end.fail.sqlException": "Failed to save metadata for record (SQLException)",
   "autocut.record.end.success": "Recording ended.",

@@ -68,6 +68,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
 
 
         addText("record.connect.success", "OBS connected.", tb);
+        addText("record.disconnect", "OBS disconnected", tb);
         addText("record.start.success", "Recording started.", tb);
         addText("record.start.fail", "Failed to start autocut", tb);
         addText("record.end.success", "Recording ended.", tb);
@@ -81,6 +82,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
 
         addCommandMessage("autocut.finish.database", "fail.databaseDoesNotExist", "The given database does not exist.", tb);
         addCommandMessage("autocut.finish", "fail.noRecording", "No record found. Did you connect, start record, and stop record?", tb);
+        addCommandMessage("autocut.connect.password", "fail.alreadyConnected", "Already connected.", tb);
 
     }
 
