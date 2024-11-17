@@ -17,7 +17,6 @@ import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,17 +101,21 @@ public class ExportHelper {
                 .done();
         FFmpegJob job = executor.createJob(builder, new ProgressListener() {
             final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Utils.totalSpace(rangeSet));
+            int lastPercentDone = -1;
+            long lastMessageTime = 0;
 
             @Override
             public void progress(Progress progress) {
                 if (progress.isEnd()) {
                     AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.finish", jobNumber, totalJobs));
                 } else {
-                    double percentDone = ((double) progress.out_time_ns / outputDurationNs) * 100;
-                    if (percentDone < 0) {
+                    int percentDone = (int)(((double) progress.out_time_ns / outputDurationNs) * 100);
+                    if (percentDone < 0 || percentDone == lastPercentDone && System.currentTimeMillis() < lastMessageTime + 10000) { // If it's strange or (it's the same number and it's been less than 10 secs)
                         return;
                     }
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress", String.format("%.0f", percentDone), jobNumber, totalJobs));
+                    lastPercentDone = percentDone;
+                    lastMessageTime = System.currentTimeMillis();
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress", percentDone, jobNumber, totalJobs));
                 }
 
             }
