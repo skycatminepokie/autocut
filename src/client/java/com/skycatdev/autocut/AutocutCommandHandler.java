@@ -27,7 +27,7 @@ public class AutocutCommandHandler {
 
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         String password = StringArgumentType.getString(context, "password");
-        if (ObsHandler.controller == null) {
+        if (!ObsHandler.hasController()) {
             new Thread(() -> ObsHandler.createConnection(password), "Autocut OBS Connection Thread").start();
             return Command.SINGLE_SUCCESS;
         }

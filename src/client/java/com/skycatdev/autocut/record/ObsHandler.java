@@ -15,7 +15,7 @@ public class ObsHandler { // All this is likely on a thread other than the main 
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
-    @Nullable public static OBSRemoteController controller = null;
+    @Nullable private static OBSRemoteController controller = null;
 
     public static void createConnection(String password) {
         controller = OBSRemoteController.builder()
@@ -27,12 +27,16 @@ public class ObsHandler { // All this is likely on a thread other than the main 
                 .onReady(() -> AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.connect.success")))
                 .onClose((closeCode) -> {
                     AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.disconnect"));
-                    AutocutClient.controller = null;
+                    controller = null;
                 })
                 .and()
                 .autoConnect(true)
-                .registerEventListener(RecordStateChangedEvent.class, OBSHandler::onRecordEventChanged)
+                .registerEventListener(RecordStateChangedEvent.class, ObsHandler::onRecordEventChanged)
                 .build();
+    }
+
+    public static boolean hasController() {
+        return controller != null;
     }
 
     private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) { // Not on client thread
