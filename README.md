@@ -15,7 +15,7 @@ Cut videos based on your gameplay!
 12. Run `/autocut finish`
 13. When it's finished a new video starting with `cut` will be in your recordings folder.
 
-You can also optionally run `/autocut finish "path/to/database"` to cut an old video. This will fail if the original video is moved or deleted.
+You can also optionally run `/autocut finish "path/to/database"` to cut an old video. This will fail if the original video is moved or deleted. Databases are stored in `.minecraft/autocut/recordings`.
 
 ## Dependencies
 - Includes [OBS WebSocket Java](https://github.com/obs-websocket-community-projects/obs-websocket-java), used under [MIT](https://github.com/obs-websocket-community-projects/obs-websocket-java/blob/develop/LICENSE)
