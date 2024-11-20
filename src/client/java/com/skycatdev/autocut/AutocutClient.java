@@ -3,7 +3,6 @@ package com.skycatdev.autocut;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.record.RecordingManager;
-import io.obswebsocket.community.client.OBSRemoteController;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -16,7 +15,6 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -29,7 +27,6 @@ import static com.skycatdev.autocut.clips.ClipTypes.*;
 
 public class AutocutClient implements ClientModInitializer {
     public static final KeyBinding CLIP_KEYBIND = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.autocut.clip", InputUtil.UNKNOWN_KEY.getCode(), "key.category.autocut.autocut"));
-    @Nullable public static OBSRemoteController controller = null;
     @Nullable public static RecordingManager currentRecordingManager = null;
 
     /**

@@ -6,6 +6,7 @@ import io.obswebsocket.community.client.message.event.outputs.RecordStateChanged
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -14,9 +15,10 @@ public class OBSHandler { // All this is likely on a thread other than the main 
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
+    @Nullable public static OBSRemoteController controller = null;
 
     public static void createConnection(String password) {
-        AutocutClient.controller = OBSRemoteController.builder()
+        controller = OBSRemoteController.builder()
                 .host(DEFAULT_HOST)
                 .port(DEFAULT_PORT)
                 .password(password)
