@@ -36,7 +36,6 @@ public class OBSHandler { // All this is likely on a thread other than the main 
     private static void onRecordEventChanged(RecordStateChangedEvent recordStateChangedEvent) { // Not on client thread
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
-            assert AutocutClient.currentRecordingManager == null; // TODO: Error handling
             AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.success"));
             try {
                 AutocutClient.currentRecordingManager = new RecordingManager();
