@@ -71,6 +71,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("record.disconnect", "OBS disconnected", tb);
         addText("record.start.success", "Recording started.", tb);
         addText("record.start.fail", "Failed to start autocut", tb);
+        addText("record.connect.alreadyRecording", "Warning: You started recording before connecting Autocut. Autocut will not record until you restart recording.", tb);
         addText("record.end.success", "Recording ended.", tb);
         addText("record.end.fail.notStarted", "Warning: Recording was not started in autocut - no record is saved.", tb);
         addText("record.end.fail.sqlException", "Failed to save metadata for record (SQLException)", tb);

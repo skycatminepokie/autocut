@@ -7,6 +7,7 @@
   "autocut.cutting.progress": "Cutting: %s%% [%s/%s]",
   "autocut.cutting.progress.fail": "Something went wrong while exporting. Check your logs for more info.",
   "autocut.cutting.start": "Preparing to cut...",
+  "autocut.record.connect.alreadyRecording": "Warning: You started recording before connecting Autocut. Autocut will not record until you restart recording.",
   "autocut.record.connect.success": "OBS connected.",
   "autocut.record.disconnect": "OBS disconnected",
   "autocut.record.end.fail.notStarted": "Warning: Recording was not started in autocut - no record is saved.",
