@@ -6,7 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.skycatdev.autocut.record.OBSHandler;
+import com.skycatdev.autocut.record.ObsHandler;
 import com.skycatdev.autocut.record.RecordingManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
@@ -27,8 +27,8 @@ public class AutocutCommandHandler {
 
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         String password = StringArgumentType.getString(context, "password");
-        if (OBSHandler.controller == null) {
-            new Thread(() -> OBSHandler.createConnection(password), "Autocut OBS Connection Thread").start();
+        if (ObsHandler.controller == null) {
+            new Thread(() -> ObsHandler.createConnection(password), "Autocut OBS Connection Thread").start();
             return Command.SINGLE_SUCCESS;
         }
         throw CONNECT_ALREADY_CONNECTED_EXCEPTION.create();

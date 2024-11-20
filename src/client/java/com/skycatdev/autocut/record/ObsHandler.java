@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class OBSHandler { // All this is likely on a thread other than the main client thread.
+public class ObsHandler { // All this is likely on a thread other than the main client thread.
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
     public static final String DEFAULT_HOST = "localhost";
