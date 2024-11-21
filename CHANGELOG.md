@@ -1,2 +1,3 @@
 - Fixed crash with broken config
 - Fixed the default for manual clip types being 1000x longer than they were meant to be
+- Localized export grouping modes
