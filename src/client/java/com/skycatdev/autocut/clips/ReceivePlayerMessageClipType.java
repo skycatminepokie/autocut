@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-public class ReceivePlayerMessageClipType extends ClipType { // TODO: regex filter?
+public class ReceivePlayerMessageClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "receive_player_message");
     public static final Codec<ReceivePlayerMessageClipType> CODEC = RecordCodecBuilder.create((instance) -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ReceivePlayerMessageClipType::new));
 
@@ -32,7 +32,7 @@ public class ReceivePlayerMessageClipType extends ClipType { // TODO: regex filt
         return Text.translatable("autocut.yacl.receive_player_message_clip");
     }
 
-    public Clip createClip(long time, Text message, @Nullable GameProfile sender) { // TODO: Make sure we don't need MessageType.Parameters
+    public Clip createClip(long time, Text message, @Nullable GameProfile sender) {
         return new Clip(time - getStartOffset(), time, time + getEndOffset(), ID, isActive(), isInverse(), getExportGroupingMode(), "Received a chat message from a player", sender == null ? null : sender.getName(), message.getString(), null, null);
     }
 

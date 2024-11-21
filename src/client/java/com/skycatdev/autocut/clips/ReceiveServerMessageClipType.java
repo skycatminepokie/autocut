@@ -8,7 +8,7 @@ import dev.isxander.yacl3.api.OptionDescription;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class ReceiveServerMessageClipType extends ClipType { // TODO: regex filter?
+public class ReceiveServerMessageClipType extends ClipType {
     public static final Identifier ID = Identifier.of(Autocut.MOD_ID, "receive_server_message");
     public static final Codec<ReceiveServerMessageClipType> CODEC = RecordCodecBuilder.create((instance) -> ClipTypes.addDefaultConfigFields(instance).apply(instance, ReceiveServerMessageClipType::new));
 
