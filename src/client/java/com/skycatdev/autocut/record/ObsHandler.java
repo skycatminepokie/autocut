@@ -67,7 +67,7 @@ public class ObsHandler { // All this is likely on a thread other than the main 
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
                 AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.success"));
                 if (AutocutClient.currentRecordingManager == null) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.fail.notStarted")); // TODO: Check at connect and warn
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.fail.notStarted"));
                 } else {
                     try {
                         AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
