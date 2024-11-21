@@ -50,6 +50,8 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addOption("generic.end_offset", "Default end offset", "How many milliseconds after the event should be counted as part of the clip.", tb);
         addOption("generic.should_record", "Enable record", "Whether this event should be recorded.", tb);
         addOption("generic.active", "Active", "Whether this event should be exported in the final record.", tb);
+        addOption("generic.inverse", "Invert new clips", "If new clips should be the opposite of clips - the footage they cover will NOT be exported.", tb);
+        addOption("generic.grouping_mode", "Grouping mode", "What clips this group should be exported with.", tb);
         addOption("take_damage_clip.damage_precision", "Damage precision", "How many decimal points of precision to record damage at.", tb);
 
         tb.add(YACL_PREFIX + ".category.export", "Export");

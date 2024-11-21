@@ -130,16 +130,16 @@ public abstract class ClipType { // TODO: Make a method that does the stuff it c
                 .controller(LongFieldControllerBuilder::create)
                 .build()
         );
-        builder.option(Option.<Boolean>createBuilder() // TODO: Localize
-                .name(Text.of("Invert new clips"))
-                .description(OptionDescription.of(Text.of("If new clips should be the opposite of clips - the footage they cover will NOT be exported.")))
+        builder.option(Option.<Boolean>createBuilder()
+                .name(Text.translatable("autocut.yacl.generic.inverse"))
+                .description(OptionDescription.of(Text.translatable("autocut.yacl.generic.inverse.description")))
                 .binding(inverseDefault, this::isInverse, this::setInverse)
                 .controller(TickBoxControllerBuilder::create)
                 .build()
         );
-        builder.option(Option.<ExportGroupingMode>createBuilder() // TODO: Localize
-                .name(Text.of("Grouping mode"))
-                .description(OptionDescription.of(Text.of("What clips this group should be exported with.")))
+        builder.option(Option.<ExportGroupingMode>createBuilder()
+                .name(Text.translatable("autocut.yacl.generic.grouping_mode"))
+                .description(OptionDescription.of(Text.translatable("autocut.yacl.generic.grouping_mode.description")))
                 .binding(exportGroupingModeDefault, this::getExportGroupingMode, this::setExportGroupingMode)
                 .controller((option) -> EnumControllerBuilder.create(option).enumClass(ExportGroupingMode.class).formatValue(ExportGroupingMode::getName))
                 .build()
