@@ -1,6 +1,5 @@
 package com.skycatdev.autocut.record;
 
-import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipBuilder;
 import com.skycatdev.autocut.config.ExportGroupingMode;
@@ -211,8 +210,14 @@ public class RecordingManager {
         if (outputPath == null) {
             throw new IllegalStateException("outputPath is null, and it should not be. Has the recording finished/onRecordingEnded been called?");
         }
-        ExportHelper.export(getActiveClips(), outputPath, startTime);
+        ExportHelper.exportFFmpeg(getActiveClips(), outputPath, startTime);
+    }
 
+    public void exportEdl() throws SQLException {
+        if (outputPath == null) {
+            throw new IllegalStateException("outputPath is null, and it should not be. Has the recording finished/onRecordingEnded been called?");
+        }
+        ExportHelper.exportEdl(getActiveClips(), outputPath, startTime);
     }
 
     public LinkedList<Clip> getActiveClips() throws SQLException {

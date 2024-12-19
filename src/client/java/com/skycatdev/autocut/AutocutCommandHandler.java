@@ -74,13 +74,31 @@ public class AutocutCommandHandler {
         var finishDatabase = argument("database", StringArgumentType.string())
                 .executes(AutocutCommandHandler::finishDatabase)
                 .build();
+        var finishDatabaseEdl = literal("edl")
+                .executes(AutocutCommandHandler::finishDatabaseEdl)
+                .build();
         //@formatter:off
         dispatcher.getRoot().addChild(autocut);
         autocut.addChild(connect);
             connect.addChild(connectPassword);
         autocut.addChild(finish);
             finish.addChild(finishDatabase);
+                finishDatabase.addChild(finishDatabaseEdl);
         //@formatter:on
+    }
+
+    private static int finishDatabaseEdl(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
+        try {
+            File database = new File(StringArgumentType.getString(context, "database"));
+            if (!database.exists()) {
+                throw FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION.create();
+            }
+            RecordingManager recordingManager = RecordingManager.fromDatabase(database);
+            recordingManager.exportEdl();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return Command.SINGLE_SUCCESS;
     }
 
 }

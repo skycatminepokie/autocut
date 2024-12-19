@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 
-public class ExportConfig {
+public class ExportConfig { // Warn: There's probably some race conditions in here with changing the config while exporting
     public static final String DEFAULT_FORMAT = "mp4";
     public static final String DEFAULT_NAME_FORMAT = "cut{ORIGINAL}";
     public static final boolean DEFAULT_KEEP_OLD = true;
@@ -133,7 +133,11 @@ public class ExportConfig {
                 .build();
     }
 
-    public File getExportFile(File original, long clips) {
+    public synchronized File getFFmpegExportFile(File original, int clips) {
+        return getExportFile(original, clips, format);
+    }
+
+    public synchronized File getExportFile(File original, int clips, String format) {
         String recordingName = original.getName();
         String firstName = nameFormat.trim()
                                    .replaceAll("\\{ORIGINAL}", recordingName)

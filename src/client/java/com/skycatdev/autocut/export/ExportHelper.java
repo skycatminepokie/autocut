@@ -7,19 +7,23 @@ import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.clips.ClipType;
 import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.config.ConfigHandler;
+import com.skycatdev.autocut.config.ExportConfig;
 import com.skycatdev.autocut.record.RecordingManager;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.job.FFmpegJob;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import net.bramp.ffmpeg.probe.FFmpegStream;
 import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -28,13 +32,13 @@ import java.util.concurrent.TimeUnit;
 
 public class ExportHelper {
     /**
-     * Export all clips in the record with ffmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
+     * Export all clips in the record with FFmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
      *
      * @param clips         All the clips to be considered when exporting. Don't include inactive clips.
      * @param recordingPath The path to the video recording
      * @param startTime     The time the recording was started
      */
-    public static void export(LinkedList<Clip> clips, @NotNull String recordingPath, long startTime) {
+    public static void exportFFmpeg(LinkedList<Clip> clips, @NotNull String recordingPath, long startTime) {
         new Thread(() -> {
             File recording = new File(recordingPath);
 
@@ -87,14 +91,95 @@ public class ExportHelper {
         }, "Autocut FFmpeg Export Thread").start();
     }
 
+    /**
+     * Export the given clips to EDL format.
+     *
+     * @param clips     The clips to export.
+     * @param recordingPath The original recording. Passed to {@link ExportConfig#getExportFile(File, int, String)}.
+     * @param startTime The time the recording started.
+     */
+    public static void exportEdl(LinkedList<Clip> clips, String recordingPath, long startTime) {
+        new Thread(() -> {
+            File recording = new File(recordingPath);
+            File export;
+            ExportConfig exportConfig = ConfigHandler.getExportConfig();
+            synchronized (exportConfig) {
+                export = exportConfig.getExportFile(recording, clips.size(), "edl");
+                try {
+                    export.createNewFile();
+                } catch (IOException e) {
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
+                    throw new RuntimeException("Could not create file for exporting.", e);
+                }
+            }
+            Fraction fps = null;
+            try {
+                FFmpegProbeResult probeResult = new FFprobe().probe(recordingPath);
+                if (probeResult.hasError()) {
+                    throw new RuntimeException("Failed to probe for frame rate.");
+                }
+                for (FFmpegStream stream : probeResult.getStreams()) {
+                    if (stream.codec_type.equals(FFmpegStream.CodecType.VIDEO)) {
+                        fps = stream.avg_frame_rate;
+                        break;
+                    }
+                }
+                if (fps == null) {
+                    throw new RuntimeException("Failed to find a video stream in the given recordingPath");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to get frame rate for recording", e);
+            }
+            assert export.exists() : "Export file didn't exist when it was created";
+            try (PrintWriter pw = new PrintWriter(export)) {
+                pw.printf("TITLE: %s\n", recording.getName());
+                pw.print("FCM: NON-DROP FRAME");
+                for (int i = 0; i < clips.size(); i++) {
+                    Clip clip = clips.get(i);
+                    Timecode timecodeIn = Timecode.fromMillis(clip.in() - startTime, fps).add(1, TimeUnit.HOURS);
+                    Timecode timecodeOut = Timecode.fromMillis(clip.out() - startTime, fps).add(1, TimeUnit.HOURS);
+                    pw.println();
+                    pw.printf("\n%03d  001      V     C        %s %s %s %s",
+                            i + 1,
+                            timecodeIn,
+                            timecodeOut,
+                            timecodeIn,
+                            timecodeOut);
+                    pw.printf("\n%s |C:ResolveColorBlue |M:%s |D:%d",  // TODO: Allow other colors
+                            clip.description() == null ? "" : clip.description().replaceAll("\\|", ""),
+                            clip.type(),
+                            timecodeOut.subtractFrames(timecodeIn.frames()).frames());
+                }
+            } catch (IOException e) {
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
+                throw new RuntimeException("Error while writing to file.", e);
+            }
+            AutocutClient.sendMessageOnClientThread(Text.of("Successfully exported to EDL.")); // TODO: Localize
+        }, "Autocut EDL Export Thread").start();
+    }
+
+    private static String millisToTimecode(long millis, Fraction fps) {
+        Fraction framesPerMilli = fps.divideBy(Fraction.getFraction(1000));
+        Fraction frames = framesPerMilli.multiplyBy(Fraction.getFraction(millis));
+        return String.format("%02d:%02d:%02d:%02d",
+                millis / 3600000, // 1000 millis/sec * 60 sec/min * 60 min/hr
+                (millis / 60000) % 60, // (millis/min) % 60 min/hr
+                (millis / 1000) % 60, // 1000 millis/sec % 60 sec/min
+                (long)(frames.doubleValue() % fps.doubleValue())); // total number of frames % fps
+    }
+
     private static FFmpegJob makeFFmpegJob(LinkedList<Clip> clips, long startTime, File recording, FFmpegProbeResult in, FFmpegExecutor executor, int totalJobs, int jobNumber) throws IOException {
         Set<Range<Long>> rangeSet = Clip.toRange(clips).asRanges();
-        File export = ConfigHandler.getExportConfig().getExportFile(recording, rangeSet.size());
+        ExportConfig exportConfig = ConfigHandler.getExportConfig();
+        File export;
+        synchronized (exportConfig) {
+            export = exportConfig.getFFmpegExportFile(recording, rangeSet.size());
+        }
         @SuppressWarnings("SpellCheckingInspection") FFmpegBuilder builder = new FFmpegBuilder()
                 .addExtraArgs("-/filter_complex", FilterGenerator.buildComplexFilter(startTime, in, rangeSet).getAbsolutePath())
                 .setInput(in)
                 .addOutput(export.getAbsolutePath())
-                .setFormat(ConfigHandler.getExportConfig().getFormat())
+                .setFormat(exportConfig.getFormat())
                 .addExtraArgs("-map", "[outv]", "-map", "[outa]")
                 .setConstantRateFactor(18)
                 //.setVideoCodec("libx264") requires gpl
