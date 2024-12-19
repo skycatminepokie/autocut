@@ -108,7 +108,7 @@ public class ExportHelper {
                 try {
                     export.createNewFile();
                 } catch (IOException e) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.progress.fail"));
                     throw new RuntimeException("Could not create file for exporting.", e);
                 }
             }
@@ -116,6 +116,7 @@ public class ExportHelper {
             try {
                 FFmpegProbeResult probeResult = new FFprobe().probe(recordingPath);
                 if (probeResult.hasError()) {
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.start.fail.probeFrameRate"));
                     throw new RuntimeException("Failed to probe for frame rate.");
                 }
                 for (FFmpegStream stream : probeResult.getStreams()) {
@@ -125,9 +126,11 @@ public class ExportHelper {
                     }
                 }
                 if (fps == null) {
+                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.start.fail.noVideoStream"));
                     throw new RuntimeException("Failed to find a video stream in the given recordingPath");
                 }
             } catch (IOException e) {
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.start.fail"));
                 throw new RuntimeException("Failed to get frame rate for recording", e);
             }
             assert export.exists() : "Export file didn't exist when it was created";
@@ -151,21 +154,11 @@ public class ExportHelper {
                             timecodeOut.subtractFrames(timecodeIn.frames()).frames());
                 }
             } catch (IOException e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.progress.fail"));
                 throw new RuntimeException("Error while writing to file.", e);
             }
-            AutocutClient.sendMessageOnClientThread(Text.of("Successfully exported to EDL.")); // TODO: Localize
+            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.finish"));
         }, "Autocut EDL Export Thread").start();
-    }
-
-    private static String millisToTimecode(long millis, Fraction fps) {
-        Fraction framesPerMilli = fps.divideBy(Fraction.getFraction(1000));
-        Fraction frames = framesPerMilli.multiplyBy(Fraction.getFraction(millis));
-        return String.format("%02d:%02d:%02d:%02d",
-                millis / 3600000, // 1000 millis/sec * 60 sec/min * 60 min/hr
-                (millis / 60000) % 60, // (millis/min) % 60 min/hr
-                (millis / 1000) % 60, // 1000 millis/sec % 60 sec/min
-                (long)(frames.doubleValue() % fps.doubleValue())); // total number of frames % fps
     }
 
     private static FFmpegJob makeFFmpegJob(LinkedList<Clip> clips, long startTime, File recording, FFmpegProbeResult in, FFmpegExecutor executor, int totalJobs, int jobNumber) throws IOException {

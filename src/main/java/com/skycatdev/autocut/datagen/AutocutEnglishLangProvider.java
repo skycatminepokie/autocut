@@ -82,6 +82,11 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("cutting.start", "Preparing to cut...", tb);
         addText("cutting.progress.fail", "Something went wrong while exporting. Check your logs for more info.", tb);
         addText("cutting.fail", "Something went wrong while preparing to export. Check your logs for more info.", tb);
+        addText("edl.start.fail", "Failed to get frame rate for recording. EDL export aborted.", tb);
+        addText("edl.start.fail.probeFrameRate", "Failed to probe for frame rate. EDL export aborted.", tb);
+        addText("edl.start.fail.noVideoStream", "Couldn't find a video stream. EDL export aborted.", tb);
+        addText("edl.progress.fail", "Something went wrong while exporting. Check your logs for more info.", tb);
+        addText("edl.finish", "Successfully exported to EDL.", tb);
         addText("exportGroupingMode.none", "Main file", tb);
         addText("exportGroupingMode.type", "Own type", tb);
         addText("exportGroupingMode.individual", "Separate", tb);
