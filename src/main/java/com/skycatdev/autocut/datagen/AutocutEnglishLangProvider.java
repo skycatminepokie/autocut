@@ -83,7 +83,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("cutting.progress.fail", "Something went wrong while exporting. Check your logs for more info.", tb);
         addText("cutting.fail", "Something went wrong while preparing to export. Check your logs for more info.", tb);
         addText("exportGroupingMode.none", "Main file", tb);
-        addText("exportGroupingMode.type", "Owm type", tb);
+        addText("exportGroupingMode.type", "Own type", tb);
         addText("exportGroupingMode.individual", "Separate", tb);
 
         addCommandMessage("autocut.finish.database", "fail.databaseDoesNotExist", "The given database does not exist.", tb);

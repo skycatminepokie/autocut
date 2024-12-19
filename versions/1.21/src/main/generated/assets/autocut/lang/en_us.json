@@ -9,7 +9,7 @@
   "autocut.cutting.start": "Preparing to cut...",
   "autocut.exportGroupingMode.individual": "Separate",
   "autocut.exportGroupingMode.none": "Main file",
-  "autocut.exportGroupingMode.type": "Owm type",
+  "autocut.exportGroupingMode.type": "Own type",
   "autocut.record.connect.alreadyRecording": "Warning: You started recording before connecting Autocut. Autocut will not record until you restart recording.",
   "autocut.record.connect.success": "OBS connected.",
   "autocut.record.disconnect": "OBS disconnected",

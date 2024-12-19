@@ -4,3 +4,4 @@
 - Localized inverse option
 - Localized export grouping mode option
 - Export to EDL for importing into DaVinci Resolve (beta, access with `/autocut finish <database> edl`)
+- Fix misspelling "Own" as "Owm"
