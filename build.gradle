@@ -179,7 +179,7 @@ tasks.register('buildAndCollect', Copy) {
 publishMods {
 	file = remapJar.archiveFile
 	modLoaders.add("fabric")
-	changelog = new File('CHANGELOG.md').text
+	changelog = rootProject.file("CHANGELOG.md").text
 	type = STABLE
 	displayName = "${mod_name} v${mod_version} for Minecraft ${mcVersion}"
 	dryRun = providers.environmentVariable("DRY_RUN").getOrElse("false") == "true"
