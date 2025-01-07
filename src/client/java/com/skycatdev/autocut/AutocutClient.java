@@ -18,6 +18,9 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+//? if <1.21.4 {
+import net.minecraft.util.TypedActionResult;
+//?}
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
@@ -70,7 +73,11 @@ public class AutocutClient implements ClientModInitializer {
                     Autocut.LOGGER.warn("Unable to store use item event", e);
                 }
             }
-            return ActionResult.PASS;
+            //? if >=1.21.4 {
+            /*return ActionResult.PASS;
+            *///?} else {
+            return TypedActionResult.pass(ItemStack.EMPTY);
+            //?}
         });
         ClientTickEvents.END_CLIENT_TICK.register((client) -> {
             if (CLIP_KEYBIND.wasPressed()) {
