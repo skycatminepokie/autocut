@@ -8,12 +8,17 @@ import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFprobe;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public class ExportConfig { // Warn: There's probably some race conditions in here with changing the config while exporting
     public static final String DEFAULT_FORMAT = "mp4";
@@ -22,7 +27,8 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
     public static final Codec<ExportConfig> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
             Codec.STRING.fieldOf("format").forGetter(ExportConfig::getFormat),
             Codec.STRING.fieldOf("nameFormat").forGetter(ExportConfig::getNameFormat),
-            Codec.BOOL.fieldOf("keepOld").orElse(true).forGetter(ExportConfig::shouldKeepOld)
+            Codec.BOOL.fieldOf("keepOld").orElse(true).forGetter(ExportConfig::shouldKeepOld),
+            Codec.STRING.optionalFieldOf("ffmpegFolder").xmap((opt) -> opt.map(Paths::get).orElse(null), (path) -> Optional.of(path.toString())).forGetter(ExportConfig::getFFmpegFolder)
     ).apply(instance, ExportConfig::new));
     /**
      * The file format to export the video to (eg .mp4, .mkv)
@@ -36,11 +42,38 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
      * Whether old files should be kept (true, rename the current one) or overwritten (false)
      */
     public boolean keepOld;
+    /**
+     * The folder with FFmpeg.
+     */
+    public @Nullable Path ffmpegFolder;
+
+    public Path getFFmpegFolder() {
+        return ffmpegFolder;
+    }
+
+    public FFmpeg getFFmpeg() throws IOException {
+        if (ffmpegFolder != null) {
+            return new FFmpeg(ffmpegFolder.resolve("ffmpeg").toString());
+        }
+        return new FFmpeg();
+    }
+
+    public FFprobe getFFprobe() throws IOException {
+        if (ffmpegFolder != null) {
+            return new FFprobe(ffmpegFolder.resolve("ffprobe").toString());
+        }
+        return new FFprobe();
+    }
 
     public ExportConfig(String format, String nameFormat, boolean keepOld) {
+        this(format, nameFormat, keepOld, null);
+    }
+
+    public ExportConfig(String format, String nameFormat, boolean keepOld, @Nullable Path ffmpegFolder) {
         this.format = format;
         this.nameFormat = nameFormat;
         this.keepOld = keepOld;
+        this.ffmpegFolder = ffmpegFolder;
     }
 
     public static boolean isValidFormat(String format) {
@@ -95,11 +128,14 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
             return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
         }
         try {
-            return Utils.readFromJson(file, CODEC);
+            ExportConfig exportConfig = Utils.readFromJson(file, CODEC);
+            if (exportConfig != null) {
+                return exportConfig;
+            }
         } catch (IOException e) {
             Autocut.LOGGER.warn("Failed to load old export config, making a default one (instead of crashing)");
-            return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
         }
+        return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
     }
 
     public ConfigCategory generateConfigCategory() {
@@ -130,7 +166,35 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
                         )
                         .build()
                 )
+                .option(Option.<String>createBuilder()
+                        .name(Text.translatable("autocut.yacl.export.ffmpegFolder")) // TODO translate
+                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.ffmpegFolder.description"))) // TODO translate
+                        .binding("", () -> {
+                            if (getFFmpegFolder() != null) {
+                                return getFFmpegFolder().toString();
+                            }
+                            return "";
+                        }, this::setFfmpegFolder)
+                        .controller((option) -> () -> new LazyPredicatedStringController(option, ExportConfig::isValidFFmpegFolder))
+                        .build()
+                )
                 .build();
+    }
+
+    public static boolean isValidFFmpegFolder(String input) {
+        try {
+            return Paths.get(input).resolve("ffmpeg").toFile().exists();
+        } catch (InvalidPathException e) {
+            return false;
+        }
+    }
+
+    private void setFfmpegFolder(@Nullable String path) {
+        if (path == null || path.isEmpty()) {
+            ffmpegFolder = null;
+        } else {
+            ffmpegFolder = Paths.get(path);
+        }
     }
 
     public synchronized File getFFmpegExportFile(File original, int clips) {
@@ -140,10 +204,10 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
     public synchronized File getExportFile(File original, int clips, String format) {
         String recordingName = original.getName();
         String firstName = nameFormat.trim()
-                                   .replaceAll("\\{ORIGINAL}", recordingName)
-                                   .replaceAll("\\{CLIPS}", String.valueOf(clips))
-                                   .replaceAll("\\\\", "")
-                                   .replaceAll("\\.", "");
+                .replaceAll("\\{ORIGINAL}", recordingName)
+                .replaceAll("\\{CLIPS}", String.valueOf(clips))
+                .replaceAll("\\\\", "")
+                .replaceAll("\\.", "");
         File export = original.toPath().resolveSibling(firstName + "." + format).toFile();
         if (ConfigHandler.getExportConfig().shouldKeepOld()) {
             int i = 0;

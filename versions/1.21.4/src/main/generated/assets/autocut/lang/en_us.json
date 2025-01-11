@@ -37,6 +37,8 @@
   "autocut.yacl.export.existingFiles.description": "Defines what happens when trying to export something with the same name as an already existing file.",
   "autocut.yacl.export.existingFiles.keep": "Keep both",
   "autocut.yacl.export.existingFiles.overwrite": "Overwrite old",
+  "autocut.yacl.export.ffmpegFolder": "FFmpeg Folder",
+  "autocut.yacl.export.ffmpegFolder.description": "The folder where FFmpeg and FFprobe are located. Leave blank for auto-detect (doesn't work on Linux).",
   "autocut.yacl.export.fileFormat": "Output file",
   "autocut.yacl.export.fileFormat.description": "The name of the file to export to, not including the extension (like \".mp4\").\nIt's recommended to include variables (see below), otherwise you'll start overwriting your videos.\n{ORIGINAL} will be replaced with the file name of the record\n{CLIPS} will be replaced with the number of clips.\nBackslashes (\\) and periods (.) will be ignored.",
   "autocut.yacl.export.format": "Format",

@@ -65,6 +65,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
                 {CLIPS} will be replaced with the number of clips.
                 Backslashes (\\) and periods (.) will be ignored.""", tb);
         addOption("export.existingFiles", "Existing files", "Defines what happens when trying to export something with the same name as an already existing file.", tb);
+        addOption("export.ffmpegFolder", "FFmpeg Folder", "The folder where FFmpeg and FFprobe are located. Leave blank for auto-detect (doesn't work on Linux).", tb);
         tb.add("autocut.yacl.export.existingFiles.keep", "Keep both");
         tb.add("autocut.yacl.export.existingFiles.overwrite", "Overwrite old");
 

@@ -11,6 +11,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileReader;
@@ -26,9 +27,11 @@ public class Utils {
      * @return A new {@link T}
      * @throws IOException When something goes wrong.
      */
-    public static <T> T readFromJson(File file, Codec<T> codec) throws IOException {
+    public static <T> @Nullable T readFromJson(File file, Codec<T> codec) throws IOException {
         try (FileReader reader = new FileReader(file)) {
-            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+            JsonElement jsonElement = JsonParser.parseReader(reader);
+            if (jsonElement == null || jsonElement.isJsonNull()) return null;
+            JsonObject json = jsonElement.getAsJsonObject();
             DataResult<Pair<T, JsonElement>> result = codec.decode(JsonOps.INSTANCE, json);
             T t;
             //? if >=1.21 {

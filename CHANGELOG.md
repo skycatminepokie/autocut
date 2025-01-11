@@ -1,7 +1,4 @@
-- Fixed crash with broken config
-- Fixed the default for manual clip types being 1000x longer than they were meant to be
-- Localized export grouping modes
-- Localized inverse option
-- Localized export grouping mode option
-- Export to EDL for importing into DaVinci Resolve (beta, access with `/autocut finish <database> edl`)
-- Fix misspelling "Own" as "Owm"
+- Fixed ModMenu integration with broken config
+- Added 1.21.4 support
+- Added custom path support for ffmpeg
+  - Linux works now!

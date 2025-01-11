@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,17 +55,16 @@ public class ConfigHandler {
         }
     }
 
-    @SuppressWarnings("unused") // I want it around just in case
-    public static <T extends ClipType> T readClipType(Identifier typeId, Codec<T> typeCodec) {
+    public static <T extends ClipType> @Nullable T readClipType(Identifier typeId, Codec<T> typeCodec) {
         File configFile = getClipTypeConfigPath(typeId).toFile();
         return readClipType(typeId, typeCodec, configFile);
     }
 
-    public static <T extends ClipType> T readClipType(Identifier typeId, Codec<T> typeCodec, File configFile) {
+    public static <T extends ClipType> @Nullable T readClipType(Identifier typeId, Codec<T> typeCodec, File configFile) {
         try {
-            return Utils.readFromJson(configFile, typeCodec);
+            return Utils.readFromJson(configFile, typeCodec); // Nullable
         } catch (IOException e) {
-            throw new RuntimeException("Failed to deserialize clipType of id " + typeId + ". For a quick fix, try deleting the config file " + configFile.getAbsolutePath() + ". You may lose configs.");
+            throw new RuntimeException("Failed to deserialize clipType of id " + typeId + ". For a quick fix, try deleting the config file " + configFile.getAbsolutePath() + ". You may lose configs.", e);
         }
     }
 
@@ -85,6 +85,9 @@ public class ConfigHandler {
             saveClipType(typeCodec, clipType);
         } else {
             clipType = readClipType(typeId, typeCodec);
+        }
+        if (clipType == null) {
+            return defaultSupplier.get();
         }
         return clipType;
     }

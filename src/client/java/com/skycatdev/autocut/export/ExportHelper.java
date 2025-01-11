@@ -9,6 +9,7 @@ import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.config.ExportConfig;
 import com.skycatdev.autocut.record.RecordingManager;
+import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -43,8 +44,8 @@ public class ExportHelper {
             File recording = new File(recordingPath);
 
             try {
-                FFmpegExecutor executor = new FFmpegExecutor();
-                FFprobe ffprobe = new FFprobe();
+                FFmpegExecutor executor = new FFmpegExecutor(ConfigHandler.getExportConfig().getFFmpeg());
+                FFprobe ffprobe = ConfigHandler.getExportConfig().getFFprobe();
                 FFmpegProbeResult in = ffprobe.probe(recordingPath);
 
                 // Split clips into export sets
