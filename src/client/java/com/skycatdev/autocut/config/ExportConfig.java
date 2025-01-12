@@ -8,6 +8,7 @@ import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import dev.isxander.yacl3.gui.controllers.string.StringController;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFprobe;
 import net.minecraft.text.Text;
@@ -28,7 +29,7 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
             Codec.STRING.fieldOf("format").forGetter(ExportConfig::getFormat),
             Codec.STRING.fieldOf("nameFormat").forGetter(ExportConfig::getNameFormat),
             Codec.BOOL.fieldOf("keepOld").orElse(true).forGetter(ExportConfig::shouldKeepOld),
-            Codec.STRING.optionalFieldOf("ffmpegFolder").xmap((opt) -> opt.map(Paths::get).orElse(null), (path) -> Optional.of(path.toString())).forGetter(ExportConfig::getFFmpegFolder)
+            Codec.STRING.optionalFieldOf("ffmpegFolder").xmap((opt) -> opt.orElse(""), Optional::of).forGetter(ExportConfig::getFFmpegFolder)
     ).apply(instance, ExportConfig::new));
     /**
      * The file format to export the video to (eg .mp4, .mkv)
@@ -45,22 +46,22 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
     /**
      * The folder with FFmpeg.
      */
-    public @Nullable Path ffmpegFolder;
+    public String ffmpegFolder;
 
-    public Path getFFmpegFolder() {
+    public String getFFmpegFolder() {
         return ffmpegFolder;
     }
 
     public FFmpeg getFFmpeg() throws IOException {
-        if (ffmpegFolder != null) {
-            return new FFmpeg(ffmpegFolder.resolve("ffmpeg").toString());
+        if (!ffmpegFolder.isBlank()) {
+            return new FFmpeg(Path.of(ffmpegFolder).resolve("ffmpeg").toString());
         }
         return new FFmpeg();
     }
 
     public FFprobe getFFprobe() throws IOException {
-        if (ffmpegFolder != null) {
-            return new FFprobe(ffmpegFolder.resolve("ffprobe").toString());
+        if (!ffmpegFolder.isBlank()) {
+            return new FFprobe(Path.of(ffmpegFolder).resolve("ffprobe").toString());
         }
         return new FFprobe();
     }
@@ -69,7 +70,7 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
         this(format, nameFormat, keepOld, null);
     }
 
-    public ExportConfig(String format, String nameFormat, boolean keepOld, @Nullable Path ffmpegFolder) {
+    public ExportConfig(String format, String nameFormat, boolean keepOld, @Nullable String ffmpegFolder) {
         this.format = format;
         this.nameFormat = nameFormat;
         this.keepOld = keepOld;
@@ -167,34 +168,17 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
                         .build()
                 )
                 .option(Option.<String>createBuilder()
-                        .name(Text.translatable("autocut.yacl.export.ffmpegFolder")) // TODO translate
-                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.ffmpegFolder.description"))) // TODO translate
-                        .binding("", () -> {
-                            if (getFFmpegFolder() != null) {
-                                return getFFmpegFolder().toString();
-                            }
-                            return "";
-                        }, this::setFfmpegFolder)
-                        .controller((option) -> () -> new LazyPredicatedStringController(option, ExportConfig::isValidFFmpegFolder))
+                        .name(Text.translatable("autocut.yacl.export.ffmpegFolder"))
+                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.ffmpegFolder.description")))
+                        .binding("", this::getFFmpegFolder, this::setFfmpegFolder)
+                        .controller((option) -> () -> new StringController(option))
                         .build()
                 )
                 .build();
     }
 
-    public static boolean isValidFFmpegFolder(String input) {
-        try {
-            return Paths.get(input).resolve("ffmpeg").toFile().exists();
-        } catch (InvalidPathException e) {
-            return false;
-        }
-    }
-
-    private void setFfmpegFolder(@Nullable String path) {
-        if (path == null || path.isEmpty()) {
-            ffmpegFolder = null;
-        } else {
-            ffmpegFolder = Paths.get(path);
-        }
+    private void setFfmpegFolder(String path) {
+        ffmpegFolder = path;
     }
 
     public synchronized File getFFmpegExportFile(File original, int clips) {
