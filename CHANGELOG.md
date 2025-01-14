@@ -1,4 +1,0 @@
-- Fixed ModMenu integration with broken config
-- Added 1.21.4 support
-- Added custom path support for ffmpeg
-  - Linux works now!
