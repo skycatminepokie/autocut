@@ -12,7 +12,6 @@ import dev.isxander.yacl3.gui.controllers.string.StringController;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFprobe;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,10 +66,10 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
     }
 
     public ExportConfig(String format, String nameFormat, boolean keepOld) {
-        this(format, nameFormat, keepOld, null);
+        this(format, nameFormat, keepOld, "");
     }
 
-    public ExportConfig(String format, String nameFormat, boolean keepOld, @Nullable String ffmpegFolder) {
+    public ExportConfig(String format, String nameFormat, boolean keepOld, String ffmpegFolder) {
         this.format = format;
         this.nameFormat = nameFormat;
         this.keepOld = keepOld;
