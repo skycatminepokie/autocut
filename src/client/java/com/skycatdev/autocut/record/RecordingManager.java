@@ -20,29 +20,29 @@ import java.util.List;
 
 public class RecordingManager {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
-    protected static final String CLIPS_TABLE = "clips"; // Keep this hardcoded
-    protected static final String CLIPS_ID_COLUMN = "id"; // Keep this hardcoded
-    protected static final String CLIPS_INPOINT_COLUMN = "start_timestamp"; // Keep this hardcoded
-    protected static final String CLIPS_TIMESTAMP_COLUMN = "timestamp"; // Keep this hardcoded
-    protected static final String CLIPS_OUTPOINT_COLUMN = "end_timestamp"; // Keep this hardcoded
-    protected static final String CLIPS_TYPE_COLUMN = "type"; // Keep this hardcoded
-    protected static final String CLIPS_DESCRIPTION_COLUMN = "description"; // Keep this hardcoded
-    protected static final String CLIPS_SOURCE_COLUMN = "source"; // Keep this hardcoded
-    protected static final String CLIPS_OBJECT_COLUMN = "object"; // Keep this hardcoded
-    protected static final String CLIPS_SOURCE_X_COLUMN = "source_x"; // Keep this hardcoded
-    protected static final String CLIPS_SOURCE_Y_COLUMN = "source_y"; // Keep this hardcoded
-    protected static final String CLIPS_SOURCE_Z_COLUMN = "source_z"; // Keep this hardcoded
-    protected static final String CLIPS_OBJECT_X_COLUMN = "object_x"; // Keep this hardcoded
-    protected static final String CLIPS_OBJECT_Y_COLUMN = "object_y"; // Keep this hardcoded
-    protected static final String CLIPS_OBJECT_Z_COLUMN = "object_z"; // Keep this hardcoded
-    protected static final String CLIPS_ACTIVE_COLUMN = "active"; // Keep this hardcoded
-    protected static final String META_TABLE = "meta"; // Keep this hardcoded
-    protected static final String META_KEY = "key"; // Keep this hardcoded
-    protected static final String META_VALUE = "value"; // Keep this hardcoded
-    protected static final String META_KEY_START_TIME = "start_time"; // Keep this hardcoded
-    protected static final String META_KEY_OUTPUT_PATH = "output_path"; // Keep this hardcoded
-    protected static final String CLIPS_INVERSE_COLUMN = "inverse"; // Keep this hardcoded
-    protected static final String CLIPS_EXPORT_GROUPING_MODE_COLUMN = "grouping_mode"; // Keep this hardcoded
+    protected static final String CLIPS_TABLE = "clips"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_ID_COLUMN = "id"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_INPOINT_COLUMN = "start_timestamp"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_TIMESTAMP_COLUMN = "timestamp"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_OUTPOINT_COLUMN = "end_timestamp"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_TYPE_COLUMN = "type"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_DESCRIPTION_COLUMN = "description"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_SOURCE_COLUMN = "source"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_OBJECT_COLUMN = "object"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_SOURCE_X_COLUMN = "source_x"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_SOURCE_Y_COLUMN = "source_y"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_SOURCE_Z_COLUMN = "source_z"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_OBJECT_X_COLUMN = "object_x"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_OBJECT_Y_COLUMN = "object_y"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_OBJECT_Z_COLUMN = "object_z"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_ACTIVE_COLUMN = "active"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String META_TABLE = "meta"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String META_KEY = "key"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String META_VALUE = "value"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String META_KEY_START_TIME = "start_time"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String META_KEY_OUTPUT_PATH = "output_path"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_INVERSE_COLUMN = "inverse"; // Keep this hardcoded, it's used in non-prepared statements
+    protected static final String CLIPS_EXPORT_GROUPING_MODE_COLUMN = "grouping_mode"; // Keep this hardcoded, it's used in non-prepared statements
 
     static {
         //noinspection ResultOfMethodCallIgnored
