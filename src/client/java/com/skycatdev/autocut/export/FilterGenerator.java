@@ -8,7 +8,8 @@ import net.bramp.ffmpeg.probe.FFmpegStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Set;
 
 public class FilterGenerator {
 
@@ -21,7 +22,7 @@ public class FilterGenerator {
      * @param clipIndex The clip index for this particular stream
      * @return a {@code select} filter, with output in the form {@code "[{stream}a{clipIndex}]"}
      */
-    private static String audioFilter(int input, int stream, String range, int clipIndex) {
+    private static String audioFilter(@SuppressWarnings("SameParameterValue") int input, int stream, String range, int clipIndex) {
         return String.format("[%d:a:%d]atrim=%s,asetpts=PTS-STARTPTS[%da%d]", input, stream, range, stream, clipIndex);
     }
 
@@ -30,7 +31,7 @@ public class FilterGenerator {
      *
      * @param startTime   The time the record started
      * @param probeResult The result from probing the raw record file. Must not have errors, and must have at least one video or audio stream.
-     * @param clipsRange The set of {@link Range}s describing what to export
+     * @param rangeSet The set of {@link Range}s describing what to export
      * @return A new temporary file containing the filter
      * @throws IOException If there's problems with the file
      */
@@ -150,7 +151,7 @@ public class FilterGenerator {
      * @param clipIndex The clip index for this particular stream
      * @return a {@code select} filter, with output in the form {@code "[{stream}v{clipIndex}]"}
      */
-    private static String videoFilter(int input, int stream, String range, int clipIndex) {
+    private static String videoFilter(@SuppressWarnings("SameParameterValue") int input, int stream, String range, int clipIndex) {
         return String.format("[%d:v:%d]trim=%s,setpts=PTS-STARTPTS[%dv%d]", input, stream, range, stream, clipIndex);
     }
 }

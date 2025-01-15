@@ -19,7 +19,7 @@ public class ClipBuilder {
     private @Nullable String object;
     private @Nullable Vec3d sourceLocation;
     private @Nullable Vec3d objectLocation;
-    public ClipBuilder(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse, ExportGroupingMode exportGroupingMode) {
+    public ClipBuilder(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse, @NotNull ExportGroupingMode exportGroupingMode) {
         this.in = in;
         this.time = time;
         this.out = out;

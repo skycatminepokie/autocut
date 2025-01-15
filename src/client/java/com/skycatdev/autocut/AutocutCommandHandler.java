@@ -25,6 +25,7 @@ public class AutocutCommandHandler {
     private static final SimpleCommandExceptionType FINISH_NO_RECORDING_EXCEPTION = new SimpleCommandExceptionType(() -> Text.translatable("autocut.command.autocut.finish.fail.noRecording").getString());
     private static final SimpleCommandExceptionType CONNECT_ALREADY_CONNECTED_EXCEPTION = new SimpleCommandExceptionType(() -> Text.translatable("autocut.command.autocut.connect.password.fail.alreadyConnected").getString());
 
+    @SuppressWarnings("SameReturnValue")
     private static int connectPasswordCommand(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         String password = StringArgumentType.getString(context, "password");
         if (!ObsHandler.hasController()) {
@@ -34,6 +35,7 @@ public class AutocutCommandHandler {
         throw CONNECT_ALREADY_CONNECTED_EXCEPTION.create();
     }
 
+    @SuppressWarnings("SameReturnValue")
     private static int finish(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         try {
             if (AutocutClient.currentRecordingManager == null) {
@@ -46,6 +48,7 @@ public class AutocutCommandHandler {
         return Command.SINGLE_SUCCESS;
     }
 
+    @SuppressWarnings("SameReturnValue")
     private static int finishDatabase(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         try {
             File database = new File(StringArgumentType.getString(context, "database"));
@@ -87,6 +90,7 @@ public class AutocutCommandHandler {
         //@formatter:on
     }
 
+    @SuppressWarnings("SameReturnValue")
     private static int finishDatabaseEdl(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
         try {
             File database = new File(StringArgumentType.getString(context, "database"));

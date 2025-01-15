@@ -23,6 +23,7 @@ import static com.skycatdev.autocut.clips.ClipTypes.SHOOT_PLAYER;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkHandler {
+    @SuppressWarnings("unused")
     @Contract("_,_,_->fail")
     private ClientPlayNetworkHandlerMixin(MinecraftClient client, ClientConnection connection, ClientConnectionState connectionState) {
         super(client, connection, connectionState);
