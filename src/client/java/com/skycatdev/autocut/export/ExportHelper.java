@@ -9,7 +9,6 @@ import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.config.ExportConfig;
 import com.skycatdev.autocut.record.RecordingManager;
-import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -107,6 +106,7 @@ public class ExportHelper {
             synchronized (exportConfig) {
                 export = exportConfig.getExportFile(recording, clips.size(), "edl");
                 try {
+                    //noinspection ResultOfMethodCallIgnored
                     export.createNewFile();
                 } catch (IOException e) {
                     AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.progress.fail"));
@@ -178,6 +178,7 @@ public class ExportHelper {
                 .setConstantRateFactor(18)
                 //.setVideoCodec("libx264") requires gpl
                 .done();
+        //noinspection UnnecessaryLocalVariable
         FFmpegJob job = executor.createJob(builder, new ProgressListener() {
             final long outputDurationNs = TimeUnit.MILLISECONDS.toNanos(Utils.totalSpace(rangeSet));
             int lastPercentDone = -1;
