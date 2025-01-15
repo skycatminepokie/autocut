@@ -1,7 +1,9 @@
 package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.database.DatabaseHandler;
+import com.skycatdev.autocut.trigger.RecordingTriggers;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -24,6 +26,12 @@ public class AutocutClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (CLIP_KEYBIND.wasPressed()) {
+                if (currentDatabaseHandler != null) {
+                    RecordingTriggers.MANUAL_TRIGGER.trigger();
+                }
+			}
+        });
     }
 }

@@ -35,7 +35,7 @@ public class DatabaseHandler {
 	/**
 	 * Holds events that are yet to be entered into the database.
 	 */
-	private ConcurrentLinkedQueue<RecordingEvent> eventQueue = new ConcurrentLinkedQueue<>();
+	private final ConcurrentLinkedQueue<RecordingEvent> eventQueue = new ConcurrentLinkedQueue<>();
 	/**
 	 * Whether the queue is being worked through. Do not access or modify without first acquiring {@link DatabaseHandler#queueStatusLock}
 	 */
