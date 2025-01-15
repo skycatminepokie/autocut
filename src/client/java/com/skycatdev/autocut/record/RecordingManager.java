@@ -109,7 +109,7 @@ public class RecordingManager {
         }
         String sqlUrl = "jdbc:sqlite:" + database.getPath();
         long startTime;
-        String outputPath;
+        @Nullable String outputPath;
         // Create connection
         try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = connection.prepareStatement("SELECT %s FROM %s WHERE %s = \"%s\"")) {
             statement.setString(0, META_VALUE);
@@ -169,7 +169,7 @@ public class RecordingManager {
             valuesBuilder.append(", ?");
             rowValues.add(clip.object());
         }
-        Vec3d sourceLocation = clip.sourceLocation();
+        @Nullable Vec3d sourceLocation = clip.sourceLocation();
         if (sourceLocation != null) {
             columnsBuilder.append(", " + CLIPS_SOURCE_X_COLUMN + ", " + CLIPS_SOURCE_Y_COLUMN + ", " + CLIPS_SOURCE_Z_COLUMN);
             valuesBuilder.append(", ?, ?, ?");
@@ -177,7 +177,7 @@ public class RecordingManager {
             rowValues.add(sourceLocation.getY());
             rowValues.add(sourceLocation.getZ());
         }
-        Vec3d objectLocation = clip.objectLocation();
+        @Nullable Vec3d objectLocation = clip.objectLocation();
         if (objectLocation != null) {
             columnsBuilder.append(", " + CLIPS_OBJECT_X_COLUMN + ", " + CLIPS_OBJECT_Y_COLUMN + ", " + CLIPS_OBJECT_Z_COLUMN);
             valuesBuilder.append(", ?, ?, ?");
@@ -243,9 +243,10 @@ public class RecordingManager {
                         results.getBoolean(CLIPS_INVERSE_COLUMN),
                         ExportGroupingMode.fromId(
                                 //? if >=1.21
-                                Identifier.of(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN))
+                                Identifier.of(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN)),
                                 //? if <1.21
-                                /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN)))*/
+                                /*Objects.requireNonNull(Identifier.tryParse(results.getString(CLIPS_EXPORT_GROUPING_MODE_COLUMN))),*/
+                                ExportGroupingMode.NONE
                         )
                 );
                 builder.setDescription(results.getString(CLIPS_DESCRIPTION_COLUMN));

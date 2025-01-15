@@ -12,6 +12,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
@@ -54,7 +55,7 @@ public class ClipTypes {
                 Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset),
                 Codec.BOOL.fieldOf("inverse").orElse(false).forGetter(ClipType::isInverse),
                 Identifier.CODEC.comapFlatMap((id) -> {
-                    ExportGroupingMode groupingMode = ExportGroupingMode.fromId(id);
+                    @Nullable ExportGroupingMode groupingMode = ExportGroupingMode.fromId(id);
                     return groupingMode != null ? DataResult.success(groupingMode) : DataResult.error(() -> "Not a valid ExportGroupingMode: " + id);
                 }, ExportGroupingMode::getId).fieldOf("grouping_mode").orElse(ExportGroupingMode.NONE).forGetter(ClipType::getExportGroupingMode));
     }

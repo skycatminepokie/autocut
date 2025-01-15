@@ -20,7 +20,7 @@ public abstract class ClientPlayerEntityMixin {
         if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
-                if (player != null && TAKE_DAMAGE.clipType().shouldRecord()) {
+                if (TAKE_DAMAGE.clipType().shouldRecord()) {
                     AutocutClient.currentRecordingManager.addClip(TAKE_DAMAGE.clipType().createClip(time, player, healthDifference));
                 }
             } catch (SQLException e) {

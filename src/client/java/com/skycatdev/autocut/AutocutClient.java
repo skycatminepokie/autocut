@@ -18,9 +18,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-//? if <1.21.4 {
 import net.minecraft.util.TypedActionResult;
-//?}
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
@@ -115,7 +113,7 @@ public class AutocutClient implements ClientModInitializer {
             if (currentRecordingManager != null && NOT_IN_WORLD.clipType().shouldRecord()) {
                 long time = System.currentTimeMillis();
                 try {
-                    Clip clip = NOT_IN_WORLD.clipType().enterWorld(time);
+                    @Nullable Clip clip = NOT_IN_WORLD.clipType().enterWorld(time);
                     if (clip != null) {
                         currentRecordingManager.addClip(clip);
                     }

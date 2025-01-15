@@ -12,6 +12,7 @@ import dev.isxander.yacl3.gui.controllers.string.StringController;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFprobe;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,7 +129,7 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
             return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
         }
         try {
-            ExportConfig exportConfig = Utils.readFromJson(file, CODEC);
+            @Nullable ExportConfig exportConfig = Utils.readFromJson(file, CODEC);
             if (exportConfig != null) {
                 return exportConfig;
             }

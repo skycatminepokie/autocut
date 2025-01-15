@@ -20,6 +20,7 @@ import net.bramp.ffmpeg.progress.ProgressListener;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class ExportHelper {
                     throw new RuntimeException("Could not create file for exporting.", e);
                 }
             }
-            Fraction fps = null;
+            @Nullable Fraction fps = null;
             try {
                 FFmpegProbeResult probeResult = new FFprobe().probe(recordingPath);
                 if (probeResult.hasError()) {

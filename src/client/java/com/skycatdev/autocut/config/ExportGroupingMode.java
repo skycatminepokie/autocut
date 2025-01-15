@@ -38,6 +38,15 @@ public enum ExportGroupingMode {
         return null;
     }
 
+    public static ExportGroupingMode fromId(Identifier id, ExportGroupingMode fallback) {
+        for (ExportGroupingMode mode : ExportGroupingMode.values()) {
+            if (mode.getId().equals(id)) {
+                return mode;
+            }
+        }
+        return fallback;
+    }
+
     public Identifier getId() {
         return id;
     }

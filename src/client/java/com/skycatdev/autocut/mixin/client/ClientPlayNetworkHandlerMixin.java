@@ -11,6 +11,7 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,7 +36,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
         if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
-                ClientPlayerEntity player = client.player;
+                @Nullable ClientPlayerEntity player = client.player;
                 if (player != null && SHOOT_PLAYER.clipType().shouldRecord()) {
                     AutocutClient.currentRecordingManager.addClip(SHOOT_PLAYER.clipType().createClip(time, player));
                 }
@@ -50,7 +51,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
         if (AutocutClient.currentRecordingManager != null) {
             long time = System.currentTimeMillis();
             try {
-                ClientPlayerEntity player = client.player;
+                @Nullable ClientPlayerEntity player = client.player;
                 if (player != null && DEATH.clipType().shouldRecord()) {
                     //? if >=1.20.5
                     AutocutClient.currentRecordingManager.addClip(DEATH.clipType().createClip(time, player, packet.message()));

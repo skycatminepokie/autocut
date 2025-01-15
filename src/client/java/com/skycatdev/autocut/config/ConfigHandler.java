@@ -69,7 +69,7 @@ public class ConfigHandler {
     }
 
     public static <T extends ClipType> T readClipTypeOrDefault(Identifier typeId, Codec<T> typeCodec, Supplier<T> defaultSupplier) {
-        T clipType;
+        @Nullable T clipType;
         Path configPath = getClipTypeConfigPath(typeId);
         File configFile = configPath.toFile();
         if (!configFile.exists()) {
