@@ -4,14 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.Utils;
-import dev.isxander.yacl3.api.ConfigCategory;
-import dev.isxander.yacl3.api.Option;
-import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
-import dev.isxander.yacl3.gui.controllers.string.StringController;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFprobe;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -139,44 +133,6 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
         return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
     }
 
-    public ConfigCategory generateConfigCategory() {
-        return ConfigCategory.createBuilder()
-                .name(Text.translatable("autocut.yacl.category.export"))
-                .tooltip(Text.translatable("autocut.yacl.category.export.tooltip"))
-                .option(Option.<String>createBuilder()
-                        .name(Text.translatable("autocut.yacl.export.format"))
-                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.format.description")))
-                        .binding(DEFAULT_FORMAT, this::getFormat, this::setFormat)
-                        .controller((option) -> () -> new PredicatedStringController(option, ExportConfig::isValidFormat))
-                        .build()
-                )
-                .option(Option.<String>createBuilder()
-                        .name(Text.translatable("autocut.yacl.export.fileFormat"))
-                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.fileFormat.description")))
-                        .binding(DEFAULT_NAME_FORMAT, this::getNameFormat, this::setNameFormat)
-                        .controller((option) -> () -> new PredicatedStringController(option, ExportConfig::isValidNameFormat))
-                        .build()
-                )
-                .option(Option.<Boolean>createBuilder()
-                        .name(Text.translatable("autocut.yacl.export.existingFiles"))
-                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.existingFiles.description")))
-                        .binding(DEFAULT_KEEP_OLD, this::shouldKeepOld, this::setKeepOld)
-                        .controller(option -> BooleanControllerBuilder.create(option)
-                                .formatValue(bool -> bool ? Text.translatable("autocut.yacl.export.existingFiles.keep") : Text.translatable("autocut.yacl.export.existingFiles.overwrite"))
-                                .coloured(true)
-                        )
-                        .build()
-                )
-                .option(Option.<String>createBuilder()
-                        .name(Text.translatable("autocut.yacl.export.ffmpegFolder"))
-                        .description(OptionDescription.of(Text.translatable("autocut.yacl.export.ffmpegFolder.description")))
-                        .binding("", this::getFFmpegFolder, this::setFfmpegFolder)
-                        .controller((option) -> () -> new StringController(option))
-                        .build()
-                )
-                .build();
-    }
-
     private void setFfmpegFolder(String path) {
         ffmpegFolder = path;
     }
@@ -193,13 +149,13 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
                 .replaceAll("\\\\", "")
                 .replaceAll("\\.", "");
         File export = original.toPath().resolveSibling(firstName + "." + format).toFile();
-        if (ConfigHandler.getExportConfig().shouldKeepOld()) {
-            int i = 0;
-            while (export.exists()) { // TODO: Cache this? Few file system queries.
-                i++;
-                export = original.toPath().resolveSibling(firstName + i + "." + format).toFile();
-            }
-        }
+        // if (ConfigHandler.getExportConfig().shouldKeepOld()) {
+        //     int i = 0;
+        //     while (export.exists()) { // TODO: Cache this? Few file system queries.
+        //         i++;
+        //         export = original.toPath().resolveSibling(firstName + i + "." + format).toFile();
+        //     }
+        // }
         return export;
     }
 

@@ -9,9 +9,6 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
 public class ObsHandler { // All this is likely on a thread other than the main client thread.
     public static final int DEFAULT_PORT = 4455;
     public static final int DEFAULT_CONNECTION_TIMEOUT = 3;
@@ -58,23 +55,15 @@ public class ObsHandler { // All this is likely on a thread other than the main 
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
             AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.success"));
-            try {
-                AutocutClient.currentRecordingManager = new RecordingManager();
-            } catch (SQLException | IOException e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.fail").setStyle(styleHoverException(e)));
-            }
-        } else {
+			// TODO: Create recording manager
+		} else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
                 AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.success"));
-                if (AutocutClient.currentRecordingManager == null) {
+                if (AutocutClient.currentDatabaseHandler == null) {
                     AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.fail.notStarted"));
                 } else {
-                    try {
-                        AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
-                    } catch (SQLException e) {
-                        AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.fail.sqlException").setStyle(styleHoverException(e)));
-                    }
-                }
+					// TODO AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
+				}
             }
         }
     }

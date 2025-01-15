@@ -20,8 +20,8 @@ public abstract class RecordingTrigger {
 	}
 
 	protected void storeEvent(JsonObject object, long time) {
-		if (AutocutClient.currentRecordingManager != null) {
-			AutocutClient.currentRecordingManager.getDatabaseHandler().queueEvent(new RecordingEvent(id, object, time));
+		if (AutocutClient.currentDatabaseHandler != null) {
+			AutocutClient.currentDatabaseHandler.queueEvent(new RecordingEvent(id, object, time));
 		}
 	}
 }

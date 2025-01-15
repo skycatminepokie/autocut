@@ -2,30 +2,17 @@ package com.skycatdev.autocut.clips;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.TreeRangeSet;
-import com.skycatdev.autocut.config.ExportGroupingMode;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.skycatdev.autocut.database.ClipType;
+import com.skycatdev.autocut.trigger.RecordingTrigger;
 
 import java.util.Collection;
 
 /**
  * A period of time in a record. Timestamps are UNIX time, not relative to the record.
  */
-public record Clip(long in, long time, long out, @NotNull Identifier type, boolean active, boolean inverse,
-                   @NotNull ExportGroupingMode exportGroupingMode, @Nullable String description,
-                   @Nullable String source, @Nullable String object, @Nullable Vec3d sourceLocation,
-                   @Nullable Vec3d objectLocation) {
+public record Clip(long in, long out, RecordingTrigger trigger, ClipType type) {
     public Clip {
         assert in < out;
-    }
-
-    /**
-     * @return A deep copy of this clip
-     */
-    public Clip copy() { // Deep copy, though since everything inside is immutable that doesn't mean much.
-        return new Clip(in, time, out, type, active, inverse, exportGroupingMode, description, source, object, sourceLocation, objectLocation);
     }
 
     /**
@@ -55,12 +42,12 @@ public record Clip(long in, long time, long out, @NotNull Identifier type, boole
     public static TreeRangeSet<Long> toRange(Collection<Clip> clips) {
         TreeRangeSet<Long> range = TreeRangeSet.create();
         for (Clip clip : clips) {
-            if (!clip.inverse()) {
+            if (!clip.type().isInverted()) {
                 range.add(clip.toRange());
             }
         }
         for (Clip clip : clips) {
-            if (clip.inverse()) {
+            if (clip.type().isInverted()) {
                 range.remove(clip.toRange());
             }
         }

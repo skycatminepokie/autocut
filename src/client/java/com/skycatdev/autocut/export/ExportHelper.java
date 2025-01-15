@@ -4,36 +4,29 @@ import com.google.common.collect.Range;
 import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.Utils;
 import com.skycatdev.autocut.clips.Clip;
-import com.skycatdev.autocut.clips.ClipType;
-import com.skycatdev.autocut.clips.ClipTypes;
 import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.config.ExportConfig;
-import com.skycatdev.autocut.record.RecordingManager;
+import com.skycatdev.autocut.database.ClipType;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.job.FFmpegJob;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
-import net.bramp.ffmpeg.probe.FFmpegStream;
 import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.minecraft.text.Text;
-import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class ExportHelper {
     /**
-     * Export all clips in the record with FFmpeg. {@link RecordingManager#outputPath} must not be {@code null}.
+     * Export all clips in the record with FFmpeg.
      *
      * @param clips         All the clips to be considered when exporting. Don't include inactive clips.
      * @param recordingPath The path to the video recording
@@ -54,7 +47,7 @@ public class ExportHelper {
                 LinkedList<Clip> individualSet = new LinkedList<>();
 
                 for (Clip clip : clips) {
-                    ClipType clipType = Objects.requireNonNull(ClipTypes.CLIP_TYPE_REGISTRY.get(clip.type())).clipType();
+                    ClipType clipType = clip.type();
                     switch (clipType.getExportGroupingMode()) {
                         case NONE -> mainSet.add(clip);
                         case TYPE -> typedExportSets.computeIfAbsent(clipType, k -> new LinkedList<>()).add(clip);
@@ -90,77 +83,6 @@ public class ExportHelper {
                 throw new RuntimeException(e);
             }
         }, "Autocut FFmpeg Export Thread").start();
-    }
-
-    /**
-     * Export the given clips to EDL format.
-     *
-     * @param clips     The clips to export.
-     * @param recordingPath The original recording. Passed to {@link ExportConfig#getExportFile(File, int, String)}.
-     * @param startTime The time the recording started.
-     */
-    public static void exportEdl(LinkedList<Clip> clips, String recordingPath, long startTime) {
-        new Thread(() -> {
-            File recording = new File(recordingPath);
-            File export;
-            ExportConfig exportConfig = ConfigHandler.getExportConfig();
-            synchronized (exportConfig) {
-                export = exportConfig.getExportFile(recording, clips.size(), "edl");
-                try {
-                    //noinspection ResultOfMethodCallIgnored
-                    export.createNewFile();
-                } catch (IOException e) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.progress.fail"));
-                    throw new RuntimeException("Could not create file for exporting.", e);
-                }
-            }
-            @Nullable Fraction fps = null;
-            try {
-                FFmpegProbeResult probeResult = new FFprobe().probe(recordingPath);
-                if (probeResult.hasError()) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.start.fail.probeFrameRate"));
-                    throw new RuntimeException("Failed to probe for frame rate.");
-                }
-                for (FFmpegStream stream : probeResult.getStreams()) {
-                    if (stream.codec_type.equals(FFmpegStream.CodecType.VIDEO)) {
-                        fps = stream.avg_frame_rate;
-                        break;
-                    }
-                }
-                if (fps == null) {
-                    AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.start.fail.noVideoStream"));
-                    throw new RuntimeException("Failed to find a video stream in the given recordingPath");
-                }
-            } catch (IOException e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.start.fail"));
-                throw new RuntimeException("Failed to get frame rate for recording", e);
-            }
-            assert export.exists() : "Export file didn't exist when it was created";
-            try (PrintWriter pw = new PrintWriter(export)) {
-                pw.printf("TITLE: %s\n", recording.getName());
-                pw.print("FCM: NON-DROP FRAME");
-                for (int i = 0; i < clips.size(); i++) {
-                    Clip clip = clips.get(i);
-                    Timecode timecodeIn = Timecode.fromMillis(clip.in() - startTime, fps).add(1, TimeUnit.HOURS);
-                    Timecode timecodeOut = Timecode.fromMillis(clip.out() - startTime, fps).add(1, TimeUnit.HOURS);
-                    pw.println();
-                    pw.printf("\n%03d  001      V     C        %s %s %s %s",
-                            i + 1,
-                            timecodeIn,
-                            timecodeOut,
-                            timecodeIn,
-                            timecodeOut);
-                    pw.printf("\n%s |C:ResolveColorBlue |M:%s |D:%d",  // TODO: Allow other colors
-                            clip.description() == null ? "" : clip.description().replaceAll("\\|", ""),
-                            clip.type(),
-                            timecodeOut.subtractFrames(timecodeIn.frames()).frames());
-                }
-            } catch (IOException e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.progress.fail"));
-                throw new RuntimeException("Error while writing to file.", e);
-            }
-            AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.edl.finish"));
-        }, "Autocut EDL Export Thread").start();
     }
 
     private static FFmpegJob makeFFmpegJob(LinkedList<Clip> clips, long startTime, File recording, FFmpegProbeResult in, FFmpegExecutor executor, int totalJobs, int jobNumber) throws IOException {

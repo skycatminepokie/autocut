@@ -7,13 +7,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.skycatdev.autocut.record.ObsHandler;
-import com.skycatdev.autocut.record.RecordingManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 
 import java.io.File;
-import java.sql.SQLException;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -37,30 +35,21 @@ public class AutocutCommandHandler {
 
     @SuppressWarnings("SameReturnValue")
     private static int finish(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
-        try {
-            if (AutocutClient.currentRecordingManager == null) {
-                throw FINISH_NO_RECORDING_EXCEPTION.create();
-            }
-            AutocutClient.currentRecordingManager.export();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return Command.SINGLE_SUCCESS;
+		if (AutocutClient.currentDatabaseHandler == null) {
+			throw FINISH_NO_RECORDING_EXCEPTION.create();
+		}
+		// TODO AutocutClient.currentRecordingManager.export();
+		return Command.SINGLE_SUCCESS;
     }
 
     @SuppressWarnings("SameReturnValue")
     private static int finishDatabase(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
-        try {
-            File database = new File(StringArgumentType.getString(context, "database"));
-            if (!database.exists()) {
-                throw FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION.create();
-            }
-            RecordingManager recordingManager = RecordingManager.fromDatabase(database);
-            recordingManager.export();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return Command.SINGLE_SUCCESS;
+		File database = new File(StringArgumentType.getString(context, "database"));
+		if (!database.exists()) {
+			throw FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION.create();
+		}
+		// TODO: Actually export
+		return Command.SINGLE_SUCCESS;
     }
 
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess ignoredCommandRegistryAccess) {
@@ -92,17 +81,14 @@ public class AutocutCommandHandler {
 
     @SuppressWarnings("SameReturnValue")
     private static int finishDatabaseEdl(CommandContext<FabricClientCommandSource> context) throws CommandSyntaxException {
-        try {
-            File database = new File(StringArgumentType.getString(context, "database"));
-            if (!database.exists()) {
-                throw FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION.create();
-            }
-            RecordingManager recordingManager = RecordingManager.fromDatabase(database);
-            recordingManager.exportEdl();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return Command.SINGLE_SUCCESS;
+		File database = new File(StringArgumentType.getString(context, "database"));
+		if (!database.exists()) {
+			throw FINISH_DATABASE_DOES_NOT_EXIST_EXCEPTION.create();
+		}
+		// TODO
+		// RecordingManager recordingManager = RecordingManager.fromDatabase(database);
+		// recordingManager.exportEdl();
+		return Command.SINGLE_SUCCESS;
     }
 
 }
