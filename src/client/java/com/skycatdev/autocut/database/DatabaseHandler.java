@@ -18,10 +18,17 @@ public class DatabaseHandler {
      * The folder where databases are kept in by default.
      */
     public static final Path DATABASE_FOLDER = FabricLoader.getInstance().getGameDir().resolve("autocutRecordings");
+    public static final String META = "meta";
     /**
      * The database file. Always exists and is a sqlite database.
+     * Do not access the database before first acquiring {@link DatabaseHandler#databaseLock}.
      */
     private final File database;
+    private final Object[] databaseLock = new Object[0];
+    /**
+     * Holds events that are yet to be entered into the database.
+     */
+    protected Queue<RecordingEvent> eventQueue = new LinkedList<>();
 
     public Future<DatabaseHandler> makeNew(long startTime) throws IOException {
         File database = DATABASE_FOLDER.resolve(String.format("%d.sqlite", startTime)).toFile();
@@ -36,7 +43,7 @@ public class DatabaseHandler {
         File finalDatabase = database;
         FutureTask<DatabaseHandler> future = new FutureTask<>(() -> {
             DatabaseHandler handler = new DatabaseHandler(finalDatabase);
-            handler.initDatabase();
+            handler.initDatabase(startTime);
             return handler;
         });
         new Thread(future, "Autocut Database Initialization Thread").start();
@@ -46,35 +53,48 @@ public class DatabaseHandler {
     /**
      * May be slow.
      */
-    private void initDatabase() throws SQLException {
+    private void initDatabase(long startTime) throws SQLException {
         Autocut.LOGGER.debug("Initializing database");
-        try (Connection connection = DriverManager.getConnection(getDatabaseUrl())) {
-            Autocut.LOGGER.debug("Creating events table");
-            try (Statement statement = connection.createStatement()) {
+        Autocut.LOGGER.debug("Acquiring lock");
+        synchronized (databaseLock) {
+            Autocut.LOGGER.debug("Lock acquired");
+            try (Connection connection = DriverManager.getConnection(getDatabaseUrl())) {
+                Autocut.LOGGER.debug("Creating events table");
+                try (Statement statement = connection.createStatement()) {
                     statement.execute(String.format("""
                     CREATE TABLE %s (
                         %s INTEGER PRIMARY KEY AUTOINCREMENT,
                         %s INTEGER,
                         %s TEXT,
                         %s INTEGER
-                    );""", "events", "id", "trigger", "text", "time"));
-            }
-            try (Statement statement = connection.createStatement()) {
-                Autocut.LOGGER.debug("Creating triggers table");
-                statement.execute(String.format("""
+                    );""", "events", "id", "recording_trigger", "object", "time"));
+                }
+                try (Statement statement = connection.createStatement()) {
+                    Autocut.LOGGER.debug("Creating recording_triggers table");
+                    statement.execute(String.format("""
                         CREATE TABLE %s (
                             %s INTEGER UNIQUE ON CONFLICT FAIL,
                             %s TEXT
-                        );""", "triggers", "trigger", "name"));
-            }
-            try (Statement statement = connection.createStatement()) {
-                Autocut.LOGGER.debug("Creating meta table");
-                statement.execute(String.format("""
+                        );""", "recording_triggers", "recording_trigger", "name"));
+                }
+                try (Statement statement = connection.createStatement()) {
+                    Autocut.LOGGER.debug("Creating meta table");
+                    statement.execute(String.format("""
                         CREATE TABLE %s (
                             %s TEXT UNIQUE ON CONFLICT FAIL,
                             %s TEXT
                         );""", "meta", "key", "value"));
             }
+                        );""", META, "meta_key", "meta_value"));
+                }
+                try (PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META))) {
+                    Autocut.LOGGER.debug("Inserting start_timestamp");
+                    statement.setString(1, "start_timestamp");
+                    statement.setLong(2, startTime);
+                    statement.execute();
+                }
+            }
+            Autocut.LOGGER.debug("Releasing lock");
         }
         Autocut.LOGGER.debug("Finished initializing database");
     }
