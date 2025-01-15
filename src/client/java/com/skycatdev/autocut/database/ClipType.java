@@ -12,8 +12,8 @@ import java.util.Optional;
 
 public class ClipType {
 	public static final Codec<ClipType> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-			RecordingTrigger.CODEC.fieldOf("start_trigger").forGetter(ClipType::getStartTrigger),
-			RecordingTrigger.CODEC.optionalFieldOf("end_trigger").forGetter((clipType) -> Optional.ofNullable(clipType.getEndTrigger())),
+			RecordingTrigger.REGISTRY.getCodec().fieldOf("start_trigger").forGetter(ClipType::getStartTrigger),
+			RecordingTrigger.REGISTRY.getCodec().optionalFieldOf("end_trigger").forGetter((clipType) -> Optional.ofNullable(clipType.getEndTrigger())),
 			Codec.LONG.fieldOf("start_offset").forGetter(ClipType::getStartOffset),
 			Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset),
 			Codec.BOOL.fieldOf("enabled").forGetter(ClipType::isEnabled),
