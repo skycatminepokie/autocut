@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.time.Instant;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class RecordingManager {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
@@ -111,20 +110,14 @@ public class RecordingManager {
         long startTime;
         @Nullable String outputPath;
         // Create connection
-        try (Connection connection = DriverManager.getConnection(sqlUrl); PreparedStatement statement = connection.prepareStatement("SELECT %s FROM %s WHERE %s = \"%s\"")) {
-            statement.setString(0, META_VALUE);
-            statement.setString(1, META_TABLE);
-            statement.setString(2, META_KEY);
+        try (Connection connection = DriverManager.getConnection(sqlUrl); Statement statement = connection.createStatement()) { // TODO: prepare this statement
             // Get start time
-            statement.setString(3, META_KEY_START_TIME);
-            ResultSet startTimeResult = statement.executeQuery();
+            ResultSet startTimeResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = \"%s\"", META_VALUE, META_TABLE, META_KEY, META_KEY_START_TIME));
             startTimeResult.next();
             startTime = Long.parseLong(startTimeResult.getString(META_VALUE));
             startTimeResult.close();
-
             // Get record path
-            statement.setString(3, META_KEY_OUTPUT_PATH);
-            ResultSet recordingPathResult = statement.executeQuery();
+            ResultSet recordingPathResult = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = \"%s\"", META_VALUE, META_TABLE, META_KEY, META_KEY_OUTPUT_PATH));
             if (recordingPathResult.next()) {
                 outputPath = recordingPathResult.getString(META_VALUE);
             } else {
@@ -211,7 +204,7 @@ public class RecordingManager {
 
     /**
      * Asks {@link com.skycatdev.autocut.export.ExportHelper} to export clips as configured
-     * @throws IllegalStateException When {@link RecordingManager#outputPath} is {@code null}.
+     * @throws IllegalStateException When {@link outputPath} is {@code null}.
      */
     public void export() throws SQLException {
         if (outputPath == null) {
