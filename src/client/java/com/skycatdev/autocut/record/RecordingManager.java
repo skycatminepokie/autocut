@@ -15,7 +15,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class RecordingManager {
     protected static final Path RECORDING_DIRECTORY = FabricLoader.getInstance().getGameDir().resolve("autocut/recordings");
@@ -204,7 +205,7 @@ public class RecordingManager {
 
     /**
      * Asks {@link com.skycatdev.autocut.export.ExportHelper} to export clips as configured
-     * @throws IllegalStateException When {@link outputPath} is {@code null}.
+     * @throws IllegalStateException When {@link RecordingManager#outputPath} is {@code null}.
      */
     public void export() throws SQLException {
         if (outputPath == null) {

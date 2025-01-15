@@ -1,1 +1,2 @@
 - Fix some bad grammar
+- Fix loading from database
