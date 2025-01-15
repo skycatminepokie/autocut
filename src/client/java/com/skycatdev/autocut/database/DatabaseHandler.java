@@ -13,147 +13,154 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public class DatabaseHandler {
-    /**
-     * The folder where databases are kept in by default.
-     */
-    public static final Path DATABASE_FOLDER = FabricLoader.getInstance().getGameDir().resolve("autocutRecordings");
-    public static final String META = "meta";
-    public static final String EVENTS = "events";
-    /**
-     * The database file. Always exists and is a sqlite database.
-     * Do not access the database before first acquiring {@link DatabaseHandler#databaseLock}.
-     */
-    private final File database;
-    private final Object[] databaseLock = new Object[0];
-    /**
-     * Holds events that are yet to be entered into the database.
-     */
-    private ConcurrentLinkedQueue<RecordingEvent> eventQueue = new ConcurrentLinkedQueue<>();
-    /**
-     * Whether the queue is being worked through. Do not access or modify without first acquiring {@link DatabaseHandler#queueStatusLock}
-     */
-    private boolean queueRunning = false;
-    private final Object[] queueStatusLock = new Object[0];
+	/**
+	 * The folder where databases are kept in by default.
+	 */
+	public static final Path DATABASE_FOLDER = FabricLoader.getInstance().getGameDir().resolve("autocutRecordings");
+	public static final String META = "meta";
+	public static final String EVENTS = "events";
 
-    public Future<DatabaseHandler> makeNew(long startTime) throws IOException {
-        File database = DATABASE_FOLDER.resolve(String.format("%d.sqlite", startTime)).toFile();
-        int i = 1;
-        while (!database.createNewFile()) {
-            if (i > 20) {
-                throw new IOException("Tried twenty different file names, I give up.");
-            }
-            database = DATABASE_FOLDER.resolve(String.format("%d_%d.sqlite", startTime, i)).toFile();
-            i++;
-        }
-        File finalDatabase = database;
-        FutureTask<DatabaseHandler> future = new FutureTask<>(() -> {
-            DatabaseHandler handler = new DatabaseHandler(finalDatabase);
-            handler.initDatabase(startTime);
-            return handler;
-        });
-        new Thread(future, "Autocut Database Initialization Thread").start();
-        return future;
-    }
+	static {
+		//noinspection ResultOfMethodCallIgnored
+		DATABASE_FOLDER.toFile().mkdirs();
+	}
 
-    /**
-     * May be slow.
-     */
-    private void initDatabase(long startTime) throws SQLException {
-        Autocut.LOGGER.debug("Initializing database");
-        Autocut.LOGGER.debug("Acquiring lock");
-        synchronized (databaseLock) {
-            Autocut.LOGGER.debug("Lock acquired");
-            try (Connection connection = DriverManager.getConnection(getDatabaseUrl())) {
-                Autocut.LOGGER.debug("Creating events table");
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute(String.format("""
-                    CREATE TABLE %s (
-                        %s INTEGER PRIMARY KEY AUTOINCREMENT,
-                        %s INTEGER,
-                        %s TEXT,
-                        %s INTEGER
-                    );""", EVENTS, "id", "recording_trigger", "object", "time"));
-                }
-                try (Statement statement = connection.createStatement()) {
-                    Autocut.LOGGER.debug("Creating recording_triggers table");
-                    statement.execute(String.format("""
-                        CREATE TABLE %s (
-                            %s TEXT UNIQUE ON CONFLICT FAIL,
-                            %s TEXT
-                        );""", "recording_triggers", "recording_trigger", "name"));
-                }
-                try (PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META))) {
-                    Autocut.LOGGER.debug("Inserting start_timestamp");
-                    statement.setString(1, "start_timestamp");
-                    statement.setLong(2, startTime);
-                    statement.execute();
-                }
-            }
-            Autocut.LOGGER.debug("Releasing lock");
-        }
-        Autocut.LOGGER.debug("Finished initializing database");
-    }
+	/**
+	 * The database file. Always exists and is a sqlite database.
+	 * Do not access the database before first acquiring {@link DatabaseHandler#databaseLock}.
+	 */
+	private final File database;
+	private final Object[] databaseLock = new Object[0];
+	private final Object[] queueStatusLock = new Object[0];
+	/**
+	 * Holds events that are yet to be entered into the database.
+	 */
+	private ConcurrentLinkedQueue<RecordingEvent> eventQueue = new ConcurrentLinkedQueue<>();
+	/**
+	 * Whether the queue is being worked through. Do not access or modify without first acquiring {@link DatabaseHandler#queueStatusLock}
+	 */
+	private boolean queueRunning = false;
 
-    private String getDatabaseUrl() {
-        return "jdbc:sqlite:" + database.getPath();
-    }
+	/**
+	 * @param database The database file. Must exist. Assumed to be a sqlite file.
+	 */
+	private DatabaseHandler(File database) {
+		this.database = database;
+	}
 
-    /**
-     * Load from file.
-     * @param database The file to load from. Must exist. Assumed to be a sqlite file. Assumed to be initialized.
-     */
-    public DatabaseHandler load(File database) {
-        if (!database.exists()) throw new IllegalArgumentException("Database must exist.");
-        return new DatabaseHandler(database);
-    }
+	/**
+	 * Blocking, but likely fast
+	 */
+	private void ensureQueueRunning() {
+		synchronized (queueStatusLock) {
+			if (!queueRunning) {
+				new Thread(this::writeQueue, "Autocut Event Queue");
+			}
+		}
+	}
 
-    /**
-     * @param database The database file. Must exist. Assumed to be a sqlite file.
-     */
-    private DatabaseHandler(File database) {
-        this.database = database;
-    }
+	private String getDatabaseUrl() {
+		return "jdbc:sqlite:" + database.getPath();
+	}
 
-    public void queueEvent(RecordingEvent event) {
-        eventQueue.add(event);
-        new Thread(this::ensureQueueRunning, "Autocut Database Queue Runner").start();
-    }
+	/**
+	 * May be slow.
+	 */
+	private void initDatabase(long startTime) throws SQLException {
+		Autocut.LOGGER.debug("Initializing database");
+		Autocut.LOGGER.debug("Acquiring lock");
+		synchronized (databaseLock) {
+			Autocut.LOGGER.debug("Lock acquired");
+			try (Connection connection = DriverManager.getConnection(getDatabaseUrl())) {
+				Autocut.LOGGER.debug("Creating events table");
+				try (Statement statement = connection.createStatement()) {
+					statement.execute(String.format("""
+							CREATE TABLE %s (
+							    %s INTEGER PRIMARY KEY AUTOINCREMENT,
+							    %s INTEGER,
+							    %s TEXT,
+							    %s INTEGER
+							);""", EVENTS, "id", "recording_trigger", "object", "time"));
+				}
+				try (Statement statement = connection.createStatement()) {
+					Autocut.LOGGER.debug("Creating recording_triggers table");
+					statement.execute(String.format("""
+							CREATE TABLE %s (
+							    %s TEXT UNIQUE ON CONFLICT FAIL,
+							    %s TEXT
+							);""", "recording_triggers", "recording_trigger", "name"));
+				}
+				try (PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META))) {
+					Autocut.LOGGER.debug("Inserting start_timestamp");
+					statement.setString(1, "start_timestamp");
+					statement.setLong(2, startTime);
+					statement.execute();
+				}
+			}
+			Autocut.LOGGER.debug("Releasing lock");
+		}
+		Autocut.LOGGER.debug("Finished initializing database");
+	}
 
-    /**
-     * Blocking, but likely fast
-     */
-    private void ensureQueueRunning() {
-        synchronized (queueStatusLock) {
-            if (!queueRunning) {
-                new Thread(this::writeQueue, "Autocut Event Queue");
-            }
-        }
-    }
+	/**
+	 * Load from file.
+	 *
+	 * @param database The file to load from. Must exist. Assumed to be a sqlite file. Assumed to be initialized.
+	 */
+	public DatabaseHandler load(File database) {
+		if (!database.exists()) throw new IllegalArgumentException("Database must exist.");
+		return new DatabaseHandler(database);
+	}
 
-    /**
-     * Blocking, may take a long time. Synchronizes on the database.
-     */
-    private void writeQueue() {
-        if (eventQueue.isEmpty()) return;
-        synchronized (databaseLock) {
-            synchronized (queueStatusLock) {
-                queueRunning = true;
-            }
-            try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
-                 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?, ?);", EVENTS))) {
-                while (!eventQueue.isEmpty()) {
-                    RecordingEvent event = eventQueue.poll();
-                    statement.setString(1, event.trigger().getId().toString());
-                    statement.setString(2, event.object().toString());
-                    statement.setLong(3, event.time());
-                    statement.execute();
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        synchronized (queueStatusLock) {
-            queueRunning = false;
-        }
-    }
+	public Future<DatabaseHandler> makeNew(long startTime) throws IOException {
+		File database = DATABASE_FOLDER.resolve(String.format("%d.sqlite", startTime)).toFile();
+		int i = 1;
+		while (!database.createNewFile()) {
+			if (i > 20) {
+				throw new IOException("Tried twenty different file names, I give up.");
+			}
+			database = DATABASE_FOLDER.resolve(String.format("%d_%d.sqlite", startTime, i)).toFile();
+			i++;
+		}
+		File finalDatabase = database;
+		FutureTask<DatabaseHandler> future = new FutureTask<>(() -> {
+			DatabaseHandler handler = new DatabaseHandler(finalDatabase);
+			handler.initDatabase(startTime);
+			return handler;
+		});
+		new Thread(future, "Autocut Database Initialization Thread").start();
+		return future;
+	}
+
+	public void queueEvent(RecordingEvent event) {
+		eventQueue.add(event);
+		new Thread(this::ensureQueueRunning, "Autocut Database Queue Runner").start();
+	}
+
+	/**
+	 * Blocking, may take a long time. Synchronizes on the database.
+	 */
+	private void writeQueue() {
+		if (eventQueue.isEmpty()) return;
+		synchronized (databaseLock) {
+			synchronized (queueStatusLock) {
+				queueRunning = true;
+			}
+			try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
+				 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?, ?);", EVENTS))) {
+				while (!eventQueue.isEmpty()) {
+					RecordingEvent event = eventQueue.poll();
+					statement.setString(1, event.trigger().toString());
+					statement.setString(2, event.object().toString());
+					statement.setLong(3, event.time());
+					statement.execute();
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		synchronized (queueStatusLock) {
+			queueRunning = false;
+		}
+	}
 }

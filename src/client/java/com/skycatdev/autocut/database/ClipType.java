@@ -4,7 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.config.ExportGroupingMode;
-import com.skycatdev.autocut.record.RecordingTrigger;
+import com.skycatdev.autocut.trigger.RecordingTrigger;
+import com.skycatdev.autocut.trigger.RecordingTriggers;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,8 +13,8 @@ import java.util.Optional;
 
 public class ClipType {
 	public static final Codec<ClipType> CODEC = RecordCodecBuilder.create((instance) -> instance.group(
-			RecordingTrigger.REGISTRY.getCodec().fieldOf("start_trigger").forGetter(ClipType::getStartTrigger),
-			RecordingTrigger.REGISTRY.getCodec().optionalFieldOf("end_trigger").forGetter((clipType) -> Optional.ofNullable(clipType.getEndTrigger())),
+			RecordingTriggers.REGISTRY.getCodec().fieldOf("start_trigger").forGetter(ClipType::getStartTrigger),
+			RecordingTriggers.REGISTRY.getCodec().optionalFieldOf("end_trigger").forGetter((clipType) -> Optional.ofNullable(clipType.getEndTrigger())),
 			Codec.LONG.fieldOf("start_offset").forGetter(ClipType::getStartOffset),
 			Codec.LONG.fieldOf("end_offset").forGetter(ClipType::getEndOffset),
 			Codec.BOOL.fieldOf("enabled").forGetter(ClipType::isEnabled),
