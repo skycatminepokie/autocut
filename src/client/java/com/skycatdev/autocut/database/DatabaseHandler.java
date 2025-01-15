@@ -1,15 +1,14 @@
 package com.skycatdev.autocut.database;
 
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.record.RecordingEvent;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
@@ -19,6 +18,7 @@ public class DatabaseHandler {
      */
     public static final Path DATABASE_FOLDER = FabricLoader.getInstance().getGameDir().resolve("autocutRecordings");
     public static final String META = "meta";
+    public static final String EVENTS = "events";
     /**
      * The database file. Always exists and is a sqlite database.
      * Do not access the database before first acquiring {@link DatabaseHandler#databaseLock}.
@@ -28,7 +28,12 @@ public class DatabaseHandler {
     /**
      * Holds events that are yet to be entered into the database.
      */
-    protected Queue<RecordingEvent> eventQueue = new LinkedList<>();
+    private ConcurrentLinkedQueue<RecordingEvent> eventQueue = new ConcurrentLinkedQueue<>();
+    /**
+     * Whether the queue is being worked through. Do not access or modify without first acquiring {@link DatabaseHandler#queueStatusLock}
+     */
+    private boolean queueRunning = false;
+    private final Object[] queueStatusLock = new Object[0];
 
     public Future<DatabaseHandler> makeNew(long startTime) throws IOException {
         File database = DATABASE_FOLDER.resolve(String.format("%d.sqlite", startTime)).toFile();
@@ -67,25 +72,15 @@ public class DatabaseHandler {
                         %s INTEGER,
                         %s TEXT,
                         %s INTEGER
-                    );""", "events", "id", "recording_trigger", "object", "time"));
+                    );""", EVENTS, "id", "recording_trigger", "object", "time"));
                 }
                 try (Statement statement = connection.createStatement()) {
                     Autocut.LOGGER.debug("Creating recording_triggers table");
                     statement.execute(String.format("""
                         CREATE TABLE %s (
-                            %s INTEGER UNIQUE ON CONFLICT FAIL,
-                            %s TEXT
-                        );""", "recording_triggers", "recording_trigger", "name"));
-                }
-                try (Statement statement = connection.createStatement()) {
-                    Autocut.LOGGER.debug("Creating meta table");
-                    statement.execute(String.format("""
-                        CREATE TABLE %s (
                             %s TEXT UNIQUE ON CONFLICT FAIL,
                             %s TEXT
-                        );""", "meta", "key", "value"));
-            }
-                        );""", META, "meta_key", "meta_value"));
+                        );""", "recording_triggers", "recording_trigger", "name"));
                 }
                 try (PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META))) {
                     Autocut.LOGGER.debug("Inserting start_timestamp");
@@ -117,5 +112,48 @@ public class DatabaseHandler {
      */
     private DatabaseHandler(File database) {
         this.database = database;
+    }
+
+    public void queueEvent(RecordingEvent event) {
+        eventQueue.add(event);
+        new Thread(this::ensureQueueRunning, "Autocut Database Queue Runner").start();
+    }
+
+    /**
+     * Blocking, but likely fast
+     */
+    private void ensureQueueRunning() {
+        synchronized (queueStatusLock) {
+            if (!queueRunning) {
+                new Thread(this::writeQueue, "Autocut Event Queue");
+            }
+        }
+    }
+
+    /**
+     * Blocking, may take a long time. Synchronizes on the database.
+     */
+    private void writeQueue() {
+        if (eventQueue.isEmpty()) return;
+        synchronized (databaseLock) {
+            synchronized (queueStatusLock) {
+                queueRunning = true;
+            }
+            try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
+                 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?, ?);", EVENTS))) {
+                while (!eventQueue.isEmpty()) {
+                    RecordingEvent event = eventQueue.poll();
+                    statement.setString(1, event.trigger().getId().toString());
+                    statement.setString(2, event.object().toString());
+                    statement.setLong(3, event.time());
+                    statement.execute();
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        synchronized (queueStatusLock) {
+            queueRunning = false;
+        }
     }
 }
