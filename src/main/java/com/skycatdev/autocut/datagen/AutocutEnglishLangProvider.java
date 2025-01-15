@@ -93,7 +93,7 @@ public class AutocutEnglishLangProvider extends FabricLanguageProvider {
         addText("exportGroupingMode.individual", "Separate", tb);
 
         addCommandMessage("autocut.finish.database", "fail.databaseDoesNotExist", "The given database does not exist.", tb);
-        addCommandMessage("autocut.finish", "fail.noRecording", "No record found. Did you connect, start record, and stop record?", tb);
+        addCommandMessage("autocut.finish", "fail.noRecording", "No record found. Did you connect, start recording, then stop recording?", tb);
         addCommandMessage("autocut.connect.password", "fail.alreadyConnected", "Already connected.", tb);
 
     }

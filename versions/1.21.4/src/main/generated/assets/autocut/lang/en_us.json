@@ -1,7 +1,7 @@
 {
   "autocut.command.autocut.connect.password.fail.alreadyConnected": "Already connected.",
   "autocut.command.autocut.finish.database.fail.databaseDoesNotExist": "The given database does not exist.",
-  "autocut.command.autocut.finish.fail.noRecording": "No record found. Did you connect, start record, and stop record?",
+  "autocut.command.autocut.finish.fail.noRecording": "No record found. Did you connect, start recording, then stop recording?",
   "autocut.cutting.fail": "Something went wrong while preparing to export. Check your logs for more info.",
   "autocut.cutting.finish": "Finished cutting [%s/%s]",
   "autocut.cutting.progress": "Cutting: %s%% [%s/%s]",
