@@ -1,4 +1,4 @@
-package com.skycatdev.autocut.clips;
+package com.skycatdev.autocut.export;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.TreeRangeSet;

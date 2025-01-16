@@ -3,7 +3,6 @@ package com.skycatdev.autocut.export;
 import com.google.common.collect.Range;
 import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.Utils;
-import com.skycatdev.autocut.clips.Clip;
 import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.config.ExportConfig;
 import com.skycatdev.autocut.database.ClipType;
