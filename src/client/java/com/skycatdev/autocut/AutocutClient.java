@@ -3,6 +3,7 @@ package com.skycatdev.autocut;
 import com.skycatdev.autocut.database.DatabaseHandler;
 import com.skycatdev.autocut.trigger.RecordingTriggers;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -33,5 +34,6 @@ public class AutocutClient implements ClientModInitializer {
                 }
 			}
         });
+        ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
     }
 }
