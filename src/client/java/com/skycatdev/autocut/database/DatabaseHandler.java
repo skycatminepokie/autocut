@@ -1,6 +1,7 @@
 package com.skycatdev.autocut.database;
 
 import com.skycatdev.autocut.Autocut;
+import com.skycatdev.autocut.export.Clip;
 import com.skycatdev.autocut.record.RecordingEvent;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -8,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -59,8 +62,23 @@ public class DatabaseHandler {
 		}
 	}
 
+	public FutureTask<LinkedList<Clip>> generateClips(ArrayList<ClipType> clipTypes) {
+		// TODO
+		return null;
+	}
+
 	private String getDatabaseUrl() {
 		return "jdbc:sqlite:" + database.getPath();
+	}
+
+	public FutureTask<String> getRecordingPath() {
+		// TODO
+		return null;
+	}
+
+	public FutureTask<Long> getStartTime() {
+		// TODO
+		return null;
 	}
 
 	/**

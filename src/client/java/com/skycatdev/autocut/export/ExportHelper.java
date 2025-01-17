@@ -6,6 +6,7 @@ import com.skycatdev.autocut.Utils;
 import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.config.ExportConfig;
 import com.skycatdev.autocut.database.ClipType;
+import com.skycatdev.autocut.database.DatabaseHandler;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -15,12 +16,15 @@ import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 public class ExportHelper {
@@ -31,8 +35,8 @@ public class ExportHelper {
      * @param recordingPath The path to the video recording
      * @param startTime     The time the recording was started
      */
-    public static void exportFFmpeg(LinkedList<Clip> clips, @NotNull String recordingPath, long startTime) {
-        new Thread(() -> {
+    public static FutureTask<@Nullable Void> startFFmpegExport(LinkedList<Clip> clips, @NotNull String recordingPath, long startTime) {
+        FutureTask<@Nullable Void> exportTask = new FutureTask<>(() -> {
             File recording = new File(recordingPath);
 
             try {
@@ -81,7 +85,10 @@ public class ExportHelper {
                 AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.fail"));
                 throw new RuntimeException(e);
             }
-        }, "Autocut FFmpeg Export Thread").start();
+            return null;
+        });
+        new Thread(exportTask, "Autocut FFmpeg Export Thread").start();
+        return exportTask;
     }
 
     private static FFmpegJob makeFFmpegJob(LinkedList<Clip> clips, long startTime, File recording, FFmpegProbeResult in, FFmpegExecutor executor, int totalJobs, int jobNumber) throws IOException {
@@ -123,5 +130,16 @@ public class ExportHelper {
             }
         });
         return job;
+    }
+
+    public static FutureTask<FutureTask<@Nullable Void>> startFFmpegExport(DatabaseHandler databaseHandler, ArrayList<ClipType> clipTypes) {
+        FutureTask<FutureTask<@Nullable Void>> generateAndExport = new FutureTask<>(() -> {
+            FutureTask<LinkedList<Clip>> clips = databaseHandler.generateClips(clipTypes);
+            FutureTask<String> recordingPath = databaseHandler.getRecordingPath();
+            FutureTask<Long> startTime = databaseHandler.getStartTime();
+            return startFFmpegExport(clips.get(), recordingPath.get(), startTime.get());
+        });
+        new Thread(generateAndExport, "Autocut Clip Generation Thread").start();
+        return generateAndExport;
     }
 }
