@@ -89,8 +89,16 @@ public class DatabaseHandler {
 	}
 
 	public FutureTask<Long> getStartTime() {
-		// TODO
-		return null;
+		FutureTask<Long> task = new FutureTask<>(() -> {
+			long ret;
+			try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
+				ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s", META_VALUE, META, META_KEY, START_TIMESTAMP));
+				ret = rs.getLong(1);
+			}
+			return ret;
+		});
+		new Thread(task, "Autocut Recording Time Grabber Thread").start();
+		return task;
 	}
 
 	/**
