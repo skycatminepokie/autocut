@@ -3,14 +3,13 @@ package com.skycatdev.autocut.export;
 import com.google.common.collect.Range;
 import com.google.common.collect.TreeRangeSet;
 import com.skycatdev.autocut.database.ClipType;
-import com.skycatdev.autocut.trigger.RecordingTrigger;
 
 import java.util.Collection;
 
 /**
  * A period of time in a record. Timestamps are UNIX time, not relative to the record.
  */
-public record Clip(long in, long out, RecordingTrigger trigger, ClipType type) {
+public record Clip(long in, long out, ClipType type) {
     public Clip {
         assert in < out;
     }
