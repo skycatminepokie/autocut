@@ -3,7 +3,6 @@ package com.skycatdev.autocut.export;
 import com.google.common.collect.Range;
 import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.Utils;
-import com.skycatdev.autocut.config.ConfigHandler;
 import com.skycatdev.autocut.config.ExportConfig;
 import com.skycatdev.autocut.database.ClipType;
 import com.skycatdev.autocut.database.DatabaseHandler;
@@ -40,8 +39,8 @@ public class ExportHelper {
             File recording = new File(recordingPath);
 
             try {
-                FFmpegExecutor executor = new FFmpegExecutor(ConfigHandler.getExportConfig().getFFmpeg());
-                FFprobe ffprobe = ConfigHandler.getExportConfig().getFFprobe();
+                FFmpegExecutor executor = new FFmpegExecutor(AutocutClient.config.getExportConfig().getFFmpeg());
+                FFprobe ffprobe = AutocutClient.config.getExportConfig().getFFprobe();
                 FFmpegProbeResult in = ffprobe.probe(recordingPath);
 
                 // Split clips into export sets
@@ -93,7 +92,7 @@ public class ExportHelper {
 
     private static FFmpegJob makeFFmpegJob(LinkedList<Clip> clips, long startTime, File recording, FFmpegProbeResult in, FFmpegExecutor executor, int totalJobs, int jobNumber) throws IOException {
         Set<Range<Long>> rangeSet = Clip.toRange(clips).asRanges();
-        ExportConfig exportConfig = ConfigHandler.getExportConfig();
+        ExportConfig exportConfig = AutocutClient.config.getExportConfig();
         File export;
         synchronized (exportConfig) {
             export = exportConfig.getFFmpegExportFile(recording, rangeSet.size());

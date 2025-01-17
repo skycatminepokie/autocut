@@ -149,7 +149,7 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
                 .replaceAll("\\\\", "")
                 .replaceAll("\\.", "");
         File export = original.toPath().resolveSibling(firstName + "." + format).toFile();
-        // if (ConfigHandler.getExportConfig().shouldKeepOld()) {
+        // if (Config.getExportConfig().shouldKeepOld()) {
         //     int i = 0;
         //     while (export.exists()) { // TODO: Cache this? Few file system queries.
         //         i++;

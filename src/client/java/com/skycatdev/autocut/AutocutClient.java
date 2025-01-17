@@ -1,5 +1,6 @@
 package com.skycatdev.autocut;
 
+import com.skycatdev.autocut.config.Config;
 import com.skycatdev.autocut.database.DatabaseHandler;
 import com.skycatdev.autocut.trigger.RecordingTriggers;
 import net.fabricmc.api.ClientModInitializer;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 public class AutocutClient implements ClientModInitializer {
     public static final KeyBinding CLIP_KEYBIND = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.autocut.clip", InputUtil.UNKNOWN_KEY.getCode(), "key.category.autocut.autocut"));
     @Nullable public static DatabaseHandler currentDatabaseHandler = null;
+    public static Config config = Config.loadOrDefault();
 
     /**
      * Utility for consistently sending messages to the player from another thread.

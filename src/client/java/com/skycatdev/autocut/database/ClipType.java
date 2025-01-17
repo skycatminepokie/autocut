@@ -1,14 +1,21 @@
 package com.skycatdev.autocut.database;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.config.ExportGroupingMode;
 import com.skycatdev.autocut.trigger.RecordingTrigger;
 import com.skycatdev.autocut.trigger.RecordingTriggers;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Optional;
 
 public class ClipType {
@@ -85,5 +92,20 @@ public class ClipType {
 
 	public boolean isInverted() {
 		return inverted;
+	}
+
+	/**
+	 * Load a ClipType from the given file.
+	 * @param file The file to read from.
+	 * @return THe read ClipType, or {@code null} if the read failed.
+	 */
+	public static @Nullable ClipType load(File file) throws FileNotFoundException {
+		JsonElement element = JsonParser.parseReader(new FileReader(file));
+		var data = CODEC.decode(JsonOps.INSTANCE, element);
+		if (data.isSuccess()) {
+			return data.getOrThrow().getFirst();
+		}
+		Autocut.LOGGER.warn("Failed to load ClipType from {}", file.getName());
+		return null;
 	}
 }

@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.skycatdev.autocut.export.ExportHelper;
 import com.skycatdev.autocut.record.ObsHandler;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
@@ -38,7 +39,7 @@ public class AutocutCommandHandler {
 		if (AutocutClient.currentDatabaseHandler == null) {
 			throw FINISH_NO_RECORDING_EXCEPTION.create();
 		}
-		// TODO AutocutClient.currentRecordingManager.export();
+		ExportHelper.startFFmpegExport(AutocutClient.currentDatabaseHandler, AutocutClient.config.getClipTypes());
 		return Command.SINGLE_SUCCESS;
     }
 
