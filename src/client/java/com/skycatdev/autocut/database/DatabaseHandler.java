@@ -22,6 +22,10 @@ public class DatabaseHandler {
 	public static final Path DATABASE_FOLDER = FabricLoader.getInstance().getGameDir().resolve("autocutRecordings");
 	public static final String META = "meta";
 	public static final String EVENTS = "events";
+	public static final String START_TIMESTAMP = "start_timestamp";
+	public static final String META_KEY = "key";
+	public static final String META_VALUE = "value";
+	public static final String RECORDING_PATH_KEY = "recording_path";
 
 	static {
 		//noinspection ResultOfMethodCallIgnored
@@ -72,8 +76,16 @@ public class DatabaseHandler {
 	}
 
 	public FutureTask<String> getRecordingPath() {
-		// TODO
-		return null;
+		FutureTask<String> task = new FutureTask<>(() -> {
+			String ret;
+			try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
+				ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s", META_VALUE, META, META_KEY, RECORDING_PATH_KEY));
+				ret = rs.getString(1); // TODO: Save recording path
+			}
+			return ret;
+		});
+		new Thread(task, "Autocut Recording Path Grabber Thread").start();
+		return task;
 	}
 
 	public FutureTask<Long> getStartTime() {
@@ -106,11 +118,11 @@ public class DatabaseHandler {
 							CREATE TABLE %s (
 							    %s TEXT UNIQUE ON CONFLICT FAIL,
 							    %s TEXT
-							);""", "recording_triggers", "recording_trigger", "name"));
+							);""", META, META_KEY, META_VALUE));
 				}
 				try (PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?);", META))) {
 					Autocut.LOGGER.debug("Inserting start_timestamp");
-					statement.setString(1, "start_timestamp");
+					statement.setString(1, START_TIMESTAMP);
 					statement.setLong(2, startTime);
 					statement.execute();
 				}
