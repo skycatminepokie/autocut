@@ -4,6 +4,7 @@ import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.export.Clip;
 import com.skycatdev.autocut.record.RecordingEvent;
 import net.fabricmc.loader.api.FabricLoader;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,7 +139,7 @@ public class DatabaseHandler {
 				try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
 					ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, RECORDING_PATH_KEY));
 					rs.next();
-					ret = rs.getString(1); // TODO: Save recording path
+					ret = rs.getString(1);
 				}
 				return ret;
 			}
@@ -232,8 +233,19 @@ public class DatabaseHandler {
 		return future;
 	}
 
-	public void onRecordingEnded(String outputPath) {
-		// TODO
+	public FutureTask<@Nullable Void> onRecordingEnded(String outputPath) {
+		FutureTask<@Nullable Void> task = new FutureTask<>(() -> {
+			synchronized (databaseLock) {
+				try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
+					 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s (%s, %s) VALUES (%s, ?);", META, META_KEY, META_VALUE, RECORDING_PATH_KEY))) {
+					statement.setString(1, outputPath);
+					statement.executeUpdate();
+				}
+			}
+			return null;
+		});
+		new Thread(task, "Autocut Recording End Thread").start();
+		return task;
 	}
 
 	public void queueEvent(RecordingEvent event) {
