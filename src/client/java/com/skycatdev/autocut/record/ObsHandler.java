@@ -2,12 +2,16 @@ package com.skycatdev.autocut.record;
 
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.AutocutClient;
+import com.skycatdev.autocut.database.DatabaseHandler;
 import io.obswebsocket.community.client.OBSRemoteController;
 import io.obswebsocket.community.client.message.event.outputs.RecordStateChangedEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class ObsHandler { // All this is likely on a thread other than the main client thread.
     public static final int DEFAULT_PORT = 4455;
@@ -55,14 +59,23 @@ public class ObsHandler { // All this is likely on a thread other than the main 
         // Looks like output path is null if stopping or starting, but is not null when stopped or started
         if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STARTED")) {
             AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.success"));
-			// TODO: Create recording manager
+			try {
+				AutocutClient.currentDatabaseHandler = DatabaseHandler.makeNew(System.currentTimeMillis());
+            } catch (IOException e) {
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.failure")); // TODO check this is a thing
+            }
 		} else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
                 AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.success"));
                 if (AutocutClient.currentDatabaseHandler == null) {
                     AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.end.fail.notStarted"));
                 } else {
-					// TODO AutocutClient.currentRecordingManager.onRecordingEnded(recordStateChangedEvent.getOutputPath());
+					try {
+						AutocutClient.currentDatabaseHandler.get().onRecordingEnded(recordStateChangedEvent.getOutputPath());
+					} catch (InterruptedException | ExecutionException e) {
+                        // Probably won't happen
+						throw new RuntimeException(e);
+					}
 				}
             }
         }

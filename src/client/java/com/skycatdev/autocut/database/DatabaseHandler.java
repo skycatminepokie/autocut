@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public class DatabaseHandler {
@@ -213,7 +212,7 @@ public class DatabaseHandler {
 		return new DatabaseHandler(database);
 	}
 
-	public Future<DatabaseHandler> makeNew(long startTime) throws IOException {
+	public static FutureTask<DatabaseHandler> makeNew(long startTime) throws IOException {
 		File database = DATABASE_FOLDER.resolve(String.format("%d.sqlite", startTime)).toFile();
 		int i = 1;
 		while (!database.createNewFile()) {
@@ -231,6 +230,10 @@ public class DatabaseHandler {
 		});
 		new Thread(future, "Autocut Database Initialization Thread").start();
 		return future;
+	}
+
+	public void onRecordingEnded(String outputPath) {
+		// TODO
 	}
 
 	public void queueEvent(RecordingEvent event) {

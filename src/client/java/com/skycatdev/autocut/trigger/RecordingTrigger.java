@@ -6,6 +6,8 @@ import com.skycatdev.autocut.AutocutClient;
 import com.skycatdev.autocut.record.RecordingEvent;
 import net.minecraft.util.Identifier;
 
+import java.util.concurrent.ExecutionException;
+
 public abstract class RecordingTrigger {
 	protected final Identifier id;
 
@@ -21,7 +23,12 @@ public abstract class RecordingTrigger {
 
 	protected void storeEvent(JsonObject object, long time) {
 		if (AutocutClient.currentDatabaseHandler != null) {
-			AutocutClient.currentDatabaseHandler.queueEvent(new RecordingEvent(id, object, time));
+			try {
+				AutocutClient.currentDatabaseHandler.get().queueEvent(new RecordingEvent(id, object, time));
+			} catch (InterruptedException | ExecutionException e) {
+				// Shouldn't really happen
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }

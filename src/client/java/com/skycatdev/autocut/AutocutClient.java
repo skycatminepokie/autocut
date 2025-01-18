@@ -13,10 +13,12 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.FutureTask;
+
 
 public class AutocutClient implements ClientModInitializer {
     public static final KeyBinding CLIP_KEYBIND = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.autocut.clip", InputUtil.UNKNOWN_KEY.getCode(), "key.category.autocut.autocut"));
-    @Nullable public static DatabaseHandler currentDatabaseHandler = null;
+    public static @Nullable FutureTask<DatabaseHandler> currentDatabaseHandler = null;
     public static Config config = Config.loadOrDefault();
 
     /**
