@@ -77,10 +77,13 @@ public class DatabaseHandler {
 
 	public FutureTask<String> getRecordingPath() {
 		FutureTask<String> task = new FutureTask<>(() -> {
-			String ret;
-			try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
-				ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, RECORDING_PATH_KEY));
-				ret = rs.getString(1); // TODO: Save recording path
+			synchronized (databaseLock) {
+				String ret;
+				try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
+					ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, RECORDING_PATH_KEY));
+					ret = rs.getString(1); // TODO: Save recording path
+				}
+				return ret;
 			}
 			return ret;
 		});
@@ -90,10 +93,13 @@ public class DatabaseHandler {
 
 	public FutureTask<Long> getStartTime() {
 		FutureTask<Long> task = new FutureTask<>(() -> {
-			long ret;
-			try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
-				ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, START_TIMESTAMP));
-				ret = rs.getLong(1);
+			synchronized (databaseLock) {
+				long ret;
+				try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
+					ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, START_TIMESTAMP));
+					ret = rs.getLong(1);
+				}
+				return ret;
 			}
 			return ret;
 		});
