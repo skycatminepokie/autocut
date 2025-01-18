@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -26,6 +27,10 @@ public class DatabaseHandler {
 	public static final String META_KEY = "key";
 	public static final String META_VALUE = "value";
 	public static final String RECORDING_PATH_KEY = "recording_path";
+	public static final String RECORDING_TRIGGER = "recording_trigger";
+	public static final String TIME = "time";
+	public static final String OBJECT = "object";
+	public static final String ID = "id";
 
 	static {
 		//noinspection ResultOfMethodCallIgnored
@@ -67,8 +72,60 @@ public class DatabaseHandler {
 	}
 
 	public FutureTask<LinkedList<Clip>> generateClips(ArrayList<ClipType> clipTypes) {
-		// TODO
-		return null;
+		FutureTask<LinkedList<Clip>> task = new FutureTask<>(() -> {
+			LinkedList<Clip> clips = new LinkedList<>();
+			// for each clip type
+			for (ClipType type : clipTypes) {
+				if (type.endTrigger != null) {
+					ResultSet triggers;
+					synchronized (databaseLock) {
+						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
+							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? OR %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, RECORDING_TRIGGER, TIME))) {
+							statement.setString(1, type.startTrigger.getId().toString());
+							statement.setString(2, type.endTrigger.getId().toString());
+							triggers = statement.executeQuery();
+						}
+					}
+					LinkedList<Boolean> isStarts = new LinkedList<>();
+					LinkedList<Long> times = new LinkedList<>();
+					while (triggers.next()) {
+						isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(type.startTrigger.toString()));
+						times.add(triggers.getLong(TIME));
+					}
+					assert isStarts.size() == times.size();
+
+					Iterator<Boolean> isStartsIt = isStarts.iterator();
+					Iterator<Long> timesIt = times.iterator();
+					boolean lastIsStart = false;
+					long lastTime = -1L;
+					while (isStartsIt.hasNext()) {
+						boolean isStart = isStartsIt.next();
+						long time = timesIt.next();
+						if (lastIsStart && !isStart) {
+							clips.add(new Clip(lastTime - type.startOffset, time + type.endOffset, type));
+						}
+						lastIsStart = isStart;
+						lastTime = time;
+					}
+				} else {
+					synchronized (databaseLock) {
+						ResultSet triggers;
+						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
+							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, TIME))) {
+							statement.setString(1, type.startTrigger.getId().toString());
+							triggers = statement.executeQuery();
+						}
+						while (triggers.next()) {
+							long time = triggers.getLong(TIME);
+							clips.add(new Clip(time - type.startOffset, time + type.endOffset, type));
+						}
+					}
+				}
+			}
+			return clips;
+		});
+		new Thread(task, "Autocut Clip Generator Thread").start();
+		return task;
 	}
 
 	private String getDatabaseUrl() {
@@ -81,11 +138,11 @@ public class DatabaseHandler {
 				String ret;
 				try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
 					ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, RECORDING_PATH_KEY));
+					rs.next();
 					ret = rs.getString(1); // TODO: Save recording path
 				}
 				return ret;
 			}
-			return ret;
 		});
 		new Thread(task, "Autocut Recording Path Grabber Thread").start();
 		return task;
@@ -97,11 +154,11 @@ public class DatabaseHandler {
 				long ret;
 				try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
 					ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, START_TIMESTAMP));
+					rs.next();
 					ret = rs.getLong(1);
 				}
 				return ret;
 			}
-			return ret;
 		});
 		new Thread(task, "Autocut Recording Time Grabber Thread").start();
 		return task;
@@ -124,7 +181,7 @@ public class DatabaseHandler {
 							    %s INTEGER,
 							    %s TEXT,
 							    %s INTEGER
-							);""", EVENTS, "id", "recording_trigger", "object", "time"));
+							);""", EVENTS, ID, RECORDING_TRIGGER, OBJECT, TIME));
 				}
 				try (Statement statement = connection.createStatement()) {
 					Autocut.LOGGER.debug("Creating recording_triggers table");
