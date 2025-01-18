@@ -62,7 +62,7 @@ public class ObsHandler { // All this is likely on a thread other than the main 
 			try {
 				AutocutClient.currentDatabaseHandler = DatabaseHandler.makeNew(System.currentTimeMillis());
             } catch (IOException e) {
-                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.failure")); // TODO check this is a thing
+                AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.record.start.fail"));
             }
 		} else {
             if (recordStateChangedEvent.getOutputState().equals("OBS_WEBSOCKET_OUTPUT_STOPPED")) {
