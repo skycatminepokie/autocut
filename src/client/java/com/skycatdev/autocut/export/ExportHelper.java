@@ -117,7 +117,7 @@ public class ExportHelper {
 						dummyList.add(clip);
 						makeFFmpegJob(dummyList, startTime, recording, in, executor, totalJobs, ++jobIndex).run();
 					}
-
+					AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.finishAll"));
 				} catch (Exception e) {
 					AutocutClient.sendMessageOnClientThread(Text.translatable("autocut.cutting.progress.fail"));
 					throw new RuntimeException("Something went wrong while exporting.", e);

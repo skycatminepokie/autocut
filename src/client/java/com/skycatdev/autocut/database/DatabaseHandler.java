@@ -136,8 +136,10 @@ public class DatabaseHandler {
 		FutureTask<String> task = new FutureTask<>(() -> {
 			synchronized (databaseLock) {
 				String ret;
-				try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
-					ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, RECORDING_PATH_KEY));
+				try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
+					 PreparedStatement statement = connection.prepareStatement(String.format("SELECT %s FROM %s WHERE %s = ?;", META_VALUE, META, META_KEY))) {
+					statement.setString(1, RECORDING_PATH_KEY);
+					ResultSet rs = statement.executeQuery();
 					rs.next();
 					ret = rs.getString(1);
 				}
@@ -152,8 +154,10 @@ public class DatabaseHandler {
 		FutureTask<Long> task = new FutureTask<>(() -> {
 			synchronized (databaseLock) {
 				long ret;
-				try (Connection connection = DriverManager.getConnection(getDatabaseUrl()); Statement statement = connection.createStatement()) {
-					ResultSet rs = statement.executeQuery(String.format("SELECT %s FROM %s WHERE %s = %s;", META_VALUE, META, META_KEY, START_TIMESTAMP));
+				try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
+					 PreparedStatement statement = connection.prepareStatement(String.format("SELECT %s FROM %s WHERE %s = ?;", META_VALUE, META, META_KEY))) {
+					statement.setString(1, START_TIMESTAMP);
+					ResultSet rs = statement.executeQuery();
 					rs.next();
 					ret = rs.getLong(1);
 				}
@@ -237,8 +241,9 @@ public class DatabaseHandler {
 		FutureTask<@Nullable Void> task = new FutureTask<>(() -> {
 			synchronized (databaseLock) {
 				try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
-					 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s (%s, %s) VALUES (%s, ?);", META, META_KEY, META_VALUE, RECORDING_PATH_KEY))) {
-					statement.setString(1, outputPath);
+					 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s (%s, %s) VALUES (?, ?);", META, META_KEY, META_VALUE))) {
+					statement.setString(1, RECORDING_PATH_KEY);
+					statement.setString(2, outputPath);
 					statement.executeUpdate();
 				}
 			}

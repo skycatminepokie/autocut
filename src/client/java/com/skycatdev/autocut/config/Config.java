@@ -46,6 +46,7 @@ public class Config {
             }
         } else {
             clipTypes = new ArrayList<>();
+            // TODO: add defaults
         }
         return new Config(clipTypes, ExportConfig.readOrDefault(EXPORT_CONFIG_FILE));
     }
