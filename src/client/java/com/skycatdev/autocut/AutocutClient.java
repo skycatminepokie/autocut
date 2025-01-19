@@ -7,6 +7,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -39,5 +40,6 @@ public class AutocutClient implements ClientModInitializer {
 			}
         });
         ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
+        AttackEntityCallback.EVENT.register(RecordingTriggers.ATTACK_ENTITY_TRIGGER);
     }
 }

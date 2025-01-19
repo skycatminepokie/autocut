@@ -11,6 +11,7 @@ public class RecordingTriggers {
 	public static final RegistryKey<Registry<RecordingTrigger>> REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.of(Autocut.MOD_ID, "triggers"));
 	public static final SimpleRegistry<RecordingTrigger> REGISTRY = new SimpleRegistry<>(REGISTRY_KEY, Lifecycle.stable());
 	public static final ManualTrigger MANUAL_TRIGGER = register(new ManualTrigger());
+	public static final AttackEntityTrigger ATTACK_ENTITY_TRIGGER = register(new AttackEntityTrigger());
 
 	public static <T extends RecordingTrigger> T register(T trigger) {
 		return Registry.register(REGISTRY, trigger.getId(), trigger);

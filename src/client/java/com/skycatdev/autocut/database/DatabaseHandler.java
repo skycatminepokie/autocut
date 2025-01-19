@@ -89,7 +89,7 @@ public class DatabaseHandler {
 								// Triggers are different
 								LinkedList<Boolean> isStarts = new LinkedList<>();
 								while (triggers.next()) {
-									isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(clipType.startTrigger.toString()));
+									isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(clipType.startTrigger.getId().toString()));
 									times.add(triggers.getLong(TIME));
 								}
 								assert isStarts.size() == times.size();
