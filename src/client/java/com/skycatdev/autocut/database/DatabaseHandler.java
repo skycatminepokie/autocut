@@ -24,7 +24,7 @@ public class DatabaseHandler {
 	public static final String META = "meta";
 	public static final String EVENTS = "events";
 	public static final String START_TIMESTAMP = "start_timestamp";
-	public static final String META_KEY = "key";
+	public static final String META_KEY = "meta_key";
 	public static final String META_VALUE = "value";
 	public static final String RECORDING_PATH_KEY = "recording_path";
 	public static final String RECORDING_TRIGGER = "recording_trigger";
