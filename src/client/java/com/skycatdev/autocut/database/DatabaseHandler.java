@@ -66,7 +66,7 @@ public class DatabaseHandler {
 	private void ensureQueueRunning() {
 		synchronized (queueStatusLock) {
 			if (!queueRunning) {
-				new Thread(this::writeQueue, "Autocut Event Queue");
+				new Thread(this::writeQueue, "Autocut Event Queue").start();
 			}
 		}
 	}
