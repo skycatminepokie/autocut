@@ -72,52 +72,70 @@ public class DatabaseHandler {
 	}
 
 	public FutureTask<LinkedList<Clip>> generateClips(ArrayList<ClipType> clipTypes) {
+		// Probably could release db lock sooner if I pull out the times and isStarts from the synchronized block
 		FutureTask<LinkedList<Clip>> task = new FutureTask<>(() -> {
 			LinkedList<Clip> clips = new LinkedList<>();
 			// for each clip type
-			for (ClipType type : clipTypes) {
-				if (type.endTrigger != null) {
+			for (ClipType clipType : clipTypes) {
+				if (clipType.endTrigger != null) {
 					synchronized (databaseLock) {
 						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
 							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? OR %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, RECORDING_TRIGGER, TIME))) {
-							statement.setString(1, type.startTrigger.getId().toString());
-							statement.setString(2, type.endTrigger.getId().toString());
+							statement.setString(1, clipType.startTrigger.getId().toString());
+							statement.setString(2, clipType.endTrigger.getId().toString());
 							ResultSet triggers = statement.executeQuery();
-							LinkedList<Boolean> isStarts = new LinkedList<>();
 							LinkedList<Long> times = new LinkedList<>();
-							while (triggers.next()) {
-								isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(type.startTrigger.toString()));
-								times.add(triggers.getLong(TIME));
-							}
-							assert isStarts.size() == times.size();
-
-							Iterator<Boolean> isStartsIt = isStarts.iterator();
-							Iterator<Long> timesIt = times.iterator();
-							boolean lastIsStart = false;
-							long lastTime = -1L;
-							while (isStartsIt.hasNext()) {
-								boolean isStart = isStartsIt.next();
-								long time = timesIt.next();
-								if (lastIsStart && !isStart) {
-									clips.add(new Clip(lastTime - type.startOffset, time + type.endOffset, type));
+							if (!clipType.startTrigger.getId().equals(clipType.endTrigger.getId())) {
+								// Triggers are different
+								LinkedList<Boolean> isStarts = new LinkedList<>();
+								while (triggers.next()) {
+									isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(clipType.startTrigger.toString()));
+									times.add(triggers.getLong(TIME));
 								}
-								lastIsStart = isStart;
-								lastTime = time;
+								assert isStarts.size() == times.size();
+
+								Iterator<Boolean> isStartsIt = isStarts.iterator();
+								Iterator<Long> timesIt = times.iterator();
+								boolean lastIsStart = false;
+								long lastTime = -1L;
+								while (isStartsIt.hasNext()) { // For each event
+									boolean isStart = isStartsIt.next();
+									long time = timesIt.next();
+									if (lastIsStart && !isStart) { // If we've found a start then an end
+										clips.add(new Clip(lastTime - clipType.startOffset, time + clipType.endOffset, clipType));
+									}
+									lastIsStart = isStart;
+									lastTime = time;
+								}
+							} else {
+								// Triggers are the same
+								while (triggers.next()) {
+									times.add(triggers.getLong(TIME));
+								}
+
+								Iterator<Long> timesIt = times.iterator();
+								// Pair each two together
+								while (timesIt.hasNext()) {
+									long startTime = timesIt.next();
+									if (timesIt.hasNext()) {
+										clips.add(new Clip(startTime - clipType.startOffset, timesIt.next() + clipType.endOffset, clipType));
+									}
+								}
 							}
 						} catch (SQLException e) {
 							throw new RuntimeException(e); // TODO: error handling
 						}
 					}
 				} else {
-					ResultSet triggers;
+					// No end trigger, just a start trigger
 					synchronized (databaseLock) {
 						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
 							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, TIME))) {
-							statement.setString(1, type.startTrigger.getId().toString());
-							triggers = statement.executeQuery();
+							statement.setString(1, clipType.startTrigger.getId().toString());
+							ResultSet triggers = statement.executeQuery();
 							while (triggers.next()) {
 								long time = triggers.getLong(TIME);
-								clips.add(new Clip(time - type.startOffset, time + type.endOffset, type));
+								clips.add(new Clip(time - clipType.startOffset, time + clipType.endOffset, clipType));
 							}
 						} catch (SQLException e) {
 							throw new RuntimeException(e); // TODO: error handling
