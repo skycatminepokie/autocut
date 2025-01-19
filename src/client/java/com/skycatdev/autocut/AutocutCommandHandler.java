@@ -39,6 +39,7 @@ public class AutocutCommandHandler {
 		if (AutocutClient.currentDatabaseHandler == null) {
 			throw FINISH_NO_RECORDING_EXCEPTION.create();
 		}
+		context.getSource().sendFeedback(Text.translatable("autocut.cutting.start"));
 		ExportHelper.startFFmpegExport(AutocutClient.currentDatabaseHandler, AutocutClient.config.getClipTypes());
 		return Command.SINGLE_SUCCESS;
     }
