@@ -50,7 +50,7 @@ public class ClipType {
 		this.exportGroupingMode = exportGroupingMode;
 	}
 
-	public ClipType(RecordingTrigger startTrigger,
+	private ClipType(RecordingTrigger startTrigger,
 					@SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<RecordingTrigger> endTrigger,
 					long startOffset,
 					long endOffset,

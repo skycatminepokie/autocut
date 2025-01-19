@@ -77,47 +77,50 @@ public class DatabaseHandler {
 			// for each clip type
 			for (ClipType type : clipTypes) {
 				if (type.endTrigger != null) {
-					ResultSet triggers;
 					synchronized (databaseLock) {
 						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
 							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? OR %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, RECORDING_TRIGGER, TIME))) {
 							statement.setString(1, type.startTrigger.getId().toString());
 							statement.setString(2, type.endTrigger.getId().toString());
-							triggers = statement.executeQuery();
-						}
-					}
-					LinkedList<Boolean> isStarts = new LinkedList<>();
-					LinkedList<Long> times = new LinkedList<>();
-					while (triggers.next()) {
-						isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(type.startTrigger.toString()));
-						times.add(triggers.getLong(TIME));
-					}
-					assert isStarts.size() == times.size();
+							ResultSet triggers = statement.executeQuery();
+							LinkedList<Boolean> isStarts = new LinkedList<>();
+							LinkedList<Long> times = new LinkedList<>();
+							while (triggers.next()) {
+								isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(type.startTrigger.toString()));
+								times.add(triggers.getLong(TIME));
+							}
+							assert isStarts.size() == times.size();
 
-					Iterator<Boolean> isStartsIt = isStarts.iterator();
-					Iterator<Long> timesIt = times.iterator();
-					boolean lastIsStart = false;
-					long lastTime = -1L;
-					while (isStartsIt.hasNext()) {
-						boolean isStart = isStartsIt.next();
-						long time = timesIt.next();
-						if (lastIsStart && !isStart) {
-							clips.add(new Clip(lastTime - type.startOffset, time + type.endOffset, type));
+							Iterator<Boolean> isStartsIt = isStarts.iterator();
+							Iterator<Long> timesIt = times.iterator();
+							boolean lastIsStart = false;
+							long lastTime = -1L;
+							while (isStartsIt.hasNext()) {
+								boolean isStart = isStartsIt.next();
+								long time = timesIt.next();
+								if (lastIsStart && !isStart) {
+									clips.add(new Clip(lastTime - type.startOffset, time + type.endOffset, type));
+								}
+								lastIsStart = isStart;
+								lastTime = time;
+							}
+						} catch (SQLException e) {
+							throw new RuntimeException(e); // TODO: error handling
 						}
-						lastIsStart = isStart;
-						lastTime = time;
 					}
 				} else {
+					ResultSet triggers;
 					synchronized (databaseLock) {
-						ResultSet triggers;
 						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
 							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, TIME))) {
 							statement.setString(1, type.startTrigger.getId().toString());
 							triggers = statement.executeQuery();
-						}
-						while (triggers.next()) {
-							long time = triggers.getLong(TIME);
-							clips.add(new Clip(time - type.startOffset, time + type.endOffset, type));
+							while (triggers.next()) {
+								long time = triggers.getLong(TIME);
+								clips.add(new Clip(time - type.startOffset, time + type.endOffset, type));
+							}
+						} catch (SQLException e) {
+							throw new RuntimeException(e); // TODO: error handling
 						}
 					}
 				}
@@ -142,6 +145,8 @@ public class DatabaseHandler {
 					ResultSet rs = statement.executeQuery();
 					rs.next();
 					ret = rs.getString(1);
+				} catch (SQLException e) {
+					throw new RuntimeException(e); // TODO: error handling
 				}
 				return ret;
 			}
@@ -160,6 +165,8 @@ public class DatabaseHandler {
 					ResultSet rs = statement.executeQuery();
 					rs.next();
 					ret = rs.getLong(1);
+				} catch (SQLException e) {
+					throw new RuntimeException(e); // TODO: error handling
 				}
 				return ret;
 			}
@@ -245,6 +252,8 @@ public class DatabaseHandler {
 					statement.setString(1, RECORDING_PATH_KEY);
 					statement.setString(2, outputPath);
 					statement.executeUpdate();
+				} catch (SQLException e) {
+					throw new RuntimeException(e);
 				}
 			}
 			return null;
@@ -268,7 +277,7 @@ public class DatabaseHandler {
 				queueRunning = true;
 			}
 			try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
-				 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s VALUES (?, ?, ?);", EVENTS))) {
+				 PreparedStatement statement = connection.prepareStatement(String.format("INSERT INTO %s (%s, %s, %s) VALUES (?, ?, ?);", EVENTS, RECORDING_TRIGGER, OBJECT, TIME))) {
 				while (!eventQueue.isEmpty()) {
 					RecordingEvent event = eventQueue.poll();
 					statement.setString(1, event.trigger().toString());

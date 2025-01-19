@@ -1,6 +1,7 @@
 package com.skycatdev.autocut.config;
 
 import com.skycatdev.autocut.database.ClipType;
+import com.skycatdev.autocut.trigger.RecordingTriggers;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +31,7 @@ public class Config {
     }
 
     public static Config loadOrDefault() {
-        @Nullable File[] clipTypeFiles = CLIP_TYPES_PATH.toFile().listFiles((file) -> !file.isFile());
+        File @Nullable[] clipTypeFiles = CLIP_TYPES_PATH.toFile().listFiles((file) -> !file.isFile());
         ArrayList<ClipType> clipTypes;
         if (clipTypeFiles != null) {
 			clipTypes = new ArrayList<>(clipTypeFiles.length);
@@ -46,6 +47,7 @@ public class Config {
             }
         } else {
             clipTypes = new ArrayList<>();
+            clipTypes.add(new ClipType(RecordingTriggers.MANUAL_TRIGGER, null, 30000, 100, true, false, ExportGroupingMode.INDIVIDUAL));
             // TODO: add defaults
         }
         return new Config(clipTypes, ExportConfig.readOrDefault(EXPORT_CONFIG_FILE));
