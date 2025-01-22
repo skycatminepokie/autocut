@@ -2,11 +2,9 @@ package com.skycatdev.autocut.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.skycatdev.autocut.Autocut;
-import com.skycatdev.autocut.Utils;
+import com.skycatdev.autocut.AutocutClient;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFprobe;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,22 +23,23 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
             Codec.BOOL.fieldOf("keepOld").orElse(true).forGetter(ExportConfig::shouldKeepOld),
             Codec.STRING.optionalFieldOf("ffmpegFolder").xmap((opt) -> opt.orElse(""), Optional::of).forGetter(ExportConfig::getFFmpegFolder)
     ).apply(instance, ExportConfig::new));
-    /**
+	/**
      * The file format to export the video to (eg .mp4, .mkv)
      */
     public String format;
-    /**
+	/**
      * The format name of the exported file. For example, "cut_{ORIGINAL}".
      */
     public String nameFormat;
-    /**
+	/**
      * Whether old files should be kept (true, rename the current one) or overwritten (false)
      */
     public boolean keepOld;
-    /**
+	/**
      * The folder with FFmpeg.
      */
     public String ffmpegFolder;
+	protected boolean isDirty;
 
     public String getFFmpegFolder() {
         return ffmpegFolder;
@@ -69,6 +68,10 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
         this.nameFormat = nameFormat;
         this.keepOld = keepOld;
         this.ffmpegFolder = ffmpegFolder;
+    }
+
+    public ExportConfig() {
+        this(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
     }
 
     public static boolean isValidFormat(String format) {
@@ -104,37 +107,11 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
         return true;
     }
 
-    /**
-     * Reads an {@link ExportConfig} from a file, or returns a default.
-     *
-     * @param file The file to read from. It will be created if it does not exist.
-     * @return The read config, or a default if the config cannot be found or is invalid
-     */
-    public static ExportConfig readOrDefault(File file) {
-        if (!file.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            file.getParentFile().mkdirs();
-            try {
-                //noinspection ResultOfMethodCallIgnored
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException();
-            }
-            return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
-        }
-        try {
-            @Nullable ExportConfig exportConfig = Utils.readFromJson(file, CODEC);
-            if (exportConfig != null) {
-                return exportConfig;
-            }
-        } catch (IOException e) {
-            Autocut.LOGGER.warn("Failed to load old export config, making a default one (instead of crashing)");
-        }
-        return new ExportConfig(DEFAULT_FORMAT, DEFAULT_NAME_FORMAT, DEFAULT_KEEP_OLD);
-    }
-
-    private void setFfmpegFolder(String path) {
-        ffmpegFolder = path;
+    private void setFfmpegFolder(String ffmpegFolder) {
+		if (!this.ffmpegFolder.equals(ffmpegFolder)) {
+			markDirty();
+			this.ffmpegFolder = ffmpegFolder;
+		}
     }
 
     public synchronized File getFFmpegExportFile(File original, int clips) {
@@ -149,13 +126,13 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
                 .replaceAll("\\\\", "")
                 .replaceAll("\\.", "");
         File export = original.toPath().resolveSibling(firstName + "." + format).toFile();
-        // if (Config.getExportConfig().shouldKeepOld()) {
-        //     int i = 0;
-        //     while (export.exists()) { // TODO: Cache this? Few file system queries.
-        //         i++;
-        //         export = original.toPath().resolveSibling(firstName + i + "." + format).toFile();
-        //     }
-        // }
+        if (AutocutClient.config.getExportConfig().shouldKeepOld()) {
+            int i = 0;
+            while (export.exists()) { // TODO: Cache this? Few file system queries.
+                i++;
+                export = original.toPath().resolveSibling(firstName + i + "." + format).toFile();
+            }
+        }
         return export;
     }
 
@@ -164,7 +141,10 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
     }
 
     public void setFormat(String format) {
-        this.format = format;
+		if (!this.format.equals(format)) {
+			this.format = format;
+			markDirty();
+		}
     }
 
     public String getNameFormat() {
@@ -172,19 +152,33 @@ public class ExportConfig { // Warn: There's probably some race conditions in he
     }
 
     public void setNameFormat(String nameFormat) {
-        this.nameFormat = nameFormat;
-    }
-
-    public void saveToFile(File file) throws IOException {
-        Utils.saveToJson(file, CODEC, this);
+		if (!this.nameFormat.equals(nameFormat)) {
+			markDirty();
+			this.nameFormat = nameFormat;
+		}
     }
 
     public void setKeepOld(boolean keepOld) {
-        this.keepOld = keepOld;
+		if (this.keepOld != keepOld) {
+			markDirty();
+			this.keepOld = keepOld;
+		}
     }
 
     public boolean shouldKeepOld() {
         return keepOld;
     }
+
+	public void setDirty(boolean isDirty) {
+		this.isDirty = isDirty;
+	}
+
+	public boolean isDirty() {
+		return isDirty;
+	}
+
+	public void markDirty() {
+		isDirty = true;
+	}
 
 }
