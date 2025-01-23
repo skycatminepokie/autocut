@@ -2,7 +2,7 @@ package com.skycatdev.autocut;
 
 import com.skycatdev.autocut.config.Config;
 import com.skycatdev.autocut.database.DatabaseHandler;
-import com.skycatdev.autocut.trigger.RecordingTriggers;
+import com.skycatdev.autocut.trigger.RecordingTriggerTypes;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -32,14 +32,15 @@ public class AutocutClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        RecordingTriggerTypes.init();
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (CLIP_KEYBIND.wasPressed()) {
                 if (currentDatabaseHandler != null) {
-                    RecordingTriggers.MANUAL_TRIGGER.trigger();
+                    RecordingTriggerTypes.MANUAL.trigger();
                 }
 			}
         });
         ClientCommandRegistrationCallback.EVENT.register(AutocutCommandHandler::register);
-        AttackEntityCallback.EVENT.register(RecordingTriggers.ATTACK_ENTITY_TRIGGER);
+        AttackEntityCallback.EVENT.register(RecordingTriggerTypes.ATTACK_ENTITY);
     }
 }

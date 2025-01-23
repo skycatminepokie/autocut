@@ -81,15 +81,15 @@ public class DatabaseHandler {
 					synchronized (databaseLock) {
 						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
 							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? OR %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, RECORDING_TRIGGER, TIME))) {
-							statement.setString(1, clipType.startTrigger.getId().toString());
-							statement.setString(2, clipType.endTrigger.getId().toString());
+							statement.setString(1, clipType.startTrigger.getType().id().toString());
+							statement.setString(2, clipType.endTrigger.getType().id().toString());
 							ResultSet triggers = statement.executeQuery();
 							LinkedList<Long> times = new LinkedList<>();
-							if (!clipType.startTrigger.getId().equals(clipType.endTrigger.getId())) {
+							if (!clipType.startTrigger.getType().id().equals(clipType.endTrigger.getType().id())) {
 								// Triggers are different
 								LinkedList<Boolean> isStarts = new LinkedList<>();
 								while (triggers.next()) {
-									isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(clipType.startTrigger.getId().toString()));
+									isStarts.add(triggers.getString(RECORDING_TRIGGER).equals(clipType.startTrigger.getType().id().toString()));
 									times.add(triggers.getLong(TIME));
 								}
 								assert isStarts.size() == times.size();
@@ -131,7 +131,7 @@ public class DatabaseHandler {
 					synchronized (databaseLock) {
 						try (Connection connection = DriverManager.getConnection(getDatabaseUrl());
 							 PreparedStatement statement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE %s = ? ORDER BY %s;", EVENTS, RECORDING_TRIGGER, TIME))) {
-							statement.setString(1, clipType.startTrigger.getId().toString());
+							statement.setString(1, clipType.startTrigger.getType().id().toString());
 							ResultSet triggers = statement.executeQuery();
 							while (triggers.next()) {
 								long time = triggers.getLong(TIME);

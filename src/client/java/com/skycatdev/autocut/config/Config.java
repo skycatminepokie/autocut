@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.Utils;
 import com.skycatdev.autocut.database.ClipType;
-import com.skycatdev.autocut.trigger.RecordingTriggers;
+import com.skycatdev.autocut.trigger.RecordingTriggerTypes;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,7 +30,7 @@ public class Config {
      * @return If the config or any of its parts are dirty (need to be saved)
      */
     public boolean isDirty() {
-        return isDirty;
+        return  isDirty || exportConfig.isDirty();
     }
 
     public void markDirty() {
@@ -69,7 +69,7 @@ public class Config {
             Autocut.LOGGER.warn("Using default config");
             // TODO: Add more default ClipTypes
             ArrayList<ClipType> defaultClipTypes = new ArrayList<>();
-            defaultClipTypes.add(new ClipType(RecordingTriggers.MANUAL_TRIGGER, null, 30000, 5000, true, false, ExportGroupingMode.INDIVIDUAL));
+            defaultClipTypes.add(new ClipType(RecordingTriggerTypes.MANUAL.makeDefault(), null, 30000, 5000, true, false, ExportGroupingMode.INDIVIDUAL));
             return new Config(defaultClipTypes, new ExportConfig());
         }
         return read;
