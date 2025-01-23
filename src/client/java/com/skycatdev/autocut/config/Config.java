@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycatdev.autocut.Autocut;
 import com.skycatdev.autocut.Utils;
 import com.skycatdev.autocut.database.ClipType;
+import com.skycatdev.autocut.trigger.RecordingTriggers;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,8 +67,10 @@ public class Config {
 
         if (read == null) {
             Autocut.LOGGER.warn("Using default config");
-            // TODO: Add default ClipTypes
-            return new Config(new ArrayList<>(), new ExportConfig());
+            // TODO: Add more default ClipTypes
+            ArrayList<ClipType> defaultClipTypes = new ArrayList<>();
+            defaultClipTypes.add(new ClipType(RecordingTriggers.MANUAL_TRIGGER, null, 30000, 5000, true, false, ExportGroupingMode.INDIVIDUAL));
+            return new Config(defaultClipTypes, new ExportConfig());
         }
         return read;
     }
