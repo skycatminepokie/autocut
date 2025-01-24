@@ -15,7 +15,6 @@ group = property("mod_group").toString()
 def id = property("mod_id").toString()
 def mod_name = property("mod_name").toString()
 def mod_version = property("mod_version").toString()
-def yacl = property("deps.yacl_version").toString()
 def fabric_api = property("deps.fabric_api").toString()
 def modmenu = property("deps.modmenu_version").toString()
 
@@ -34,10 +33,6 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
-	maven {
-		name 'Xander Maven'
-		url 'https://maven.isxander.dev/releases'
-	}
 	maven {
 		name = "Terraformers"
 		url = "https://maven.terraformersmc.com/"
@@ -78,7 +73,6 @@ dependencies {
 	}
 	include implementation("org.xerial:sqlite-jdbc:${property('deps.sqlite_jdbc_version')}")
 	shadow implementation("net.bramp.ffmpeg:ffmpeg:${property('deps.ffmpeg_cli_wrapper_version')}")
-	modImplementation("dev.isxander:yet-another-config-lib:${property('deps.yacl_version')}")
 	modCompileOnly("com.terraformersmc:modmenu:${property('deps.modmenu_version')}")
 	modRuntimeOnly("com.terraformersmc:modmenu:${property('deps.modmenu_version')}")
 }
@@ -103,7 +97,6 @@ processResources { // I don't know gradle enough to get the ModData class workin
 	inputs.property("version", fullVersion)
 	inputs.property("earliest_minecraft", earliest_minecraft)
 	inputs.property("latest_minecraft", latest_minecraft)
-	inputs.property("yacl_version", yacl)
 	inputs.property("fabric_api_version", fabric_api)
 	inputs.property("modmenu_version", modmenu)
 	inputs.property("java_version", javaVersion)
@@ -114,7 +107,6 @@ processResources { // I don't know gradle enough to get the ModData class workin
 			"version": fullVersion,
 			"earliest_minecraft": earliest_minecraft,
 			"latest_minecraft": latest_minecraft,
-			"yacl_version": yacl,
 			"fabric_api_version": fabric_api,
 			"modmenu_version": modmenu,
 			"java_version": javaVersion
